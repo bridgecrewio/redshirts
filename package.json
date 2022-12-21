@@ -1,0 +1,66 @@
+{
+    "name": "redshirts",
+    "version": "0.0.0",
+    "description": "Counts contributors for a git repository",
+    "author": "Kartik Pande @kartikp10",
+    "bin": {
+        "redshirts": "./bin/run"
+    },
+    "homepage": "https://github.com/bridgecrewio/redshirts",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "repository": "bridgecrewio/redshirts",
+    "files": [
+        "/bin",
+        "/dist",
+        "/npm-shrinkwrap.json",
+        "/oclif.manifest.json"
+    ],
+    "dependencies": {
+        "@oclif/core": "^1.19.1",
+        "@oclif/plugin-help": "^5",
+        "axios": "^1.2.1"
+    },
+    "devDependencies": {
+        "@oclif/test": "^2.2.10",
+        "@types/chai": "^4",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^16.18.3",
+        "chai": "^4",
+        "eslint": "^7.32.0",
+        "eslint-config-oclif": "^4",
+        "eslint-config-oclif-typescript": "^1.0.3",
+        "eslint-config-prettier": "^8.5.0",
+        "mocha": "^9",
+        "oclif": "^3",
+        "prettier": "^2.7.1",
+        "shx": "^0.3.3",
+        "ts-node": "^10.9.1",
+        "tslib": "^2.4.1",
+        "typescript": "^4.9.3"
+    },
+    "oclif": {
+        "bin": "redshirts",
+        "dirname": "redshirts",
+        "commands": "./dist/commands",
+        "plugins": [
+            "@oclif/plugin-help"
+        ],
+        "topicSeparator": " ",
+        "topics": {}
+    },
+    "scripts": {
+        "build": "shx rm -rf dist && tsc -b",
+        "lint": "eslint . --ext .ts --config .eslintrc",
+        "postpack": "shx rm -f oclif.manifest.json",
+        "posttest": "yarn lint",
+        "prepack": "yarn build && oclif manifest && oclif readme",
+        "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+        "version": "oclif readme && git add README.md"
+    },
+    "engines": {
+        "node": ">=12.0.0"
+    },
+    "bugs": "https://github.com/bridgecrewio/redshirts/issues",
+    "types": "dist/index.d.ts"
+}
