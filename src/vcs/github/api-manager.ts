@@ -40,7 +40,7 @@ export class GithubApiManager extends ApiManager {
       return result?.data || []
    }
 
-   async getUserRepos(): Promise<unknown[]> {
+   async getUserRepos(): Promise<Repo[]> {
       const config: AxiosRequestConfig = {
          url: '/user/repos',
          method: 'GET',
