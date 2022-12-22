@@ -29,58 +29,52 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`redshirts hello PERSON`](#redshirts-hello-person)
-* [`redshirts hello world`](#redshirts-hello-world)
+* [`redshirts github`](#redshirts-github)
+* [`redshirts gitlab [FILE]`](#redshirts-gitlab-file)
 * [`redshirts help [COMMAND]`](#redshirts-help-command)
-* [`redshirts plugins`](#redshirts-plugins)
-* [`redshirts plugins:install PLUGIN...`](#redshirts-pluginsinstall-plugin)
-* [`redshirts plugins:inspect PLUGIN...`](#redshirts-pluginsinspect-plugin)
-* [`redshirts plugins:install PLUGIN...`](#redshirts-pluginsinstall-plugin-1)
-* [`redshirts plugins:link PLUGIN`](#redshirts-pluginslink-plugin)
-* [`redshirts plugins:uninstall PLUGIN...`](#redshirts-pluginsuninstall-plugin)
-* [`redshirts plugins:uninstall PLUGIN...`](#redshirts-pluginsuninstall-plugin-1)
-* [`redshirts plugins:uninstall PLUGIN...`](#redshirts-pluginsuninstall-plugin-2)
-* [`redshirts plugins update`](#redshirts-plugins-update)
 
-## `redshirts hello PERSON`
+## `redshirts github`
 
-Say hello
+Count active contributors for Github
 
 ```
 USAGE
-  $ redshirts hello [PERSON] -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
+  $ redshirts github -t <value> [--orgs <value>] [--repos <value>]
 
 FLAGS
-  -f, --from=<value>  (required) Who is saying hello
+  -t, --token=<value>  (required) Github personal access token
+  --orgs=<value>       Organization names
+  --repos=<value>      Repository names
 
 DESCRIPTION
-  Say hello
+  Count active contributors for Github
 
 EXAMPLES
-  $ oex hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
+  $ redshirts github --token github_pat_xxx --orgs bridgecrewio --repos checkov,terragoat
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/hello/index.ts)_
+_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/github.ts)_
 
-## `redshirts hello world`
+## `redshirts gitlab [FILE]`
 
-Say hello world
+describe the command here
 
 ```
 USAGE
-  $ redshirts hello world
+  $ redshirts gitlab [FILE] [-n <value>] [-f]
+
+FLAGS
+  -f, --force
+  -n, --name=<value>  name to print
 
 DESCRIPTION
-  Say hello world
+  describe the command here
 
 EXAMPLES
-  $ redshirts hello world
-  hello world! (./src/commands/hello/world.ts)
+  $ redshirts gitlab
 ```
+
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/gitlab.ts)_
 
 ## `redshirts help [COMMAND]`
 
@@ -101,234 +95,4 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.19/src/commands/help.ts)_
-
-## `redshirts plugins`
-
-List installed plugins.
-
-```
-USAGE
-  $ redshirts plugins [--core]
-
-FLAGS
-  --core  Show core plugins.
-
-DESCRIPTION
-  List installed plugins.
-
-EXAMPLES
-  $ redshirts plugins
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.1.7/src/commands/plugins/index.ts)_
-
-## `redshirts plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ redshirts plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-
-ALIASES
-  $ redshirts plugins add
-
-EXAMPLES
-  $ redshirts plugins:install myplugin 
-
-  $ redshirts plugins:install https://github.com/someuser/someplugin
-
-  $ redshirts plugins:install someuser/someplugin
-```
-
-## `redshirts plugins:inspect PLUGIN...`
-
-Displays installation properties of a plugin.
-
-```
-USAGE
-  $ redshirts plugins:inspect PLUGIN...
-
-ARGUMENTS
-  PLUGIN  [default: .] Plugin to inspect.
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Displays installation properties of a plugin.
-
-EXAMPLES
-  $ redshirts plugins:inspect myplugin
-```
-
-## `redshirts plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ redshirts plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-
-ALIASES
-  $ redshirts plugins add
-
-EXAMPLES
-  $ redshirts plugins:install myplugin 
-
-  $ redshirts plugins:install https://github.com/someuser/someplugin
-
-  $ redshirts plugins:install someuser/someplugin
-```
-
-## `redshirts plugins:link PLUGIN`
-
-Links a plugin into the CLI for development.
-
-```
-USAGE
-  $ redshirts plugins:link PLUGIN
-
-ARGUMENTS
-  PATH  [default: .] path to plugin
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Links a plugin into the CLI for development.
-  Installation of a linked plugin will override a user-installed or core plugin.
-
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
-  command will override the user-installed or core plugin implementation. This is useful for development work.
-
-
-EXAMPLES
-  $ redshirts plugins:link myplugin
-```
-
-## `redshirts plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ redshirts plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ redshirts plugins unlink
-  $ redshirts plugins remove
-```
-
-## `redshirts plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ redshirts plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ redshirts plugins unlink
-  $ redshirts plugins remove
-```
-
-## `redshirts plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ redshirts plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ redshirts plugins unlink
-  $ redshirts plugins remove
-```
-
-## `redshirts plugins update`
-
-Update installed plugins.
-
-```
-USAGE
-  $ redshirts plugins update [-h] [-v]
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Update installed plugins.
-```
 <!-- commandsstop -->
