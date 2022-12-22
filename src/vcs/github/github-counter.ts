@@ -1,5 +1,5 @@
 import { BaseCounterClass } from '../../common/base-counter'
-import { Contributor, SourceType } from '../../common/types'
+import { Repo, SourceType } from '../../common/types'
 import { GithubCommit, GithubSourceInfo } from './types'
 
 export class GithubCounter extends BaseCounterClass {
@@ -10,19 +10,17 @@ export class GithubCounter extends BaseCounterClass {
       this.githubSourceInfo = githubSourceInfo
    }
 
-   convertCommitsToContributors(commits: GithubCommit[]): Contributor[] {
-      
-      const contributors: Contributor[] = [];
+   aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
+      console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
+      for (const commitObject of commits.reverse()) {
+         const { commit, author } = commitObject
+         const username = author.login // we need to use this object, because the nested commit object has the display name at the time of the commit
 
-      for (const commitObject of commits) {
-         const { commit } = commitObject
+         // TODO do we need null checks here?
          const email: string = commit?.author?.email
-         const name: string = commit?.author?.name
-         const lastCommitDate: string = commit?.author?.date
-         if (email && !contributorMap.has(email)) {
-            const contributor: Contributor = { email, name, lastCommitDate }
-            contributorMap.set(email, contributor)
-         }
+         const commitDate: string = commit?.author?.date
+
+         this.addContributor(repo.owner, repo.name, username, email, commitDate)
       }
    }
 }

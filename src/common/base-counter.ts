@@ -1,72 +1,95 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Commit, Contributor, ContributorMap, OutputFormat, Report } from './types'
+import { Commit, Contributor, ContributorMap, OutputFormat, Repo, Report, SummaryReport } from './types'
+import { jsonReportReplacer } from './utils';
 
 export abstract class BaseCounterClass {
    sourceType: string;
    excludedUsers: string[];
-   contributors: Contributor[];
-   contributorsByEmail: ContributorMap;
    contributorsByUsername: ContributorMap;
-   totalContributors: number
+   contributorsByRepo: Map<string, ContributorMap>;
 
    constructor(sourceType: string, excludedUsers: Array<string>) {
       this.sourceType = sourceType;
       this.excludedUsers = excludedUsers;
-      this.contributors = [];
-      this.contributorsByEmail = new Map();
-      this.contributorsByName = new Map();
-      this.totalContributors = 0;
+      this.contributorsByUsername = new Map();
+      this.contributorsByRepo = new Map();
    }
 
-   abstract convertCommitsToContributors(commits: Commit[]): ContributorMap
+   abstract aggregateCommitContributors(repo: Repo, commits: Commit[]): void
 
-   addContributor(email: string, name: string, commitDate: string): void {
-      // we have to handle the same email with different names and also the same name with different emails
-      // when a user makes a commit, the commit stores the email and display name of the user at that time
-      // if the display name changes, then future commits will have a different name
+   addContributor(repoOwner: string, repoName: string, username: string, email: string, commitDate: string): void {
+      // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
+      // This method assumes that the commits will be added in ascending order of date (oldest first), and thus the commit date
+      // parameter is always the "last" commit date (unless updated by another call later)
 
+      const repoPath = repoOwner + '/' + repoName;
 
-   }
+      let repoContributors = this.contributorsByRepo.get(repoPath);
 
-   aggregateContributors(contributorMap: ContributorMap): [ContributorMap, number] {
-      let totalContributors = 0
-      for (const c of contributorMap.keys()) {
-         if (this.excludedUsers.includes(c)) {
-            contributorMap.delete(c)
-            continue
-         }
-
-         totalContributors++
+      if (!repoContributors) {
+         console.debug(`Creating new contributors map for repo ${repoPath}`);
+         repoContributors = new Map();
+         this.contributorsByRepo.set(repoPath, repoContributors);
       }
 
-      return [contributorMap, totalContributors]
+      // handle the 2 maps separately so that we can track commit dates per repo and globally
+      this.upsertContributor(repoContributors, username, email, commitDate);      
+      this.upsertContributor(this.contributorsByUsername, username, email, commitDate);
+   }
+
+   upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
+      const contributor = contributorMap.get(username);
+
+      if (contributor) {
+         contributor.emails.add(email);
+         contributor.lastCommitDate = commitDate;
+      } else {
+         console.debug(`Found new contributor: ${username}, ${email}`)
+         contributorMap.set(username, {
+            username,
+            emails: new Set([email]),
+            lastCommitDate: commitDate
+         });
+      }
+   }
+
+   generateReportObject(): SummaryReport {
+
+      const repos = [];
+
+      for (const [repo, contributors] of this.contributorsByRepo) {
+         repos.push({
+            repo,
+            totalContributors: contributors.size,
+            contributors: [...contributors.values()]
+         });
+      }
+
+      const report: SummaryReport = {
+         totalContributors: this.contributorsByUsername.size,
+         contributors: [...this.contributorsByUsername.values()],
+         repos
+      };
+
+      return report;
    }
 
    printSummary(outputFormat?: string): void {
       switch (outputFormat) {
-         case OutputFormat.Summary:
-            // console.log(`Contributor Details:`)
-            // for (const [k, v] of filteredContributorMap.entries()) console.log(k, ':', v)
-            // console.log(`Total Contributors: ${totalContributors}`)
-
-            break
 
          case OutputFormat.JSON:
-            // // eslint-disable-next-line no-case-declarations
-            // const contributorObj = Object.fromEntries(filteredContributorMap)
-            // // eslint-disable-next-line no-case-declarations
-            // const report: Report = {
-            //    contributorDetails: contributorObj,
-            //    totalContributors,
-            // }
-            // console.log(report)
+            console.log(JSON.stringify(this.generateReportObject(), jsonReportReplacer, 2));
 
             break
 
          default:
-            console.log(`Contributor Details:`)
-            for (const c of this.contributors) console.log(c)
-            console.log(`Total Contributors: ${this.contributors.length}`)
+            console.log(`Contributor Details:`);
+            console.log(`Total unique contributors (all repos): ${this.contributorsByUsername.size}`);
+            console.log('');
+            for (const [repo, contributors] of this.contributorsByRepo) {
+               console.log(`${repo}: ${contributors.size}`);
+            }
+
             break
       }
    }

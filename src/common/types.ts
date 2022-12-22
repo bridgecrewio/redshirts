@@ -1,11 +1,11 @@
 export type SourceInfo = {
    url: string
-   token: string
+   token?: string
 }
 
 export type Contributor = {
-   usernames: string[]
-   emails: string[]
+   username: string
+   emails: Set<string>
    // repos: Array<string>
    lastCommitDate: string
 }
@@ -17,9 +17,7 @@ export type ContributorMap = Map<id, Contributor>
 
 export type Repo = {
    name: string
-   owner: {
-      login: string
-   }
+   owner: string
    private?: boolean
 }
 
@@ -27,9 +25,17 @@ export type Commit = {
    commit: any
 }
 
-export type Report = {
-   contributorDetails: any
-   totalContributors: number
+export interface Report {
+   contributors: Contributor[];
+   totalContributors: number;
+}
+
+export interface SummaryReport extends Report {
+   repos: RepoReport[]
+}
+
+export interface RepoReport extends Report {
+   repo: string
 }
 
 export enum SourceType {

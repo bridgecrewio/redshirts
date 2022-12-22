@@ -11,6 +11,9 @@ export interface GithubSourceInfo extends SourceInfo {
 }
 
 export interface GithubCommit extends Commit {
+   author: {
+      login: string
+   }
    commit: {
       author: author
    }

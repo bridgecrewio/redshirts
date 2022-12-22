@@ -8,27 +8,27 @@ export class GithubApiManager extends ApiManager {
    githubSourceInfo: GithubSourceInfo
    axiosInstance: AxiosInstance
 
-   constructor(githubSourceInfo: GithubSourceInfo) {
-      super(SourceType.Github)
+   constructor(githubSourceInfo: GithubSourceInfo, certPath?: string) {
+      super(SourceType.Github, certPath);
       this.githubSourceInfo = githubSourceInfo
+
       this.axiosInstance = axios.create(this._getAxiosConfiguration())
    }
 
    // async getRepositories(): Promise<Repo[]> {}
 
    _getAxiosConfiguration(): AxiosRequestConfig {
-      return {
-         baseURL: this.githubSourceInfo.url,
-         headers: {
-            Accept: 'application/vnd.github.machine-man-preview+json',
-            Authorization: `Bearer ${this.githubSourceInfo.token}`,
-         },
-      }
+      return this._buildAxiosConfiguration(this.githubSourceInfo.url, {
+         Accept: 'application/vnd.github.machine-man-preview+json',
+         Authorization: `Bearer ${this.githubSourceInfo.token}`,
+      });
    }
 
-   async getCommits(repo: Repo, lastNDays: number): Promise<GithubCommit[] | []> {
+   async getCommits(repo: Repo, lastNDays: number): Promise<GithubCommit[]> {
+      const repoPath = repo.owner + '/' + repo.name;
+      console.debug(`Getting commits for repo: ${repoPath}`)
       const config: AxiosRequestConfig = {
-         url: `repos/${repo.owner.login}/${repo.name}/commits`,
+         url: `repos/${repo.owner}/${repo.name}/commits`,
          method: 'GET',
          params: {
             // eslint-disable-next-line camelcase
@@ -36,8 +36,11 @@ export class GithubApiManager extends ApiManager {
             since: getXDaysAgoDate(lastNDays).toISOString(),
          },
       }
-      const result: AxiosResponse = await this.paginationRequest(config)
-      return result?.data || []
+
+      const result: AxiosResponse = await this.paginationRequest(config);
+      const commits = result?.data || [];
+      console.debug(`Found ${commits.length} commits`);
+      return commits;
    }
 
    async getUserRepos(): Promise<Repo[]> {
