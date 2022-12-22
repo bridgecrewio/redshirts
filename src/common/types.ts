@@ -6,19 +6,30 @@ export type SourceInfo = {
 export type Contributor = {
    username: string
    email: string
-   repos: Array<string>
+   // repos: Array<string>
+   lastCommitDate: string
 }
+
+// Unique id that identifies a contributor
+export type id = string
+
+export type ContributorMap = Map<id, Contributor>
 
 export type Repo = {
    name: string
-   owner: string
+   owner: {
+      login: string
+   }
    private?: boolean
-   defaultBranch?: string
 }
 
 export type Commit = {
-   date: Date
-   author: string
+   commit: any
+}
+
+export type Report = {
+   contributorDetails: any
+   totalContributors: number
 }
 
 export enum SourceType {
@@ -30,4 +41,9 @@ export enum SourceType {
    BitbucketServer = 'BitbucketServer',
    AzureRepos = 'AzureRepos',
    Local = 'Local',
+}
+
+export enum OutputFormat {
+   Summary = 'summary',
+   JSON = 'json',
 }

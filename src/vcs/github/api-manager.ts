@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { GithubSourceInfo } from '../github/types'
+import { GithubSourceInfo, GithubCommit } from '../github/types'
 import { ApiManager } from '../../common/api-manager'
-import { SourceType } from '../../common/types'
+import { Repo, SourceType } from '../../common/types'
+import { getXDaysAgoDate } from '../../common/utils'
 
 export class GithubApiManager extends ApiManager {
    githubSourceInfo: GithubSourceInfo
@@ -14,12 +15,45 @@ export class GithubApiManager extends ApiManager {
    }
 
    // async getRepositories(): Promise<Repo[]> {}
-   //
-   // async getCommits(repo: Repo): Promise<Commit[]> {}
+
+   _getAxiosConfiguration(): AxiosRequestConfig {
+      return {
+         baseURL: this.githubSourceInfo.url,
+         headers: {
+            Accept: 'application/vnd.github.machine-man-preview+json',
+            Authorization: `Bearer ${this.githubSourceInfo.token}`,
+         },
+      }
+   }
+
+   async getCommits(repo: Repo, lastNDays: number): Promise<GithubCommit[] | []> {
+      const config: AxiosRequestConfig = {
+         url: `repos/${repo.owner.login}/${repo.name}/commits`,
+         method: 'GET',
+         params: {
+            // eslint-disable-next-line camelcase
+            per_page: 100,
+            since: getXDaysAgoDate(lastNDays).toISOString(),
+         },
+      }
+      const result: AxiosResponse = await this.paginationRequest(config)
+      return result?.data || []
+   }
 
    async getUserRepos(): Promise<unknown[]> {
       const config: AxiosRequestConfig = {
          url: '/user/repos',
+         method: 'GET',
+         // eslint-disable-next-line camelcase
+         params: { per_page: 100 },
+      }
+      const result: AxiosResponse = await this.paginationRequest(config)
+      return result.data
+   }
+
+   async getOrgRepos(org: string): Promise<Repo[]> {
+      const config: AxiosRequestConfig = {
+         url: `/orgs/${org}/repos`,
          method: 'GET',
          // eslint-disable-next-line camelcase
          params: { per_page: 100 },
@@ -39,17 +73,7 @@ export class GithubApiManager extends ApiManager {
       return result.data
    }
 
-   _getAxiosConfiguration(): AxiosRequestConfig {
-      return {
-         baseURL: this.githubSourceInfo.url,
-         headers: {
-            Accept: 'application/vnd.github.machine-man-preview+json',
-            Authorization: `Bearer ${this.githubSourceInfo.token}`,
-         },
-      }
-   }
-
-   async paginationRequest(config: AxiosRequestConfig) {
+   async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
       let response = await this.axiosInstance.request(config)
       const result = response
       while (response.headers.link) {

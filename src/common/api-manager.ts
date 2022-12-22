@@ -1,4 +1,4 @@
-// import { Repo, Commit } from './types'
+import { Repo, Commit } from './types'
 
 export abstract class ApiManager {
    sourceType: string
@@ -10,6 +10,6 @@ export abstract class ApiManager {
    abstract _getAxiosConfiguration(): any
 
    // abstract getRepositories(): Promise<Repo[]>
-   //
-   // abstract getCommits(repo: Repo): Promise<Commit[]>
+
+   abstract getCommits(repo: Repo, lastNDays: number): Promise<Commit[] | []>
 }
