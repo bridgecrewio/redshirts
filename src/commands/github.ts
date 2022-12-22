@@ -52,12 +52,26 @@ export default class Github extends Command {
       }
 
       // for testing - to be deleted
-      const repo: Repo = {
-         owner: {
-            login: 'kartikp10',
+      const repoList: Repo[] = [
+         {
+            owner: {
+               login: 'mikeurbanski1',
+            },
+            name: 'tfcloud',
          },
-         name: 'sample-tf',
-      }
+         // {
+         //    owner: {
+         //       login: 'mikeurbanski1',
+         //    },
+         //    name: 'tg3',
+         // },
+         {
+            owner: {
+               login: 'mikeurbanski1',
+            },
+            name: 'repo1',
+         }
+      ];
 
       /**
        * TODO:
@@ -65,13 +79,17 @@ export default class Github extends Command {
        *    - for each repo, get commits and convert commits to contributors
        *    - only append to the contributor map if the map does not have the contributor already
        */
-      const commits: GithubCommit[] = (await githubApi.getCommits(repo, 90)) as GithubCommit[]
-      const contributors: ContributorMap = githubCounter.convertCommitsToContributors(commits)
+      for (const repo of repoList) {
+         console.log(repo);
+         const commits: GithubCommit[] = (await githubApi.getCommits(repo, 90)) as GithubCommit[];
+         const contributors: ContributorMap = githubCounter.convertCommitsToContributors(commits);
+         githubCounter.aggregateContributors(contributors);
+         githubCounter.printSummary(
+            flags.output
+         )
+      }
 
-      githubCounter.printSummary(
-         ...githubCounter.countContributors(contributors, githubCounter.excludedUsers),
-         flags.output
-      )
+      
    }
 
    filterRepos(reposResponse: Repo[]): any {

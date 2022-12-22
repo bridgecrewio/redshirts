@@ -4,8 +4,8 @@ export type SourceInfo = {
 }
 
 export type Contributor = {
-   username: string
-   email: string
+   usernames: string[]
+   emails: string[]
    // repos: Array<string>
    lastCommitDate: string
 }
