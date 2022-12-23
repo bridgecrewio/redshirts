@@ -1,13 +1,9 @@
-import { Commit, SourceInfo } from '../../common/types';
+import { Commit } from "../../common/types";
 
-export type author = {
+export type Author = {
    name: string
    email: string
    date: string
-}
-
-export interface GithubSourceInfo extends SourceInfo {
-   orgs?: string[]
 }
 
 export interface GithubCommit extends Commit {
@@ -15,11 +11,11 @@ export interface GithubCommit extends Commit {
       login: string
    }
    commit: {
-      author: author
+      author: Author
    }
 }
 
-export type RepoResponse = {
+export type GithubRepoResponse = {
    name: string
    owner: {
       login: string

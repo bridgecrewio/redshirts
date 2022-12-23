@@ -1,34 +1,37 @@
+/* eslint-disable camelcase */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { GithubCommit, GithubRepoResponse } from './github-types';
 import { ApiManager } from '../../common/api-manager';
 import { Repo, SourceInfo, SourceType } from '../../common/types';
-import { getXDaysAgoDate } from '../../common/utils';
+// import { getXDaysAgoDate } from '../../common/utils';
+import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 
-export class GithubApiManager extends ApiManager {
+const MAX_PAGE_SIZE = 100;
 
-   constructor(githubSourceInfo: SourceInfo, certPath?: string) {
-      super(githubSourceInfo, SourceType.Github, certPath);
+export class GitlabApiManager extends ApiManager {
+
+   constructor(sourceInfo: SourceInfo, certPath?: string) {
+      super(sourceInfo, SourceType.Gitlab, certPath);
    }
 
    // async getRepositories(): Promise<Repo[]> {}
 
    _getAxiosConfiguration(): AxiosRequestConfig {
       return this._buildAxiosConfiguration(this.sourceInfo.url, {
-         Accept: 'application/vnd.github.machine-man-preview+json',
          Authorization: `Bearer ${this.sourceInfo.token}`,
+         'Accept-Encoding': 'gzip,deflate,compress'
       });
    }
 
-   async getCommits(repo: Repo, lastNDays: number): Promise<GithubCommit[]> {
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   async getCommits(repo: Repo, lastNDays: number): Promise<GitlabCommit[]> {
       const repoPath = repo.owner + '/' + repo.name;
       console.debug(`Getting commits for repo: ${repoPath}`);
       const config: AxiosRequestConfig = {
-         url: `repos/${repo.owner}/${repo.name}/commits`,
+         url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}/repository/commits`,
          method: 'GET',
          params: {
-            // eslint-disable-next-line camelcase
-            per_page: 100,
-            since: getXDaysAgoDate(lastNDays).toISOString(),
+            per_page: MAX_PAGE_SIZE,
+           // TODO since: getXDaysAgoDate(lastNDays).toISOString(),
          },
       };
 
@@ -38,25 +41,24 @@ export class GithubApiManager extends ApiManager {
       return commits;
    }
 
-   async getUserRepos(): Promise<GithubRepoResponse[]> {
+   async getUserRepos(): Promise<GitlabRepoResponse[]> {
       const config: AxiosRequestConfig = {
          url: '/user/repos',
          method: 'GET',
-         // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: { per_page: MAX_PAGE_SIZE },
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;
    }
 
-   async getOrgRepos(org: string): Promise<GithubRepoResponse[]> {
-      // first attempts as an org, then attempts as a user
-      
+   async getGroupRepos(group: string): Promise<GitlabRepoResponse[]> {
       const config: AxiosRequestConfig = {
-         url: `/orgs/${org}/repos`,
+         url: `groups/${encodeURIComponent(group)}/projects`,
          method: 'GET',
-         // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: {
+            per_page: MAX_PAGE_SIZE,
+            include_subgroups: true
+         },
       };
       
       try {
@@ -65,10 +67,10 @@ export class GithubApiManager extends ApiManager {
       }
       catch (error) {
          if (error instanceof AxiosError && error.response?.status === 404) {
-            console.debug(`Got 404 from /orgs/${org}/repos call - attempting a user call`);
-            config.url = `/users/${org}/repos`;
-            const result: AxiosResponse = await this.paginationRequest(config);
-            return result.data;
+            console.debug(`Got 404 from ${config.url} call - attempting a user call`);
+            // config.url = `users/${encodeURIComponent(group)}/projects`;
+            // const result: AxiosResponse = await this.paginationRequest(config);
+            // return result.data;
          }
 
          throw error;
@@ -79,8 +81,7 @@ export class GithubApiManager extends ApiManager {
       const config: AxiosRequestConfig = {
          url: '/user/orgs',
          method: 'GET',
-         // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: { per_page: MAX_PAGE_SIZE },
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;

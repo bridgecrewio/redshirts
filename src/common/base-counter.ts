@@ -16,7 +16,7 @@ export abstract class BaseCounter {
 
    abstract aggregateCommitContributors(repo: Repo, commits: Commit[]): void
 
-   addContributor(repoOwner: string, repoName: string, username: string, email: string, commitDate: string): void {
+   addContributor(repoOwner: string, repoName: string, commit: Commit): void {
       // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
       // This method assumes that the commits will be added in ascending order of date (oldest first), and thus the commit date
       // parameter is always the "last" commit date (unless updated by another call later)
@@ -30,6 +30,8 @@ export abstract class BaseCounter {
          repoContributors = new Map();
          this.contributorsByRepo.set(repoPath, repoContributors);
       }
+
+      const { username, email, commitDate } = commit;
 
       // handle the 2 maps separately so that we can track commit dates per repo and globally
       this.upsertContributor(repoContributors, username, email, commitDate);      

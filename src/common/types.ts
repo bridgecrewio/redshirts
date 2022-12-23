@@ -21,9 +21,11 @@ export type Repo = {
    private?: boolean
 }
 
-export type Commit = {
-   commit: any
-}
+export interface Commit {
+   username: string,
+   email: string,
+   commitDate: string
+};
 
 export interface Report {
    contributors: Contributor[];
@@ -35,10 +37,10 @@ export interface SummaryReport extends Report {
 }
 
 export enum SourceType {
-   Github = 'Github',
-   GithubServer = 'GithubServer',
-   Gitlab = 'Gitlab',
-   GitlabServer = 'GitlabServer',
+   Github = 'GitHub',
+   GithubServer = 'GitHubServer',
+   Gitlab = 'GitLab',
+   GitlabServer = 'GitLabServer',
    Bitbucket = 'Bitbucket',
    BitbucketServer = 'BitbucketServer',
    AzureRepos = 'AzureRepos',

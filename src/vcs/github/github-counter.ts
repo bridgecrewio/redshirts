@@ -1,16 +1,15 @@
 import { BaseCounter } from '../../common/base-counter';
 import { Repo, SourceType } from '../../common/types';
-import { GithubCommit, GithubSourceInfo } from './github-types';
+import { GithubCommit } from './github-types';
 
 export class GithubCounter extends BaseCounter {
-   githubSourceInfo: GithubSourceInfo
 
-   constructor(githubSourceInfo: GithubSourceInfo) {
+   constructor() {
       super(SourceType.Github, ['noreply@github.com']);
-      this.githubSourceInfo = githubSourceInfo;
    }
 
    aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
+      // TODO exclude emails
       console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
       for (const commitObject of commits.reverse()) {
          const { commit, author } = commitObject;
@@ -20,7 +19,11 @@ export class GithubCounter extends BaseCounter {
          const email: string = commit?.author?.email;
          const commitDate: string = commit?.author?.date;
 
-         this.addContributor(repo.owner, repo.name, username, email, commitDate);
+         commitObject.username = username;
+         commitObject.commitDate = commitDate;
+         commitObject.email = email;
+
+         this.addContributor(repo.owner, repo.name, commitObject);
       }
    }
 }
