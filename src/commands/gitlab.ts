@@ -1,4 +1,4 @@
-import {Command, Flags} from '@oclif/core'
+import {Command, Flags} from '@oclif/core';
 
 export default class Gitlab extends Command {
   static description = 'describe the command here'
@@ -17,12 +17,12 @@ export default class Gitlab extends Command {
   static args = [{name: 'file'}]
 
   public async run(): Promise<void> {
-    const {args, flags} = await this.parse(Gitlab)
+    const {args, flags} = await this.parse(Gitlab);
 
-    const name = flags.name ?? 'world'
-    this.log(`hello ${name} from /Users/kpande/dev/redshirts/src/commands/gitlab.ts`)
+    const name = flags.name ?? 'world';
+    this.log(`hello ${name} from /Users/kpande/dev/redshirts/src/commands/gitlab.ts`);
     if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
+      this.log(`you input --force and --file: ${args.file}`);
     }
   }
 }

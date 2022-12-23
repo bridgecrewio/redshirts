@@ -1,12 +1,12 @@
 /* eslint-disable no-await-in-loop */
-import { Command, Flags } from '@oclif/core'
-import { AxiosError } from 'axios'
-import { printSummary } from '../common/output'
-import { Repo } from '../common/types'
-import { commonFlags, splitRepos, stringToArr } from '../common/utils'
-import { GithubApiManager } from '../vcs/github/github-api-manager'
-import { GithubCounter } from '../vcs/github/github-counter'
-import { GithubCommit, GithubSourceInfo, RepoResponse } from '../vcs/github/github-types'
+import { Command, Flags } from '@oclif/core';
+import { AxiosError } from 'axios';
+import { printSummary } from '../common/output';
+import { Repo } from '../common/types';
+import { commonFlags, splitRepos, stringToArr } from '../common/utils';
+import { GithubApiManager } from '../vcs/github/github-api-manager';
+import { GithubCounter } from '../vcs/github/github-counter';
+import { GithubCommit, GithubSourceInfo, RepoResponse } from '../vcs/github/github-types';
 
 export default class Github extends Command {
    static description = 'Count active contributors for Github'
@@ -30,28 +30,28 @@ export default class Github extends Command {
    }
 
    async run(): Promise<void> {
-      const { flags } = await this.parse(Github)
-      let repos: Repo[] = []
+      const { flags } = await this.parse(Github);
+      let repos: Repo[] = [];
       const githubSourceInfo: GithubSourceInfo = {
          url: 'https://api.github.com',
          token: flags.token,
-      }
-      const githubApi: GithubApiManager = new GithubApiManager(githubSourceInfo, flags.cert)
-      const githubCounter: GithubCounter = new GithubCounter(githubSourceInfo)
+      };
+      const githubApi: GithubApiManager = new GithubApiManager(githubSourceInfo, flags.cert);
+      const githubCounter: GithubCounter = new GithubCounter(githubSourceInfo);
 
       // fetch all repos for specified orgs
       if (flags.orgs) {
-         const orgs = stringToArr(flags.orgs)
+         const orgs = stringToArr(flags.orgs);
          for (const org of orgs) {
-            console.debug(`Getting repos for org ${org}`)
-            const orgRepos = (await githubApi.getOrgRepos(org)).filter(r => r.name === 'checkov' || r.name === 'bridgecrew-action');
-            repos.push(...this.filterRepos(orgRepos))
+            console.debug(`Getting repos for org ${org}`);
+            const orgRepos = (await githubApi.getOrgRepos(org));
+            repos.push(...this.filterRepos(orgRepos));
          }
       } else if (flags.repos) {
          repos = splitRepos(flags.repos);
       } else {
-         const userRepos = await githubApi.getUserRepos()
-         repos = this.filterRepos(userRepos)
+         const userRepos = await githubApi.getUserRepos();
+         repos = this.filterRepos(userRepos);
       }
 
       for (const repo of repos) {
@@ -69,15 +69,15 @@ export default class Github extends Command {
    }
 
    filterRepos(reposResponse: RepoResponse[]): Repo[] {
-      const filteredRepos: Repo[] = []
+      const filteredRepos: Repo[] = [];
       for (const repo of reposResponse) {
          filteredRepos.push({
             name: repo.name,
             owner: repo.owner.login,
             private: repo.private,
-         })
+         });
       }
 
-      return filteredRepos
+      return filteredRepos;
    }
 }

@@ -1,16 +1,16 @@
-import { Flags } from '@oclif/core'
-import { readFileSync } from 'node:fs'
-import { OutputFormat, Repo } from './types'
+import { Flags } from '@oclif/core';
+import { readFileSync } from 'node:fs';
+import { OutputFormat, Repo } from './types';
 
 export const getXDaysAgoDate = (nDaysAgo: number): Date => {
-   const xDaysAgo = new Date()
-   xDaysAgo.setDate(xDaysAgo.getDate() - nDaysAgo)
-   return xDaysAgo
-}
+   const xDaysAgo = new Date();
+   xDaysAgo.setDate(xDaysAgo.getDate() - nDaysAgo);
+   return xDaysAgo;
+};
 
 export const stringToArr = (csv: string): string[] => {
-   return csv.replace(/ /g, '').split(',')
-}
+   return csv.replace(/ /g, '').split(',');
+};
 
 export const commonFlags = {
    output: Flags.enum({
@@ -29,7 +29,7 @@ export const commonFlags = {
       required: false,
       aliases: ['ca-cert']
    })
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const jsonReportReplacer = (_key: any, value: any): any => {
@@ -41,7 +41,7 @@ export const jsonReportReplacer = (_key: any, value: any): any => {
    }
    
    return value;
-}
+};
 
 export const readFile = (path: string): Buffer => {
    return readFileSync(path);
@@ -59,4 +59,4 @@ export const splitRepos = (repoString: string): Repo[] => {
          name: r.slice(s + 1)
       };
    });
-}
+};

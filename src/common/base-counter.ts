@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Commit, Contributor, ContributorMap, OutputFormat, Repo, Report, SummaryReport } from './types'
+import { Commit, Contributor, ContributorMap, OutputFormat, Repo, Report, SummaryReport } from './types';
 
 export abstract class BaseCounter {
    sourceType: string;
@@ -43,7 +43,7 @@ export abstract class BaseCounter {
          contributor.emails.add(email);
          contributor.lastCommitDate = commitDate;
       } else {
-         console.debug(`Found new contributor: ${username}, ${email}`)
+         console.debug(`Found new contributor: ${username}, ${email}`);
          contributorMap.set(username, {
             username,
             emails: new Set([email]),

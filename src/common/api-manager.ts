@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
-import { Repo, Commit } from './types'
+import { Repo, Commit } from './types';
 import { readFile } from './utils';
 import https = require('https')
 

@@ -19,7 +19,8 @@
     "dependencies": {
         "@oclif/core": "^1.19.1",
         "@oclif/plugin-help": "^5",
-        "axios": "^1.2.1"
+        "axios": "^1.2.1",
+        "console-table-printer": "^2.11.1"
     },
     "devDependencies": {
         "@oclif/test": "^2.2.10",
@@ -52,6 +53,7 @@
     "scripts": {
         "build": "shx rm -rf dist && tsc -b",
         "lint": "eslint . --ext .ts --config .eslintrc",
+        "lint-fix": "eslint . --ext .ts --config .eslintrc --fix",
         "postpack": "shx rm -f oclif.manifest.json",
         "posttest": "yarn lint",
         "prepack": "yarn build && oclif manifest && oclif readme",

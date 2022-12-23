@@ -1,4 +1,4 @@
-import { Commit, SourceInfo } from '../../common/types'
+import { Commit, SourceInfo } from '../../common/types';
 
 export type author = {
    name: string

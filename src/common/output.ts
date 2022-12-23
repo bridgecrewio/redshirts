@@ -6,31 +6,37 @@ import { jsonReportReplacer } from "./utils";
 export const printSummary = (counter: BaseCounter, outputFormat?: string): void => {
     switch (outputFormat) {
 
-       case OutputFormat.JSON:
-          console.log(JSON.stringify(generateReportObject(counter), jsonReportReplacer, 2));
+        case OutputFormat.JSON:
+            console.log(JSON.stringify(generateReportObject(counter), jsonReportReplacer, 2));
 
-          break
+            break;
        
-       case OutputFormat.CSV:
-          console.log('Repo,Unique contributors');
-          console.log(`Total,${counter.contributorsByUsername.size}`);
-          for (const [repo, contributors] of counter.contributorsByRepo) {
-             console.log(`${repo},${contributors.size}`);
-          } 
+        case OutputFormat.CSV:
+            console.log('Repo,Unique contributors');
+            console.log(`Total,${counter.contributorsByUsername.size}`);
+            for (const [repo, contributors] of counter.contributorsByRepo) {
+                console.log(`${repo},${contributors.size}`);
+            } 
 
-          break
+            break;
+        
+    
+        case OutputFormat.Summary:
 
-       default:
-          console.log(`Contributor Details:`);
-          console.log(`Total unique contributors (all repos): ${counter.contributorsByUsername.size}`);
-          console.log('');
-          for (const [repo, contributors] of counter.contributorsByRepo) {
-             console.log(`${repo}: ${contributors.size}`);
-          }
+        // this is actually used :|
+        // eslint-disable-next-line no-fallthrough
+        default:
+            // TODO tabular output using console-table-printer
+            console.log(`Contributor Details:`);
+            console.log(`Total unique contributors (all repos): ${counter.contributorsByUsername.size}`);
+            console.log('');
+            for (const [repo, contributors] of counter.contributorsByRepo) {
+                console.log(`${repo}: ${contributors.size}`);
+            }
 
-          break
+            break;
     }
- }
+ };
 
  const generateReportObject = (counter: BaseCounter): SummaryReport => {
 
@@ -50,4 +56,4 @@ export const printSummary = (counter: BaseCounter, outputFormat?: string): void 
     };
 
     return report;
- }
+ };
