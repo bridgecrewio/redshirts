@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GithubSourceInfo, GithubCommit, RepoResponse } from './github-types';
 import { ApiManager } from '../../common/api-manager';
 import { Repo, SourceType } from '../../common/types';
@@ -55,14 +55,29 @@ export class GithubApiManager extends ApiManager {
    }
 
    async getOrgRepos(org: string): Promise<RepoResponse[]> {
+      // first attempts as an org, then attempts as a user
+      
       const config: AxiosRequestConfig = {
          url: `/orgs/${org}/repos`,
          method: 'GET',
          // eslint-disable-next-line camelcase
          params: { per_page: 100 },
       };
-      const result: AxiosResponse = await this.paginationRequest(config);
-      return result.data;
+      
+      try {
+         const result: AxiosResponse = await this.paginationRequest(config);
+         return result.data;
+      }
+      catch (error) {
+         if (error instanceof AxiosError && error.response?.status === 404) {
+            console.debug(`Got 404 from /orgs/${org}/repos call - attempting a user call`);
+            config.url = `/users/${org}/repos`;
+            const result: AxiosResponse = await this.paginationRequest(config);
+            return result.data;
+         }
+
+         throw error;
+      }
    }
 
    async getUserOrgs(): Promise<unknown[]> {

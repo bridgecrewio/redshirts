@@ -12,8 +12,8 @@ export default class Github extends Command {
    static description = 'Count active contributors for Github'
 
    static examples = [
-      `$ <%= config.bin %> <%= command.id %> --token github_pat_xxx --orgs bridgecrewio --repos checkov,terragoat
-`,
+      `$ <%= config.bin %> <%= command.id %> --token ghp_xxxx --repos bridgecrewio/checkov,try-bridgecrew/terragoat`,
+      `$ <%= config.bin %> <%= command.id %> --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew`,
    ]
 
    static flags = {
