@@ -4,6 +4,7 @@ import { ApiManager } from '../../common/api-manager';
 import { Repo, SourceInfo, SourceType } from '../../common/types';
 import { getXDaysAgoDate } from '../../common/utils';
 
+const MAX_PAGE_SIZE = 100;
 export class GithubApiManager extends ApiManager {
 
    constructor(githubSourceInfo: SourceInfo, certPath?: string) {
@@ -27,7 +28,7 @@ export class GithubApiManager extends ApiManager {
          method: 'GET',
          params: {
             // eslint-disable-next-line camelcase
-            per_page: 100,
+            per_page: MAX_PAGE_SIZE,
             since: getXDaysAgoDate(lastNDays).toISOString(),
          },
       };
@@ -43,7 +44,7 @@ export class GithubApiManager extends ApiManager {
          url: '/user/repos',
          method: 'GET',
          // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: { per_page: MAX_PAGE_SIZE },
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;
@@ -56,7 +57,7 @@ export class GithubApiManager extends ApiManager {
          url: `/orgs/${org}/repos`,
          method: 'GET',
          // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: { per_page: MAX_PAGE_SIZE },
       };
       
       try {
@@ -80,30 +81,9 @@ export class GithubApiManager extends ApiManager {
          url: '/user/orgs',
          method: 'GET',
          // eslint-disable-next-line camelcase
-         params: { per_page: 100 },
+         params: { per_page: MAX_PAGE_SIZE },
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;
-   }
-
-   async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-      let response = await this.axiosInstance.request(config);
-      const result = response;
-      while (response.headers.link) {
-         const pages = response.headers.link.split(',');
-         const nextPage = pages.find((item) => item.includes('rel="next"'));
-         if (nextPage) {
-            const startPos = nextPage.indexOf('<') + 1;
-            const endPos = nextPage.indexOf('>', startPos);
-            config.url = nextPage.slice(startPos, endPos);
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
-            result.data = [...result.data, ...response.data];
-         } else {
-            break;
-         }
-      }
-
-      return result;
    }
 }

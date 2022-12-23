@@ -36,7 +36,9 @@ export abstract class RedshirtsCommand extends Command {
         } else if (flags.repoFile) {
             repos = readRepoFile(flags.repoFile);
         } else {
+            console.debug('Getting all user repos');
             const userRepos = await apiManager.getUserRepos();
+            console.debug(`Found ${userRepos.length} repos for the user`);
             repos = this.filterRepos(userRepos);
         }
 

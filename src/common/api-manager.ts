@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { Repo, Commit, SourceInfo, RepoResponse } from './types';
 import { getFileBuffer } from './utils';
 import https = require('https')
@@ -33,5 +33,33 @@ export abstract class ApiManager {
    abstract getCommits(repo: Repo, lastNDays: number): Promise<Commit[]>
    abstract getOrgRepos(group: string): Promise<RepoResponse[]> 
    abstract getUserRepos(): Promise<RepoResponse[]> 
+
+   async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
+      // generic pagination handler for systems that returned standardized 'Link' headers
+      console.debug(`Submitting request to ${config.url}`);
+      let page = 1;
+      let response = await this.axiosInstance.request(config);
+      const result = response;
+      while (response.headers.link) {
+         const pages = response.headers.link.split(',');
+         const nextPage = pages.find((item) => item.includes('rel="next"'));
+         if (nextPage) {
+            const startPos = nextPage.indexOf('<') + 1;
+            const endPos = nextPage.indexOf('>', startPos);
+            config.url = nextPage.slice(startPos, endPos);
+
+            page++;
+            console.debug(`Submitting request to ${config.url} (page: ${page})`);
+
+            // eslint-disable-next-line no-await-in-loop
+            response = await this.axiosInstance.request(config);
+            result.data = [...result.data, ...response.data];
+         } else {
+            break;
+         }
+      }
+
+      return result;
+   }
 
 }

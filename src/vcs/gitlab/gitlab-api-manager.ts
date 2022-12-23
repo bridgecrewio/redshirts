@@ -43,9 +43,11 @@ export class GitlabApiManager extends ApiManager {
 
    async getUserRepos(): Promise<GitlabRepoResponse[]> {
       const config: AxiosRequestConfig = {
-         url: '/user/repos',
+         url: '/projects',
          method: 'GET',
-         params: { per_page: MAX_PAGE_SIZE },
+         params: { 
+            per_page: MAX_PAGE_SIZE
+          },
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;
@@ -85,26 +87,5 @@ export class GitlabApiManager extends ApiManager {
       };
       const result: AxiosResponse = await this.paginationRequest(config);
       return result.data;
-   }
-
-   async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-      let response = await this.axiosInstance.request(config);
-      const result = response;
-      while (response.headers.link) {
-         const pages = response.headers.link.split(',');
-         const nextPage = pages.find((item) => item.includes('rel="next"'));
-         if (nextPage) {
-            const startPos = nextPage.indexOf('<') + 1;
-            const endPos = nextPage.indexOf('>', startPos);
-            config.url = nextPage.slice(startPos, endPos);
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
-            result.data = [...result.data, ...response.data];
-         } else {
-            break;
-         }
-      }
-
-      return result;
    }
 }

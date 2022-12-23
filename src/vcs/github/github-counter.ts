@@ -11,7 +11,7 @@ export class GithubCounter extends BaseCounter {
    aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
       // TODO exclude emails
       console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
-      for (const commitObject of commits.reverse()) {
+      for (const commitObject of commits) {
          const { commit, author } = commitObject;
          const username = author.login; // we need to use this object, because the nested commit object has the display name at the time of the commit
 

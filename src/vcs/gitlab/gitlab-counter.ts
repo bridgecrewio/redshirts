@@ -11,7 +11,7 @@ export class GitlabCounter extends BaseCounter {
 
    aggregateCommitContributors(repo: Repo, commits: GitlabCommit[]): void {
       console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
-      for (const commit of commits.reverse()) {
+      for (const commit of commits) {
          const email = commit.committer_email;
          const commitDate = commit.committed_date;
 

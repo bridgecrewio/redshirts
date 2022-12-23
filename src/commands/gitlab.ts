@@ -22,13 +22,9 @@ export default class Gitlab extends RedshirtsCommand {
       required: true,
     }),
     groups: Flags.string({
-      description: 'Usernames or groups for which to fetch repos. These values must be the namespace name or slug, as it appears in GitLab URLs, not the display name, which might be different. Takes precendence over the --repos option.',
+      description: 'Usernames or groups for which to fetch repos. These values must be the namespace name or slug, as it appears in GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. Takes precendence over the --repos option.',
       required: false,
     }),
-    //  TODO handled with a param in the API
-    // includeSubgroups: Flags.boolean({ 
-    //   description: ''
-    // })
     ...commonFlags,
   }
 
