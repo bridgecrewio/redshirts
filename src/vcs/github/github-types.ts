@@ -1,4 +1,4 @@
-import { Commit } from "../../common/types";
+import { Commit, RepoResponse } from "../../common/types";
 
 export type Author = {
    name: string
@@ -15,7 +15,7 @@ export interface GithubCommit extends Commit {
    }
 }
 
-export type GithubRepoResponse = {
+export interface GithubRepoResponse extends RepoResponse {
    name: string
    owner: {
       login: string

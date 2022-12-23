@@ -1,4 +1,4 @@
-import { Commit } from "../../common/types";
+import { Commit, RepoResponse } from "../../common/types";
 
 export type author = {
    name: string
@@ -13,7 +13,7 @@ export interface GitlabCommit extends Commit {
    "committed_date": string
 }
 
-export type GitlabRepoResponse = {
+export interface GitlabRepoResponse extends RepoResponse {
    id?: number
    name: string
    path: string

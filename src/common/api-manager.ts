@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
-import { Repo, Commit, SourceInfo } from './types';
+import { Repo, Commit, SourceInfo, RepoResponse } from './types';
 import { getFileBuffer } from './utils';
 import https = require('https')
 
@@ -30,8 +30,8 @@ export abstract class ApiManager {
    }
 
    abstract _getAxiosConfiguration(): any
+   abstract getCommits(repo: Repo, lastNDays: number): Promise<Commit[]>
+   abstract getOrgRepos(group: string): Promise<RepoResponse[]> 
+   abstract getUserRepos(): Promise<RepoResponse[]> 
 
-   // abstract getRepositories(): Promise<Repo[]>
-
-   abstract getCommits(repo: Repo, lastNDays: number): Promise<Commit[] | []>
 }

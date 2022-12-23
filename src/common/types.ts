@@ -1,6 +1,9 @@
 export type SourceInfo = {
    url: string
    token?: string
+   repoTerm: string
+   orgTerm: string
+   orgFlagName: string
 }
 
 export type Contributor = {
@@ -26,6 +29,9 @@ export interface Commit {
    email: string,
    commitDate: string
 };
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RepoResponse {}
 
 export interface Report {
    contributors: Contributor[];

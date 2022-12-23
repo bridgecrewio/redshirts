@@ -51,7 +51,7 @@ export class GitlabApiManager extends ApiManager {
       return result.data;
    }
 
-   async getGroupRepos(group: string): Promise<GitlabRepoResponse[]> {
+   async getOrgRepos(group: string): Promise<GitlabRepoResponse[]> {
       const config: AxiosRequestConfig = {
          url: `groups/${encodeURIComponent(group)}/projects`,
          method: 'GET',
@@ -68,9 +68,9 @@ export class GitlabApiManager extends ApiManager {
       catch (error) {
          if (error instanceof AxiosError && error.response?.status === 404) {
             console.debug(`Got 404 from ${config.url} call - attempting a user call`);
-            // config.url = `users/${encodeURIComponent(group)}/projects`;
-            // const result: AxiosResponse = await this.paginationRequest(config);
-            // return result.data;
+            config.url = `users/${encodeURIComponent(group)}/projects`;
+            const result: AxiosResponse = await this.paginationRequest(config);
+            return result.data;
          }
 
          throw error;

@@ -16,7 +16,7 @@ export const commonFlags = {
     repoFile: Flags.file({
         description: 'The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more details.',
         required: false,
-        aliases: ['--repo-file']
+        aliases: ['repo-file']
      }),
     cert: Flags.file({
        description: "Path to certificate chain to use in HTTP requests",

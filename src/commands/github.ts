@@ -1,15 +1,13 @@
 /* eslint-disable no-await-in-loop */
-import { Command, Flags } from '@oclif/core';
-import { AxiosError } from 'axios';
+import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { printSummary } from '../common/output';
-import { Repo, SourceInfo } from '../common/types';
-import { readRepoFile, splitRepos, stringToArr } from '../common/utils';
+import { RedshirtsCommand } from '../common/redshirts-command';
+import { Repo } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubCounter } from '../vcs/github/github-counter';
 import { GithubRepoResponse } from '../vcs/github/github-types';
 
-export default class Github extends Command {
+export default class Github extends RedshirtsCommand {
    static description = 'Count active contributors for GitHub repos'
 
    static examples = [
@@ -32,52 +30,19 @@ export default class Github extends Command {
 
    async run(): Promise<void> {
       const { flags } = await this.parse(Github);
-      let repos: Repo[] = [];
-      const githubSourceInfo: SourceInfo = {
+
+      const sourceInfo = {
          url: 'https://api.github.com',
          token: flags.token,
+         repoTerm: 'repo',
+         orgTerm: 'organization',
+         orgFlagName: 'orgs'
       };
-      const githubApi = new GithubApiManager(githubSourceInfo, flags.cert);
-      const githubCounter = new GithubCounter();
 
-      // fetch all repos for specified orgs
-      if (flags.orgs) {
-         const orgs = stringToArr(flags.orgs);
-         for (const org of orgs) {
-            try {
-               console.debug(`Getting repos for org ${org}`);
-               const orgRepos = (await githubApi.getOrgRepos(org));
-               repos.push(...this.filterRepos(orgRepos));
-            } catch (error) {
-               if (error instanceof AxiosError) {
-                  console.error(`Error getting repos for the org ${org}: ${error.message}`);
-               } else {
-                  console.error(`Error getting repos for the org ${org}:`);
-                  console.error(error);
-               }
-             }
-         }
-      } else if (flags.repos) {
-         repos = splitRepos(flags.repos);
-      } else if (flags.repoFile) {
-         repos = readRepoFile(flags.repoFile);
-      } else {
-         const userRepos = await githubApi.getUserRepos();
-         repos = this.filterRepos(userRepos);
-      }
+      const apiManager = new GithubApiManager(sourceInfo, flags.cert);
+      const counter = new GithubCounter();
 
-      for (const repo of repos) {
-         try {
-            const commits = await githubApi.getCommits(repo, flags.days);
-            githubCounter.aggregateCommitContributors(repo, commits);
-         } catch (error) {
-            if (error instanceof AxiosError) {
-               console.error(`Failed to get commits for repo ${repo.owner}/${repo.name}. Reason: ${error.response?.data?.message}`);
-            }
-         }
-      }
-
-      printSummary(githubCounter, flags.output);
+      await this.execute(flags, sourceInfo, apiManager, counter);
    }
 
    filterRepos(reposResponse: GithubRepoResponse[]): Repo[] {

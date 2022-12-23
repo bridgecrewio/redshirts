@@ -33,7 +33,7 @@ export const getFileContents = (path: string): string => {
 
 export const getRepos = (repos: string[]): Repo[] => {
    // converts a string[] of repo names to Repo objects, validating that they have at least 1 slash
-   return repos.map(r => {
+   return repos.filter(r => r.length).map(r => {
       const s = r.lastIndexOf('/');
       if (s === -1) {
          throw new Error(`Invalid repo name (must have at least one slash): ${r}`);
