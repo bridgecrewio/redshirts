@@ -20,12 +20,7 @@ export const printSummary = (counter: BaseCounter, outputFormat?: string): void 
 
             break;
         
-    
         case OutputFormat.Summary:
-
-        // this is actually used :|
-        // eslint-disable-next-line no-fallthrough
-        default:
             // TODO tabular output using console-table-printer
             console.log(`Contributor Details:`);
             console.log(`Total unique contributors (all repos): ${counter.contributorsByUsername.size}`);

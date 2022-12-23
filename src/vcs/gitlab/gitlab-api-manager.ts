@@ -2,7 +2,7 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiManager } from '../../common/api-manager';
 import { Repo, SourceInfo, SourceType } from '../../common/types';
-// import { getXDaysAgoDate } from '../../common/utils';
+import { getXDaysAgoDate } from '../../common/utils';
 import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 
 const MAX_PAGE_SIZE = 100;
@@ -13,8 +13,6 @@ export class GitlabApiManager extends ApiManager {
       super(sourceInfo, SourceType.Gitlab, certPath);
    }
 
-   // async getRepositories(): Promise<Repo[]> {}
-
    _getAxiosConfiguration(): AxiosRequestConfig {
       return this._buildAxiosConfiguration(this.sourceInfo.url, {
          Authorization: `Bearer ${this.sourceInfo.token}`,
@@ -22,7 +20,6 @@ export class GitlabApiManager extends ApiManager {
       });
    }
 
-   // eslint-disable-next-line @typescript-eslint/no-unused-vars
    async getCommits(repo: Repo, lastNDays: number): Promise<GitlabCommit[]> {
       const repoPath = repo.owner + '/' + repo.name;
       console.debug(`Getting commits for repo: ${repoPath}`);
@@ -31,7 +28,7 @@ export class GitlabApiManager extends ApiManager {
          method: 'GET',
          params: {
             per_page: MAX_PAGE_SIZE,
-           // TODO since: getXDaysAgoDate(lastNDays).toISOString(),
+            since: getXDaysAgoDate(lastNDays).toISOString(),
          },
       };
 

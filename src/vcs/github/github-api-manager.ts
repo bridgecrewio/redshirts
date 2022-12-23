@@ -11,8 +11,6 @@ export class GithubApiManager extends ApiManager {
       super(githubSourceInfo, SourceType.Github, certPath);
    }
 
-   // async getRepositories(): Promise<Repo[]> {}
-
    _getAxiosConfiguration(): AxiosRequestConfig {
       return this._buildAxiosConfiguration(this.sourceInfo.url, {
          Accept: 'application/vnd.github.machine-man-preview+json',

@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
 import { RedshirtsCommand } from '../common/redshirts-command';
