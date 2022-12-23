@@ -36,7 +36,9 @@ export const jsonReportReplacer = (_key: any, value: any): any => {
    // serialization function for JSON report
    if (value instanceof Set) {
       return [...value];
-   } 
+   } else if (value instanceof Map) {
+      return Object.fromEntries(value);
+   }
    
    return value;
 }
@@ -46,8 +48,7 @@ export const readFile = (path: string): Buffer => {
 };
 
 export const splitRepos = (repoString: string): Repo[] => {
-   return repoString.split(',').map(r => {
-      r = r.trim();
+   return stringToArr(repoString).map(r => {
       const s = r.lastIndexOf('/');
       if (s === -1) {
          throw new Error(`Invalid repo name (must have at least one slash): ${r}`);

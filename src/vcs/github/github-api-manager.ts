@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { GithubSourceInfo, GithubCommit } from '../github/types'
+import { GithubSourceInfo, GithubCommit, RepoResponse } from './github-types'
 import { ApiManager } from '../../common/api-manager'
 import { Repo, SourceType } from '../../common/types'
 import { getXDaysAgoDate } from '../../common/utils'
@@ -43,7 +43,7 @@ export class GithubApiManager extends ApiManager {
       return commits;
    }
 
-   async getUserRepos(): Promise<Repo[]> {
+   async getUserRepos(): Promise<RepoResponse[]> {
       const config: AxiosRequestConfig = {
          url: '/user/repos',
          method: 'GET',
@@ -54,7 +54,7 @@ export class GithubApiManager extends ApiManager {
       return result.data
    }
 
-   async getOrgRepos(org: string): Promise<Repo[]> {
+   async getOrgRepos(org: string): Promise<RepoResponse[]> {
       const config: AxiosRequestConfig = {
          url: `/orgs/${org}/repos`,
          method: 'GET',
@@ -78,7 +78,7 @@ export class GithubApiManager extends ApiManager {
 
    async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
       let response = await this.axiosInstance.request(config)
-      const result = response
+      const result = response;
       while (response.headers.link) {
          const pages = response.headers.link.split(',')
          const nextPage = pages.find((item) => item.includes('rel="next"'))
@@ -88,6 +88,7 @@ export class GithubApiManager extends ApiManager {
             config.url = nextPage.slice(startPos, endPos)
             // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config)
+            result.data = [...result.data, ...response.data];
          } else {
             break
          }

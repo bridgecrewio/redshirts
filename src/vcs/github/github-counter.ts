@@ -1,8 +1,8 @@
-import { BaseCounterClass } from '../../common/base-counter'
+import { BaseCounter } from '../../common/base-counter'
 import { Repo, SourceType } from '../../common/types'
-import { GithubCommit, GithubSourceInfo } from './types'
+import { GithubCommit, GithubSourceInfo } from './github-types'
 
-export class GithubCounter extends BaseCounterClass {
+export class GithubCounter extends BaseCounter {
    githubSourceInfo: GithubSourceInfo
 
    constructor(githubSourceInfo: GithubSourceInfo) {

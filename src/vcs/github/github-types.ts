@@ -18,3 +18,11 @@ export interface GithubCommit extends Commit {
       author: author
    }
 }
+
+export type RepoResponse = {
+   name: string
+   owner: {
+      login: string
+   }
+   private?: boolean
+}

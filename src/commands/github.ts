@@ -1,11 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import { Command, Flags } from '@oclif/core'
 import { AxiosError } from 'axios'
+import { printSummary } from '../common/output'
 import { Repo } from '../common/types'
 import { commonFlags, splitRepos, stringToArr } from '../common/utils'
-import { GithubApiManager } from '../vcs/github/api-manager'
+import { GithubApiManager } from '../vcs/github/github-api-manager'
 import { GithubCounter } from '../vcs/github/github-counter'
-import { GithubCommit, GithubSourceInfo } from '../vcs/github/types'
+import { GithubCommit, GithubSourceInfo, RepoResponse } from '../vcs/github/github-types'
 
 export default class Github extends Command {
    static description = 'Count active contributors for Github'
@@ -18,11 +19,11 @@ export default class Github extends Command {
    static flags = {
       token: Flags.string({
          char: 't',
-         description: 'Github personal access token. This is generally required, especially for any private repos. However, in some cases, omitting this can get around org-level restrictions like IP whitelisting.',
-         required: false,
+         description: 'Github personal access token. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
+         required: true,
       }),
       orgs: Flags.string({
-         description: 'Organization names',
+         description: 'Organization or user names for which to fetch repos. Takes precendence over the --repos option.',
          required: false,
       }),
       ...commonFlags,
@@ -30,8 +31,7 @@ export default class Github extends Command {
 
    async run(): Promise<void> {
       const { flags } = await this.parse(Github)
-      let orgs: string[]
-      let repos: any = []
+      let repos: Repo[] = []
       const githubSourceInfo: GithubSourceInfo = {
          url: 'https://api.github.com',
          token: flags.token,
@@ -41,48 +41,19 @@ export default class Github extends Command {
 
       // fetch all repos for specified orgs
       if (flags.orgs) {
-         orgs = stringToArr(flags.orgs)
+         const orgs = stringToArr(flags.orgs)
          for (const org of orgs) {
-            console.log(`Getting repos for org ${org}..`)
-            const orgRepos = await githubApi.getOrgRepos(org)
+            console.debug(`Getting repos for org ${org}`)
+            const orgRepos = (await githubApi.getOrgRepos(org)).filter(r => r.name === 'checkov' || r.name === 'bridgecrew-action');
             repos.push(...this.filterRepos(orgRepos))
          }
       } else if (flags.repos) {
          repos = splitRepos(flags.repos);
-
       } else {
          const userRepos = await githubApi.getUserRepos()
          repos = this.filterRepos(userRepos)
       }
 
-      // // for testing - to be deleted
-      // const repoList: Repo[] = [
-      //    {
-      //       owner: 'mikeurbanski1',
-      //       name: 'tfcloud',
-      //    },
-      //    {
-      //       owner: 'mikeurbanski2',
-      //       name: 'terragoat',
-      //    },
-      //    {
-      //       owner: 'mikeurbanski1',
-      //       name: 'repo1',
-      //       private: true
-      //    },
-      //    {
-      //       owner: 'bridgecrewio',
-      //       name: 'checkov',
-      //       private: false
-      //    }
-      // ];
-
-      // TODO:
-      /**
-       *    - loop over list of repos
-       *    - for each repo, get commits and convert commits to contributors
-       *    - only append to the contributor map if the map does not have the contributor already
-       */
       for (const repo of repos) {
          try {
             const commits: GithubCommit[] = (await githubApi.getCommits(repo, 90)) as GithubCommit[];
@@ -94,17 +65,15 @@ export default class Github extends Command {
          }
       }
 
-      githubCounter.printSummary(
-         flags.output
-      );
+      printSummary(githubCounter, flags.output);
    }
 
-   filterRepos(reposResponse: Repo[]): any {
-      const filteredRepos: any = []
+   filterRepos(reposResponse: RepoResponse[]): Repo[] {
+      const filteredRepos: Repo[] = []
       for (const repo of reposResponse) {
          filteredRepos.push({
             name: repo.name,
-            owner: repo.owner,
+            owner: repo.owner.login,
             private: repo.private,
          })
       }

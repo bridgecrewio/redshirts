@@ -1,8 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Commit, Contributor, ContributorMap, OutputFormat, Repo, Report, SummaryReport } from './types'
-import { jsonReportReplacer } from './utils';
 
-export abstract class BaseCounterClass {
+export abstract class BaseCounter {
    sourceType: string;
    excludedUsers: string[];
    contributorsByUsername: ContributorMap;
@@ -50,47 +49,6 @@ export abstract class BaseCounterClass {
             emails: new Set([email]),
             lastCommitDate: commitDate
          });
-      }
-   }
-
-   generateReportObject(): SummaryReport {
-
-      const repos = [];
-
-      for (const [repo, contributors] of this.contributorsByRepo) {
-         repos.push({
-            repo,
-            totalContributors: contributors.size,
-            contributors: [...contributors.values()]
-         });
-      }
-
-      const report: SummaryReport = {
-         totalContributors: this.contributorsByUsername.size,
-         contributors: [...this.contributorsByUsername.values()],
-         repos
-      };
-
-      return report;
-   }
-
-   printSummary(outputFormat?: string): void {
-      switch (outputFormat) {
-
-         case OutputFormat.JSON:
-            console.log(JSON.stringify(this.generateReportObject(), jsonReportReplacer, 2));
-
-            break
-
-         default:
-            console.log(`Contributor Details:`);
-            console.log(`Total unique contributors (all repos): ${this.contributorsByUsername.size}`);
-            console.log('');
-            for (const [repo, contributors] of this.contributorsByRepo) {
-               console.log(`${repo}: ${contributors.size}`);
-            }
-
-            break
       }
    }
 }

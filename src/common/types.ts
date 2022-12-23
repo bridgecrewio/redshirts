@@ -31,11 +31,7 @@ export interface Report {
 }
 
 export interface SummaryReport extends Report {
-   repos: RepoReport[]
-}
-
-export interface RepoReport extends Report {
-   repo: string
+   repos: Map<string, Report>
 }
 
 export enum SourceType {
@@ -52,4 +48,5 @@ export enum SourceType {
 export enum OutputFormat {
    Summary = 'summary',
    JSON = 'json',
+   CSV = 'csv'
 }
