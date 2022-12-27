@@ -11,7 +11,7 @@ export default class Gitlab extends RedshirtsCommand {
 
   static examples = [
     `$ <%= config.bin %> <%= command.id %> --token glpat_xxxx --repos bridgecrewio/checkov,group/subgroup/terragoat`,
-    `$ <%= config.bin %> <%= command.id %> --token glpat_xxxx --groups bridgecrewio,try-bridgecrew`,
+    `$ <%= config.bin %> <%= command.id %> --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup`,
   ]
 
   static flags = {

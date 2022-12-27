@@ -1,6 +1,6 @@
 export type SourceInfo = {
    url: string
-   token?: string
+   token: string
    repoTerm: string
    orgTerm: string
    orgFlagName: string
@@ -9,7 +9,6 @@ export type SourceInfo = {
 export type Contributor = {
    username: string
    emails: Set<string>
-   // repos: Array<string>
    lastCommitDate: string
 }
 
@@ -58,3 +57,10 @@ export enum OutputFormat {
    JSON = 'json',
    CSV = 'csv'
 }
+
+export enum SortField {
+   REPO = 'repo',
+   CONTRIBUTORS = 'contributors'
+}
+
+export type OutputTableRow = { Repo: string, Contributors: number };

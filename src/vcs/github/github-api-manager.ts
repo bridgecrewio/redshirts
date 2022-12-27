@@ -7,8 +7,8 @@ import { getXDaysAgoDate } from '../../common/utils';
 const MAX_PAGE_SIZE = 100;
 export class GithubApiManager extends ApiManager {
 
-   constructor(githubSourceInfo: SourceInfo, certPath?: string) {
-      super(githubSourceInfo, SourceType.Github, certPath);
+   constructor(sourceInfo: SourceInfo, certPath?: string) {
+      super(sourceInfo, SourceType.Github, certPath);
    }
 
    _getAxiosConfiguration(): AxiosRequestConfig {
@@ -18,7 +18,7 @@ export class GithubApiManager extends ApiManager {
       });
    }
 
-   async getCommits(repo: Repo, lastNDays: number): Promise<GithubCommit[]> {
+   async getCommits(repo: Repo, numDays: number): Promise<GithubCommit[]> {
       const repoPath = repo.owner + '/' + repo.name;
       console.debug(`Getting commits for repo: ${repoPath}`);
       const config: AxiosRequestConfig = {
@@ -27,11 +27,11 @@ export class GithubApiManager extends ApiManager {
          params: {
             // eslint-disable-next-line camelcase
             per_page: MAX_PAGE_SIZE,
-            since: getXDaysAgoDate(lastNDays).toISOString(),
+            since: getXDaysAgoDate(numDays).toISOString(),
          },
       };
 
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       const commits = result?.data || [];
       console.debug(`Found ${commits.length} commits`);
       return commits;
@@ -44,7 +44,7 @@ export class GithubApiManager extends ApiManager {
          // eslint-disable-next-line camelcase
          params: { per_page: MAX_PAGE_SIZE },
       };
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       return result.data;
    }
 
@@ -59,14 +59,14 @@ export class GithubApiManager extends ApiManager {
       };
       
       try {
-         const result: AxiosResponse = await this.paginationRequest(config);
+         const result: AxiosResponse = await this.submitPaginatedRequest(config);
          return result.data;
       }
       catch (error) {
          if (error instanceof AxiosError && error.response?.status === 404) {
             console.debug(`Got 404 from /orgs/${org}/repos call - attempting a user call`);
             config.url = `/users/${org}/repos`;
-            const result: AxiosResponse = await this.paginationRequest(config);
+            const result: AxiosResponse = await this.submitPaginatedRequest(config);
             return result.data;
          }
 
@@ -81,7 +81,7 @@ export class GithubApiManager extends ApiManager {
          // eslint-disable-next-line camelcase
          params: { per_page: MAX_PAGE_SIZE },
       };
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       return result.data;
    }
 }

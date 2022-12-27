@@ -18,8 +18,6 @@ export abstract class BaseCounter {
 
    addContributor(repoOwner: string, repoName: string, commit: Commit): void {
       // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
-      // This method assumes that the commits will be added in desccending order of date (newest first), so it will only save the commit
-      // date for the first commit per user and repo.
 
       const repoPath = repoOwner + '/' + repoName;
 
@@ -43,6 +41,9 @@ export abstract class BaseCounter {
 
       if (contributor) {
          contributor.emails.add(email);
+         if (contributor.lastCommitDate < commitDate) {
+            contributor.lastCommitDate = commitDate;
+         }
       } else {
          console.debug(`Found new contributor: ${username}, ${email}`);
          contributorMap.set(username, {

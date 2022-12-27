@@ -1,9 +1,10 @@
+/* eslint-disable no-case-declarations */
 import { BaseCounter } from "./base-counter";
-import { OutputFormat, Report, SummaryReport } from "./types";
-import { jsonReportReplacer } from "./utils";
+import { OutputFormat, OutputTableRow, Report, SortField, SummaryReport } from "./types";
+import { jsonReportReplacer, mapIterable } from "./utils";
+import { Table } from "console-table-printer";
 
-
-export const printSummary = (counter: BaseCounter, outputFormat?: string): void => {
+export const printSummary = (counter: BaseCounter, outputFormat: string, sortField: SortField): void => {
     switch (outputFormat) {
 
         case OutputFormat.JSON:
@@ -14,23 +15,54 @@ export const printSummary = (counter: BaseCounter, outputFormat?: string): void 
         case OutputFormat.CSV:
             console.log('Repo,Unique contributors');
             console.log(`Total,${counter.contributorsByUsername.size}`);
-            for (const [repo, contributors] of counter.contributorsByRepo) {
-                console.log(`${repo},${contributors.size}`);
+
+            const repos = mapIterable(counter.contributorsByRepo.entries(), (value): OutputTableRow => {
+                return {
+                    Repo: value[0],
+                    Contributors: value[1].size
+                };
+            } );
+
+            repos.sort(getSortFn(sortField));
+
+            for (const repo of repos) {
+                console.log(`${repo.Repo},${repo.Contributors}`);
             } 
 
             break;
         
         case OutputFormat.Summary:
-            // TODO tabular output using console-table-printer
-            console.log(`Contributor Details:`);
-            console.log(`Total unique contributors (all repos): ${counter.contributorsByUsername.size}`);
-            console.log('');
+            // TODO determine tabular output format (mainly the header with total)
+
+            const table = new Table({
+                title: `Total unique contributors: ${counter.contributorsByUsername.size}`,
+                columns : [
+                    {
+                        name: 'Repo',
+                        alignment: 'left'
+                    },
+                    {
+                        name: 'Contributors',
+                        alignment: 'left'
+                    }
+                ],
+                sort: getSortFn(sortField)
+            });
+
             for (const [repo, contributors] of counter.contributorsByRepo) {
-                console.log(`${repo}: ${contributors.size}`);
-            }
+                table.addRow({ 'Repo': repo, 'Contributors': contributors.size });
+            } 
+
+            table.printTable();
 
             break;
     }
+ };
+
+ const getSortFn = (sortField: SortField): (repo1: OutputTableRow, repo2: OutputTableRow) => number => {
+    return (repo1: OutputTableRow, repo2: OutputTableRow): number => {
+        return sortField === SortField.REPO ? repo1.Repo.localeCompare(repo2.Repo) : repo2.Contributors - repo1.Contributors;
+    };
  };
 
  const generateReportObject = (counter: BaseCounter): SummaryReport => {

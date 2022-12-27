@@ -20,7 +20,7 @@ export class GitlabApiManager extends ApiManager {
       });
    }
 
-   async getCommits(repo: Repo, lastNDays: number): Promise<GitlabCommit[]> {
+   async getCommits(repo: Repo, numDays: number): Promise<GitlabCommit[]> {
       const repoPath = repo.owner + '/' + repo.name;
       console.debug(`Getting commits for repo: ${repoPath}`);
       const config: AxiosRequestConfig = {
@@ -28,11 +28,11 @@ export class GitlabApiManager extends ApiManager {
          method: 'GET',
          params: {
             per_page: MAX_PAGE_SIZE,
-            since: getXDaysAgoDate(lastNDays).toISOString(),
+            since: getXDaysAgoDate(numDays).toISOString(),
          },
       };
 
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       const commits = result?.data || [];
       console.debug(`Found ${commits.length} commits`);
       return commits;
@@ -46,7 +46,7 @@ export class GitlabApiManager extends ApiManager {
             per_page: MAX_PAGE_SIZE
           },
       };
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       return result.data;
    }
 
@@ -61,14 +61,14 @@ export class GitlabApiManager extends ApiManager {
       };
       
       try {
-         const result: AxiosResponse = await this.paginationRequest(config);
+         const result: AxiosResponse = await this.submitPaginatedRequest(config);
          return result.data;
       }
       catch (error) {
          if (error instanceof AxiosError && error.response?.status === 404) {
             console.debug(`Got 404 from ${config.url} call - attempting a user call`);
             config.url = `users/${encodeURIComponent(group)}/projects`;
-            const result: AxiosResponse = await this.paginationRequest(config);
+            const result: AxiosResponse = await this.submitPaginatedRequest(config);
             return result.data;
          }
 
@@ -82,7 +82,7 @@ export class GitlabApiManager extends ApiManager {
          method: 'GET',
          params: { per_page: MAX_PAGE_SIZE },
       };
-      const result: AxiosResponse = await this.paginationRequest(config);
+      const result: AxiosResponse = await this.submitPaginatedRequest(config);
       return result.data;
    }
 }

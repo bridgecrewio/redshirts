@@ -30,14 +30,13 @@ export abstract class ApiManager {
    }
 
    abstract _getAxiosConfiguration(): any
-   abstract getCommits(repo: Repo, lastNDays: number): Promise<Commit[]>
+   abstract getCommits(repo: Repo, numDays: number): Promise<Commit[]>
    abstract getOrgRepos(group: string): Promise<RepoResponse[]> 
    abstract getUserRepos(): Promise<RepoResponse[]> 
 
-   async paginationRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
+   async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
       // generic pagination handler for systems that returned standardized 'Link' headers
       console.debug(`Submitting request to ${config.url}`);
-      let page = 1;
       let response = await this.axiosInstance.request(config);
       const result = response;
       while (response.headers.link) {
@@ -48,8 +47,7 @@ export abstract class ApiManager {
             const endPos = nextPage.indexOf('>', startPos);
             config.url = nextPage.slice(startPos, endPos);
 
-            page++;
-            console.debug(`Submitting request to ${config.url} (page: ${page})`);
+            console.debug(`Fetching next page of request from ${config.url}`);
 
             // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config);
@@ -58,6 +56,8 @@ export abstract class ApiManager {
             break;
          }
       }
+
+      console.debug(`Fetched ${result.data.length} total items`);
 
       return result;
    }

@@ -53,3 +53,26 @@ export const splitRepos = (repoString: string): Repo[] => {
 export const readRepoFile = (path: string): Repo[] => {
    return getRepos(getFileContents(path).split('\n').map(s => s.trim()));
 };
+
+export const mapIterable = <T, U>(it: Iterable<T>, callbackfn: (value: T, index: number, it: Iterable<T>) => U): U[] => {
+   const arr = [];
+
+   let i = 0;
+   for (const e of it) {
+      arr.push(callbackfn(e, i, it));
+      i++;
+   }
+
+   return arr;
+};
+
+export const reduceIterable = <T, U>(it: Iterable<T>, callbackfn: (prev: U, next: T, index: number, it: Iterable<T>) => U, initial: U): U => {
+   // simple 'reduce' implementation that requires an initial value (and thus removes a lot of the edge cases)
+   let i = 0;
+   for (const e of it) {
+      initial = callbackfn(initial, e, i, it);
+      i++;
+   }
+   
+   return initial;
+};

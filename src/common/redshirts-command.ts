@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { Command } from '@oclif/core';
+// import { CLIError } from '@oclif/errors';
 import { AxiosError } from 'axios';
 import { Commit, Repo, RepoResponse, SourceInfo } from '../common/types';
 import { ApiManager } from './api-manager';
@@ -7,13 +8,19 @@ import { BaseCounter } from './base-counter';
 import { printSummary } from './output';
 import { readRepoFile, splitRepos, stringToArr } from './utils';
 
+// TODO
+// - get commits from all branches for all VCSes and git log
+// - unique user identification per VCS
+
 export abstract class RedshirtsCommand extends Command {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async execute(flags: any, sourceInfo: SourceInfo, apiManager: ApiManager, counter: BaseCounter): Promise<void> {
-        // Set some variables for common logic without messing with oclif constructor definitions
-        
         let repos: Repo[] = [];
+
+        // if (!(flags[sourceInfo.orgFlagName] || flags.repos || flags.repoFile)) {
+        //     throw new CLIError(`One of the following arguments is required: --repos, --repoFile, --${sourceInfo.orgFlagName}`);
+        // }
 
         if (flags[sourceInfo.orgFlagName]) {
             const orgs = stringToArr(flags[sourceInfo.orgFlagName]);
@@ -53,7 +60,7 @@ export abstract class RedshirtsCommand extends Command {
             }
           }
       
-          printSummary(counter, flags.output);
+          printSummary(counter, flags.output, flags.sort);
 
     }
 

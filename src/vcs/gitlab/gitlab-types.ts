@@ -1,6 +1,6 @@
 import { Commit, RepoResponse } from "../../common/types";
 
-export type author = {
+export type GitlabAuthor = {
    name: string
    email: string
    date: string
