@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { Repo } from './types';
 
+export const DEFAULT_DAYS = 90;
+
 export const getXDaysAgoDate = (nDaysAgo: number): Date => {
    const xDaysAgo = new Date();
    xDaysAgo.setDate(xDaysAgo.getDate() - nDaysAgo);

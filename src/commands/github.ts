@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
 import { RedshirtsCommand } from '../common/redshirts-command';
-import { Repo } from '../common/types';
+import { HelpGroup, Repo } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubCounter } from '../vcs/github/github-counter';
 import { GithubRepoResponse } from '../vcs/github/github-types';
@@ -19,10 +19,12 @@ export default class Github extends RedshirtsCommand {
          char: 't',
          description: 'Github personal access token. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
          required: true,
+         helpGroup: HelpGroup.AUTH
       }),
       orgs: Flags.string({
-         description: 'Organization or user names for which to fetch repos. Takes precendence over the --repos option.',
+         description: 'Organization names and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified org(s). Use the --skip-repos option to exclude individual repos that are a part of these org(s).',
          required: false,
+         helpGroup: HelpGroup.REPO_SPEC
       }),
       ...commonFlags,
    }
@@ -38,7 +40,7 @@ export default class Github extends RedshirtsCommand {
          orgFlagName: 'orgs'
       };
 
-      const apiManager = new GithubApiManager(sourceInfo, flags.cert);
+      const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
       const counter = new GithubCounter();
 
       await this.execute(flags, sourceInfo, apiManager, counter);

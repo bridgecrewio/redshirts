@@ -63,4 +63,11 @@ export enum SortField {
    CONTRIBUTORS = 'contributors'
 }
 
+export enum HelpGroup {
+   REPO_SPEC = 'Repo specification',
+   AUTH = 'Authentication',
+   OUTPUT = 'Output',
+   OTHER = 'Other'
+}
+
 export type OutputTableRow = { Repo: string, Contributors: number };

@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
 import { RedshirtsCommand } from '../common/redshirts-command';
-import { Repo } from '../common/types';
+import { HelpGroup, Repo } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketCounter } from '../vcs/bitbucket/bitbucket-counter';
 import { BitbucketRepoResponse } from '../vcs/bitbucket/bitbucket-types';
@@ -18,16 +18,19 @@ export default class Bitbucket extends RedshirtsCommand {
       username: Flags.string({
          description: 'Your Bitbucket username associated with the provided app token',
          char: 'u',
-         required: true
+         required: true,
+         helpGroup: HelpGroup.AUTH
       }),
       token: Flags.string({
          char: 't',
          description: 'A Bitbucket app token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
          required: true,
+         helpGroup: HelpGroup.AUTH
       }),
       workspaces: Flags.string({
-         description: 'Workspace or usernames for which to fetch repos. Takes precendence over the --repos option.',
+         description: 'Workspace and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude individual repos that are a part of these workspace(s).',
          required: false,
+         helpGroup: HelpGroup.REPO_SPEC
       }),
       ...commonFlags,
    }
@@ -43,7 +46,7 @@ export default class Bitbucket extends RedshirtsCommand {
          orgFlagName: 'workspaces'
       };
 
-      const apiManager = new BitbucketApiManager(sourceInfo, flags.cert);
+      const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
       const counter = new BitbucketCounter();
 
       await this.execute(flags, sourceInfo, apiManager, counter);

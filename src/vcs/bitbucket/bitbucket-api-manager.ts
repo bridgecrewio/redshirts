@@ -6,6 +6,7 @@ import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, Bitb
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
+
 export class BitbucketApiManager extends ApiManager {
 
    constructor(sourceInfo: SourceInfo, certPath?: string) {
@@ -33,7 +34,7 @@ export class BitbucketApiManager extends ApiManager {
       // Bitbucket does not support a 'since' filter, so we have to do it manually
       const filterfn = getBitbucketDateCompareFunction(getXDaysAgoDate(numDays));
 
-      const result: AxiosResponse = await this.submitTruncatedPaginatedRequest(config, filterfn);
+      const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
       const commits = result?.data.values || [];
       console.debug(`Found ${commits.length} commits`);
       return commits;
@@ -115,17 +116,23 @@ export class BitbucketApiManager extends ApiManager {
       return result;
    }
 
-   async submitTruncatedPaginatedRequest(config: AxiosRequestConfig, filterfn?: (c: BitbucketCommit) => boolean): Promise<AxiosResponse> {
+   async submitFilteredPaginatedRequest(config: AxiosRequestConfig, filterfn: (c: BitbucketCommit) => boolean): Promise<AxiosResponse> {
+      // same as the regular pagination logic, except this one will run the filter function on each
+      // page of results, and if any of the elements in that page matches, then the function
+      // will stop pagination, slice off that item and everything after it, and return. 
+      // This means that the filter function must use the field by which the results for the 
+      // request are sorted.
+      
       console.debug(`Submitting truncated request to ${config.url}`);
       let response = await this.axiosInstance.request(config);
 
-      if (filterfn) {
-         const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex((c) => filterfn(c));
+      // this is safe because we control the definition
+      // eslint-disable-next-line unicorn/no-array-callback-reference
+      const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex(filterfn);
 
-         if (oldCommitIndex !== -1) {
-            console.debug(`Found truncation marker at index ${oldCommitIndex}`);
-            response.data.values = response.data.values.slice(0, oldCommitIndex);
-         }
+      if (oldCommitIndex !== -1) {
+         console.debug(`Found truncation marker at index ${oldCommitIndex}`);
+         response.data.values = response.data.values.slice(0, oldCommitIndex);
       }
 
       const result = response;
@@ -138,18 +145,15 @@ export class BitbucketApiManager extends ApiManager {
          // eslint-disable-next-line no-await-in-loop
          response = await this.axiosInstance.request(config);
 
-         if (filterfn) {
-            const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex((c) => filterfn(c));
+         // eslint-disable-next-line unicorn/no-array-callback-reference
+         const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex(filterfn);
 
-            if (oldCommitIndex === -1) {
-               result.data.values = [...result.data.values, ...response.data.values];
-            } else {
-               console.debug(`Found truncation marker at index ${oldCommitIndex}`);
-               result.data.values = [...result.data.values, ...response.data.values.slice(0, oldCommitIndex)];
-               break;
-            }
-         } else {
+         if (oldCommitIndex === -1) {
             result.data.values = [...result.data.values, ...response.data.values];
+         } else {
+            console.debug(`Found truncation marker at index ${oldCommitIndex}`);
+            result.data.values = [...result.data.values, ...response.data.values.slice(0, oldCommitIndex)];
+            break;
          }
       }
 

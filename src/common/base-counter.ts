@@ -16,6 +16,12 @@ export abstract class BaseCounter {
 
    abstract aggregateCommitContributors(repo: Repo, commits: Commit[]): void
 
+   addEmptyRepo(repo: Repo): void {
+      // Adds a repo that has no commits to the aggregation
+      const repoPath = repo.owner + '/' + repo.name;
+      this.contributorsByRepo.set(repoPath, new Map());
+   }
+   
    addContributor(repoOwner: string, repoName: string, commit: Commit): void {
       // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
 

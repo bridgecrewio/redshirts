@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Commit, RepoResponse } from "../../common/types";
 
 export type GitlabAuthor = {
@@ -21,4 +22,9 @@ export interface GitlabRepoResponse extends RepoResponse {
       "full_path": string
    }
    visibility: "private" | "public"
+}
+
+export type GitlabGroupResponse = {
+   id: number
+   full_path: string
 }
