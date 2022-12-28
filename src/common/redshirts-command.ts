@@ -81,7 +81,7 @@ export abstract class RedshirtsCommand extends Command {
 
         return repos;
     }
-    
+
     getExplicitRepoList(sourceInfo: SourceInfo, repos: Repo[], reposList?: string, reposFile?: string): Repo[] {
         const explicitRepos = this.getRepoListFromParams(sourceInfo.minPathLength, sourceInfo.maxPathLength, reposList, reposFile);
 
