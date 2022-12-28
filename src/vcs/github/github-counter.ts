@@ -1,28 +1,29 @@
-import { BaseCounterClass } from '../../common/base-counter'
-import { Contributor, ContributorMap, SourceType } from '../../common/types'
-import { GithubCommit, GithubSourceInfo } from './types'
+import { BaseCounter } from '../../common/base-counter';
+import { Repo, SourceType } from '../../common/types';
+import { GithubCommit } from './github-types';
 
-export class GithubCounter extends BaseCounterClass {
-   githubSourceInfo: GithubSourceInfo
+export class GithubCounter extends BaseCounter {
 
-   constructor(githubSourceInfo: GithubSourceInfo) {
-      super(SourceType.Github, ['noreply@github.com'])
-      this.githubSourceInfo = githubSourceInfo
-   }
+    constructor() {
+        super(SourceType.Github, ['noreply@github.com']);
+    }
 
-   convertCommitsToContributors(commits: GithubCommit[]): ContributorMap {
-      const contributorMap: ContributorMap = new Map()
-      for (const commitObject of commits) {
-         const { commit } = commitObject
-         const email: string = commit?.author?.email
-         const username: string = commit?.author?.name
-         const lastCommitDate: string = commit?.author?.date
-         if (email && !contributorMap.has(email)) {
-            const contributor: Contributor = { email, username, lastCommitDate }
-            contributorMap.set(email, contributor)
-         }
-      }
+    aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
+        // TODO exclude emails
+        console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
+        for (const commitObject of commits) {
+            const { commit, author } = commitObject;
+            const username = author.login; // we need to use this object, because the nested commit object has the display name at the time of the commit
 
-      return contributorMap
-   }
+            // TODO do we need null checks here?
+            const email: string = commit?.author?.email;
+            const commitDate: string = commit?.author?.date;
+
+            commitObject.username = username;
+            commitObject.commitDate = commitDate;
+            commitObject.email = email;
+
+            this.addContributor(repo.owner, repo.name, commitObject);
+        }
+    }
 }

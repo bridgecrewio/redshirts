@@ -1,49 +1,72 @@
 export type SourceInfo = {
-   url: string
-   token: string
+    url: string
+    token: string
+    repoTerm: string
+    orgTerm: string
+    orgFlagName: string,
+    minPathLength: number,
+    maxPathLength: number
 }
 
 export type Contributor = {
-   username: string
-   email: string
-   // repos: Array<string>
-   lastCommitDate: string
+    username: string
+    emails: Set<string>
+    lastCommitDate: string
 }
 
-// Unique id that identifies a contributor
-export type id = string
-
-export type ContributorMap = Map<id, Contributor>
+export type ContributorMap = Map<string, Contributor>
 
 export type Repo = {
-   name: string
-   owner: {
-      login: string
-   }
-   private?: boolean
+    name: string
+    owner: string
+    private?: boolean
 }
 
-export type Commit = {
-   commit: any
+export interface Commit {
+    username: string,
+    email: string,
+    commitDate: string
+};
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RepoResponse { }
+
+export interface Report {
+    contributors: Contributor[];
+    totalContributors: number;
 }
 
-export type Report = {
-   contributorDetails: any
-   totalContributors: number
+export interface SummaryReport extends Report {
+    repos: Map<string, Report>
 }
 
 export enum SourceType {
-   Github = 'Github',
-   GithubServer = 'GithubServer',
-   Gitlab = 'Gitlab',
-   GitlabServer = 'GitlabServer',
-   Bitbucket = 'Bitbucket',
-   BitbucketServer = 'BitbucketServer',
-   AzureRepos = 'AzureRepos',
-   Local = 'Local',
+    Github = 'GitHub',
+    GithubServer = 'GitHubServer',
+    Gitlab = 'GitLab',
+    GitlabServer = 'GitLabServer',
+    Bitbucket = 'Bitbucket',
+    BitbucketServer = 'BitbucketServer',
+    AzureRepos = 'AzureRepos',
+    Local = 'Local',
 }
 
 export enum OutputFormat {
-   Summary = 'summary',
-   JSON = 'json',
+    Summary = 'summary',
+    JSON = 'json',
+    CSV = 'csv'
 }
+
+export enum SortField {
+    REPO = 'repo',
+    CONTRIBUTORS = 'contributors'
+}
+
+export enum HelpGroup {
+    REPO_SPEC = 'Repo specification',
+    AUTH = 'Authentication',
+    OUTPUT = 'Output',
+    OTHER = 'Other'
+}
+
+export type OutputTableRow = { Repo: string, Contributors: number };

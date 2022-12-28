@@ -1,56 +1,62 @@
-import { Commit, ContributorMap, OutputFormat, Report } from './types'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Commit, Contributor, ContributorMap, OutputFormat, Repo, Report, SummaryReport } from './types';
 
-export abstract class BaseCounterClass {
-   sourceType: string
-   excludedUsers: Array<string>
+export abstract class BaseCounter {
+    sourceType: string;
+    excludedUsers: string[];
+    contributorsByUsername: ContributorMap;
+    contributorsByRepo: Map<string, ContributorMap>;
 
-   constructor(sourceType: string, excludedUsers: Array<string>) {
-      this.sourceType = sourceType
-      this.excludedUsers = excludedUsers
-   }
+    constructor(sourceType: string, excludedUsers: Array<string>) {
+        this.sourceType = sourceType;
+        this.excludedUsers = excludedUsers;
+        this.contributorsByUsername = new Map();
+        this.contributorsByRepo = new Map();
+    }
 
-   abstract convertCommitsToContributors(commits: Commit[]): ContributorMap
+    abstract aggregateCommitContributors(repo: Repo, commits: Commit[]): void
 
-   countContributors(contributorMap: ContributorMap, excludedUsers: string[]): [ContributorMap, number] {
-      let totalContributors = 0
-      for (const c of contributorMap.keys()) {
-         if (excludedUsers.includes(c)) {
-            contributorMap.delete(c)
-            continue
-         }
+    addEmptyRepo(repo: Repo): void {
+        // Adds a repo that has no commits to the aggregation
+        const repoPath = repo.owner + '/' + repo.name;
+        this.contributorsByRepo.set(repoPath, new Map());
+    }
 
-         totalContributors++
-      }
+    addContributor(repoOwner: string, repoName: string, commit: Commit): void {
+        // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
 
-      return [contributorMap, totalContributors]
-   }
+        const repoPath = repoOwner + '/' + repoName;
 
-   printSummary(filteredContributorMap: ContributorMap, totalContributors: number, outputFormat?: string): void {
-      switch (outputFormat) {
-         case OutputFormat.Summary:
-            console.log(`Contributor Details:`)
-            for (const [k, v] of filteredContributorMap.entries()) console.log(k, ':', v)
-            console.log(`Total Contributors: ${totalContributors}`)
+        let repoContributors = this.contributorsByRepo.get(repoPath);
 
-            break
+        if (!repoContributors) {
+            console.debug(`Creating new contributors map for repo ${repoPath}`);
+            repoContributors = new Map();
+            this.contributorsByRepo.set(repoPath, repoContributors);
+        }
 
-         case OutputFormat.JSON:
-            // eslint-disable-next-line no-case-declarations
-            const contributorObj = Object.fromEntries(filteredContributorMap)
-            // eslint-disable-next-line no-case-declarations
-            const report: Report = {
-               contributorDetails: contributorObj,
-               totalContributors,
+        const { username, email, commitDate } = commit;
+
+        // handle the 2 maps separately so that we can track commit dates per repo and globally
+        this.upsertContributor(repoContributors, username, email, commitDate);
+        this.upsertContributor(this.contributorsByUsername, username, email, commitDate);
+    }
+
+    upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
+        const contributor = contributorMap.get(username);
+
+        if (contributor) {
+            contributor.emails.add(email);
+            if (contributor.lastCommitDate < commitDate) {
+                contributor.lastCommitDate = commitDate;
             }
-            console.log(report)
-
-            break
-
-         default:
-            console.log(`Contributor Details:`)
-            for (const [k, v] of filteredContributorMap.entries()) console.log(k, ':', v)
-            console.log(`Total Contributors: ${totalContributors}`)
-            break
-      }
-   }
+        } else {
+            console.debug(`Found new contributor: ${username}, ${email}`);
+            contributorMap.set(username, {
+                username,
+                emails: new Set([email]),
+                lastCommitDate: commitDate
+            });
+        }
+    }
 }

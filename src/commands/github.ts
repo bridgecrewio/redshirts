@@ -1,89 +1,63 @@
-/* eslint-disable no-await-in-loop */
-import { Command, Flags } from '@oclif/core'
-import { Repo, ContributorMap } from '../common/types'
-import { commonFlags, stringToArr } from '../common/utils'
-import { GithubApiManager } from '../vcs/github/api-manager'
-import { GithubCounter } from '../vcs/github/github-counter'
-import { GithubCommit, GithubSourceInfo } from '../vcs/github/types'
+import { Flags } from '@oclif/core';
+import { commonFlags } from '../common/flags';
+import { RedshirtsCommand } from '../common/redshirts-command';
+import { HelpGroup, Repo } from '../common/types';
+import { GithubApiManager } from '../vcs/github/github-api-manager';
+import { GithubCounter } from '../vcs/github/github-counter';
+import { GithubRepoResponse } from '../vcs/github/github-types';
 
-export default class Github extends Command {
-   static description = 'Count active contributors for Github'
+export default class Github extends RedshirtsCommand {
+    static description = 'Count active contributors for GitHub repos'
 
-   static examples = [
-      `$ <%= config.bin %> <%= command.id %> --token github_pat_xxx --orgs bridgecrewio --repos checkov,terragoat
-`,
-   ]
+    static examples = [
+        `$ <%= config.bin %> <%= command.id %> --token ghp_xxxx --repos bridgecrewio/checkov,try-bridgecrew/terragoat`,
+        `$ <%= config.bin %> <%= command.id %> --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew`,
+    ]
 
-   static flags = {
-      token: Flags.string({
-         char: 't',
-         description: 'Github personal access token',
-         required: true,
-      }),
-      orgs: Flags.string({
-         description: 'Organization names',
-         required: false,
-      }),
-      ...commonFlags,
-   }
+    static flags = {
+        token: Flags.string({
+            char: 't',
+            description: 'Github personal access token. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
+            required: true,
+            helpGroup: HelpGroup.AUTH
+        }),
+        orgs: Flags.string({
+            description: 'Organization names and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified org(s). Use the --skip-repos option to exclude individual repos that are a part of these org(s).',
+            required: false,
+            helpGroup: HelpGroup.REPO_SPEC
+        }),
+        ...commonFlags,
+    }
 
-   async run(): Promise<void> {
-      const { flags } = await this.parse(Github)
-      let orgs: string[]
-      let repos: any = []
-      const githubSourceInfo: GithubSourceInfo = {
-         url: 'https://api.github.com',
-         token: flags.token,
-      }
-      const githubApi: GithubApiManager = new GithubApiManager(githubSourceInfo)
-      const githubCounter: GithubCounter = new GithubCounter(githubSourceInfo)
+    async run(): Promise<void> {
+        const { flags } = await this.parse(Github);
 
-      // fetch all repos for specified orgs
-      if (flags.orgs) {
-         orgs = stringToArr(flags.orgs)
-         for (const org of orgs) {
-            console.log(`Getting repos for org ${org}..`)
-            const orgRepos = await githubApi.getOrgRepos(org)
-            repos.push(...this.filterRepos(orgRepos))
-         }
-      } else {
-         const userRepos = await githubApi.getUserRepos()
-         repos = this.filterRepos(userRepos)
-      }
+        const sourceInfo = {
+            url: 'https://api.github.com',
+            token: flags.token,
+            repoTerm: 'repo',
+            orgTerm: 'organization',
+            orgFlagName: 'orgs',
+            minPathLength: 2,
+            maxPathLength: 2
+        };
 
-      // for testing - to be deleted
-      const repo: Repo = {
-         owner: {
-            login: 'kartikp10',
-         },
-         name: 'sample-tf',
-      }
+        const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
+        const counter = new GithubCounter();
 
-      /**
-       * TODO:
-       *    - loop over list of repos
-       *    - for each repo, get commits and convert commits to contributors
-       *    - only append to the contributor map if the map does not have the contributor already
-       */
-      const commits: GithubCommit[] = (await githubApi.getCommits(repo, 90)) as GithubCommit[]
-      const contributors: ContributorMap = githubCounter.convertCommitsToContributors(commits)
+        await this.execute(flags, sourceInfo, apiManager, counter);
+    }
 
-      githubCounter.printSummary(
-         ...githubCounter.countContributors(contributors, githubCounter.excludedUsers),
-         flags.output
-      )
-   }
+    convertRepos(reposResponse: GithubRepoResponse[]): Repo[] {
+        const filteredRepos: Repo[] = [];
+        for (const repo of reposResponse) {
+            filteredRepos.push({
+                name: repo.name,
+                owner: repo.owner.login,
+                private: repo.private,
+            });
+        }
 
-   filterRepos(reposResponse: Repo[]): any {
-      const filteredRepos: any = []
-      for (const repo of reposResponse) {
-         filteredRepos.push({
-            name: repo.name,
-            owner: repo.owner.login,
-            private: repo.private,
-         })
-      }
-
-      return filteredRepos
-   }
+        return filteredRepos;
+    }
 }
