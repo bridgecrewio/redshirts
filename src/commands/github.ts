@@ -1,12 +1,10 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { RedshirtsCommand } from '../common/redshirts-command';
-import { HelpGroup, Repo } from '../common/types';
+import { HelpGroup } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
-import { GithubCounter } from '../vcs/github/github-counter';
-import { GithubRepoResponse } from '../vcs/github/github-types';
+import { GithubRunner } from '../vcs/github/github-runner';
 
-export default class Github extends RedshirtsCommand {
+export default class Github extends Command {
     static description = 'Count active contributors for GitHub repos'
 
     static examples = [
@@ -43,21 +41,8 @@ export default class Github extends RedshirtsCommand {
         };
 
         const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
-        const counter = new GithubCounter();
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        await this.execute(flags, sourceInfo, apiManager, counter);
-    }
-
-    convertRepos(reposResponse: GithubRepoResponse[]): Repo[] {
-        const filteredRepos: Repo[] = [];
-        for (const repo of reposResponse) {
-            filteredRepos.push({
-                name: repo.name,
-                owner: repo.owner.login,
-                private: repo.private,
-            });
-        }
-
-        return filteredRepos;
+        await runner.execute();
     }
 }

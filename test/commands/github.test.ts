@@ -1,17 +1,28 @@
-import {expect, test} from '@oclif/test';
+// import { expect } from "chai";
+// import { Repo } from "../../src/common/types";
+// import { getRepoListFromParams, repoMatches, splitRepos } from '../../src/common/utils';
+// import { GithubRepoResponse } from "../../src/vcs/github/github-types";
+// import Github from "../../src/commands/github";
 
-describe('github', () => {
-  test
-  .stdout()
-  .command(['github'])
-  .it('runs hello', ctx => {
-    expect(ctx.stdout).to.contain('hello world');
-  });
+// describe('github command', () => {
+//     it('converts the repo response into generic repos', () => {
+//         const repos: GithubRepoResponse[] = [
+//             {
+//                 name: 'repo1',
+//                 owner: { login: 'owner1' }
+//             },
+//             {
+//                 name: 'repo2',
+//                 owner: { login: 'owner2' },
+//                 private: true
+//             },
+//             {
+//                 name: 'repo3',
+//                 owner: { login: 'owner3' },
+//                 private: false
+//             }
+//         ];
 
-  test
-  .stdout()
-  .command(['github', '--name', 'jeff'])
-  .it('runs hello --name jeff', ctx => {
-    expect(ctx.stdout).to.contain('hello jeff');
-  });
-});
+//         // expect(new Github());
+//     });
+// });

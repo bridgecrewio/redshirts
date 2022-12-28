@@ -1,12 +1,10 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { RedshirtsCommand } from '../common/redshirts-command';
-import { HelpGroup, Repo, } from '../common/types';
+import { HelpGroup, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
-import { GitlabCounter } from '../vcs/gitlab/gitlab-counter';
-import { GitlabRepoResponse } from '../vcs/gitlab/gitlab-types';
+import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
-export default class Gitlab extends RedshirtsCommand {
+export default class Gitlab extends Command {
     static description = 'Count active contributors for GitLab repos'
 
     static examples = [
@@ -43,21 +41,8 @@ export default class Gitlab extends RedshirtsCommand {
         };
 
         const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
-        const counter = new GitlabCounter();
+        const runner = new GitlabRunner(sourceInfo, flags, apiManager);
 
-        await this.execute(flags, sourceInfo, apiManager, counter);
-    }
-
-    convertRepos(reposResponse: GitlabRepoResponse[]): Repo[] {
-        const filteredRepos: Repo[] = [];
-        for (const repo of reposResponse) {
-            filteredRepos.push({
-                name: repo.path,
-                owner: repo.namespace.full_path,
-                private: repo.visibility === 'private'
-            });
-        }
-
-        return filteredRepos;
+        await runner.execute();
     }
 }

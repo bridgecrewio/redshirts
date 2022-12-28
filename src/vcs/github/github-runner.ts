@@ -1,11 +1,12 @@
-import { BaseCounter } from '../../common/base-counter';
-import { Repo, SourceType } from '../../common/types';
-import { GithubCommit } from './github-types';
+import { BaseRunner } from '../../common/base-runner';
+import { Repo, SourceInfo } from '../../common/types';
+import { GithubApiManager } from './github-api-manager';
+import { GithubCommit, GithubRepoResponse } from './github-types';
 
-export class GithubCounter extends BaseCounter {
+export class GithubRunner extends BaseRunner {
 
-    constructor() {
-        super(SourceType.Github, ['noreply@github.com']);
+    constructor(sourceInfo: SourceInfo, flags: any, apiManager: GithubApiManager) {
+        super(sourceInfo, ['noreply@github.com'], flags, apiManager);
     }
 
     aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
@@ -25,5 +26,18 @@ export class GithubCounter extends BaseCounter {
 
             this.addContributor(repo.owner, repo.name, commitObject);
         }
+    }
+
+    convertRepos(reposResponse: GithubRepoResponse[]): Repo[] {
+        const filteredRepos: Repo[] = [];
+        for (const repo of reposResponse) {
+            filteredRepos.push({
+                name: repo.name,
+                owner: repo.owner.login,
+                private: repo.private,
+            });
+        }
+
+        return filteredRepos;
     }
 }

@@ -1,10 +1,10 @@
 /* eslint-disable no-case-declarations */
-import { BaseCounter } from "./base-counter";
+import { BaseRunner } from "./base-runner";
 import { OutputFormat, OutputTableRow, Report, SortField, SummaryReport } from "./types";
 import { jsonReportReplacer, mapIterable } from "./utils";
 import { Table } from "console-table-printer";
 
-export const printSummary = (counter: BaseCounter, outputFormat: string, sortField: SortField): void => {
+export const printSummary = (counter: BaseRunner, outputFormat: string, sortField: SortField): void => {
     switch (outputFormat) {
 
         case OutputFormat.JSON:
@@ -65,7 +65,7 @@ const getSortFn = (sortField: SortField): (repo1: OutputTableRow, repo2: OutputT
     };
 };
 
-const generateReportObject = (counter: BaseCounter): SummaryReport => {
+const generateReportObject = (counter: BaseRunner): SummaryReport => {
 
     const repos = new Map<string, Report>();
 

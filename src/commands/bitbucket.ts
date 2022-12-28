@@ -1,12 +1,10 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { RedshirtsCommand } from '../common/redshirts-command';
-import { HelpGroup, Repo } from '../common/types';
+import { HelpGroup } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
-import { BitbucketCounter } from '../vcs/bitbucket/bitbucket-counter';
-import { BitbucketRepoResponse } from '../vcs/bitbucket/bitbucket-types';
+import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
-export default class Bitbucket extends RedshirtsCommand {
+export default class Bitbucket extends Command {
     static description = 'Count active contributors for Bitbucket repos'
 
     static examples = [
@@ -49,22 +47,8 @@ export default class Bitbucket extends RedshirtsCommand {
         };
 
         const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
-        const counter = new BitbucketCounter();
+        const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
 
-        await this.execute(flags, sourceInfo, apiManager, counter);
-    }
-
-    convertRepos(reposResponse: BitbucketRepoResponse[]): Repo[] {
-        const filteredRepos: Repo[] = [];
-        for (const repo of reposResponse) {
-            const nameParts = repo.full_name.split('/');
-            filteredRepos.push({
-                name: nameParts[1],
-                owner: nameParts[0],
-                private: repo.is_private,
-            });
-        }
-
-        return filteredRepos;
+        await runner.execute();
     }
 }
