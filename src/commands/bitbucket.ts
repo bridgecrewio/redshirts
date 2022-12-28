@@ -43,7 +43,9 @@ export default class Bitbucket extends RedshirtsCommand {
          token: flags.username + ':' + flags.token,
          repoTerm: 'repo',
          orgTerm: 'workspace',
-         orgFlagName: 'workspaces'
+         orgFlagName: 'workspaces',
+         minPathLength: 2,
+         maxPathLength: 2
       };
 
       const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
@@ -52,7 +54,7 @@ export default class Bitbucket extends RedshirtsCommand {
       await this.execute(flags, sourceInfo, apiManager, counter);
    }
 
-   filterRepos(reposResponse: BitbucketRepoResponse[]): Repo[] {
+   convertRepos(reposResponse: BitbucketRepoResponse[]): Repo[] {
       const filteredRepos: Repo[] = [];
       for (const repo of reposResponse) {
          const nameParts = repo.full_name.split('/');

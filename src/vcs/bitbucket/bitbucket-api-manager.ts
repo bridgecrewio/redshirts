@@ -15,7 +15,6 @@ export class BitbucketApiManager extends ApiManager {
 
    _getAxiosConfiguration(): AxiosRequestConfig {
       return this._buildAxiosConfiguration(this.sourceInfo.url, {
-         Accept: 'application/vnd.github.machine-man-preview+json',
          Authorization: `Basic ${Buffer.from(this.sourceInfo.token).toString('base64')}`,
       });
    }

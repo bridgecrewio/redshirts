@@ -33,27 +33,27 @@ export const getFileContents = (path: string): string => {
    return getFileBuffer(path).toString();
 };
 
-export const getRepos = (repos: string[]): Repo[] => {
+export const getRepos = (repos: string[], minPathLength = 2, maxPathLength = 2): Repo[] => {
    // converts a string[] of repo names to Repo objects, validating that they have at least 1 slash
    return repos.filter(r => r.length).map(r => {
-      const s = r.lastIndexOf('/');
-      if (s === -1) {
-         throw new Error(`Invalid repo name (must have at least one slash): ${r}`);
+      const s = r.split('/');
+      if (s.length < minPathLength || s.length > maxPathLength) {
+         throw new Error(`Invalid repo name (must have ${minPathLength === maxPathLength ? `exactly ${minPathLength}` : `at least ${minPathLength} and max ${maxPathLength}`} parts): ${r}`);
       }
 
       return {
-         owner: r.slice(0, s),
-         name: r.slice(s + 1)
+         owner: s.slice(0, -1).join('/'),
+         name: s[s.length - 1]
       };
    });
 };
 
-export const splitRepos = (repoString: string): Repo[] => {
-   return getRepos(stringToArr(repoString));
+export const splitRepos = (repoString: string, minPathLength = 2, maxPathLength = 2): Repo[] => {
+   return getRepos(stringToArr(repoString), minPathLength, maxPathLength);
 };
 
-export const readRepoFile = (path: string): Repo[] => {
-   return getRepos(getFileContents(path).split('\n').map(s => s.trim()));
+export const readRepoFile = (path: string, minPathLength = 2, maxPathLength = 2): Repo[] => {
+   return getRepos(getFileContents(path).split('\n').map(s => s.trim()), minPathLength, maxPathLength);
 };
 
 export const mapIterable = <T, U>(it: Iterable<T>, callbackfn: (value: T, index: number, it: Iterable<T>) => U): U[] => {

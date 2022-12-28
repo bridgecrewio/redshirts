@@ -37,7 +37,9 @@ export default class Github extends RedshirtsCommand {
          token: flags.token,
          repoTerm: 'repo',
          orgTerm: 'organization',
-         orgFlagName: 'orgs'
+         orgFlagName: 'orgs',
+         minPathLength: 2,
+         maxPathLength: 2
       };
 
       const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
@@ -46,7 +48,7 @@ export default class Github extends RedshirtsCommand {
       await this.execute(flags, sourceInfo, apiManager, counter);
    }
 
-   filterRepos(reposResponse: GithubRepoResponse[]): Repo[] {
+   convertRepos(reposResponse: GithubRepoResponse[]): Repo[] {
       const filteredRepos: Repo[] = [];
       for (const repo of reposResponse) {
          filteredRepos.push({

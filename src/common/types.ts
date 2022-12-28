@@ -3,7 +3,9 @@ export type SourceInfo = {
    token: string
    repoTerm: string
    orgTerm: string
-   orgFlagName: string
+   orgFlagName: string,
+   minPathLength: number,
+   maxPathLength: number
 }
 
 export type Contributor = {
@@ -12,10 +14,7 @@ export type Contributor = {
    lastCommitDate: string
 }
 
-// Unique id that identifies a contributor
-export type id = string
-
-export type ContributorMap = Map<id, Contributor>
+export type ContributorMap = Map<string, Contributor>
 
 export type Repo = {
    name: string

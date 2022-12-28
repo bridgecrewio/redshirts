@@ -9,9 +9,9 @@ export type GitlabAuthor = {
 
 export interface GitlabCommit extends Commit {
    // TODO gitlab commits do not have a username. Need to handle?
-   "committer_name": string,
-   "committer_email": string,
-   "committed_date": string
+   committer_name: string,
+   committer_email: string,
+   committed_date: string
 }
 
 export interface GitlabRepoResponse extends RepoResponse {
@@ -19,7 +19,7 @@ export interface GitlabRepoResponse extends RepoResponse {
    name: string
    path: string
    namespace: {
-      "full_path": string
+      full_path: string
    }
    visibility: "private" | "public"
 }

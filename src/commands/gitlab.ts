@@ -37,7 +37,9 @@ export default class Gitlab extends RedshirtsCommand {
       token: flags.token,
       repoTerm: 'project',
       orgTerm: 'group',
-      orgFlagName: 'groups'
+      orgFlagName: 'groups',
+      minPathLength: 2,
+      maxPathLength: 99
     };
 
     const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
@@ -46,7 +48,7 @@ export default class Gitlab extends RedshirtsCommand {
     await this.execute(flags, sourceInfo, apiManager, counter);
   }
 
-  filterRepos(reposResponse: GitlabRepoResponse[]): Repo[] {
+  convertRepos(reposResponse: GitlabRepoResponse[]): Repo[] {
     const filteredRepos: Repo[] = [];
     for (const repo of reposResponse) {
       filteredRepos.push({
