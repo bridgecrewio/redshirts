@@ -1,5 +1,6 @@
 import { BaseRunner } from '../../common/base-runner';
 import { Repo, SourceInfo } from '../../common/types';
+import { LOGGER } from '../../common/utils';
 import { GitlabApiManager } from './gitlab-api-manager';
 import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 
@@ -12,16 +13,18 @@ export class GitlabRunner extends BaseRunner {
     }
 
     aggregateCommitContributors(repo: Repo, commits: GitlabCommit[]): void {
-        console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
+        LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commit of commits) {
             const email = commit.committer_email;
             const commitDate = commit.committed_date;
 
-            commit.username = email;
-            commit.email = email;
-            commit.commitDate = commitDate;
+            const newCommit = {
+                username: email,
+                email,
+                commitDate
+            };
 
-            this.addContributor(repo.owner, repo.name, commit);
+            this.addContributor(repo.owner, repo.name, newCommit);
         }
     }
 

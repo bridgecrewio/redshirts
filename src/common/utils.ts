@@ -1,5 +1,7 @@
+import { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
-import { Repo, SourceInfo } from './types';
+import { Protocol, Repo, SourceInfo } from './types';
+import { createLogger, transports, format } from 'winston';
 
 export const DEFAULT_DAYS = 90;
 
@@ -102,7 +104,7 @@ export const getExplicitRepoList = (sourceInfo: SourceInfo, repos: Repo[], repos
 
     for (const repo of explicitRepos) {
         if (repos.some(r => repoMatches(r, repo))) {
-            console.debug(`Skipping adding ${sourceInfo.repoTerm} ${repo.owner}/${repo.name} as we already got it from the ${sourceInfo.orgTerm}`);
+            LOGGER.debug(`Skipping adding ${sourceInfo.repoTerm} ${repo.owner}/${repo.name} as we already got it from the ${sourceInfo.orgTerm}`);
         } else {
             addedRepos.push(repo);
         }
@@ -120,7 +122,7 @@ export const filterRepoList = (
     if (filterList.length > 0) {
         repos = repos.filter(r => {
             if (filterList.some(s => filterfn(r, s))) {
-                console.debug(`Removing explicitly skipped ${objectType} ${r.owner}/${r.name}`);
+                LOGGER.debug(`Removing explicitly skipped ${objectType} ${r.owner}/${r.name}`);
                 return false;
             } else {
                 return true;
@@ -129,4 +131,75 @@ export const filterRepoList = (
     }
 
     return repos;
+};
+
+export const getServerUrl = (hostname: string, port?: number, protocol = Protocol.HTTPS): string => {
+    // builds a server URL from the parts, with some validation
+
+    if (hostname.startsWith('https://')) {
+        hostname = hostname.slice(8);
+    } else if (hostname.startsWith('http://')) {
+        hostname = hostname.slice(7);
+    }
+
+    let url = `${protocol}://${hostname}`;
+
+    if (port) {
+        url += `:${port}`;
+    }
+
+    return url;
+};
+
+export const isSslError = (error: AxiosError): boolean => {
+    const keywords = ['CERT', 'SSL', 'VERIFY'];
+    return keywords.some(k => error.code && error.code.includes(k));
+};
+
+
+const logFormat = format.printf(({ level, message, timestamp, ...rest }) => {
+    const argumentsString = JSON.stringify({ ...rest });
+    return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
+});
+
+const DEFAULT_LOG_LEVEL = 'warn';
+const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
+
+const getLogLevel = (): string => {
+    const envLevel = process.env.LOG_LEVEL;
+    if (!envLevel) {
+        return DEFAULT_LOG_LEVEL;
+    } else if (LOG_LEVELS.includes(envLevel.toLowerCase())) {
+        return envLevel.toLowerCase();
+    } else {
+        console.warn(`Found unknown LOG_LEVEL environment variable: ${envLevel}. Expected one of: ${LOG_LEVELS}. Reverting to "${DEFAULT_LOG_LEVEL}".`);
+        return DEFAULT_LOG_LEVEL;
+    }
+};
+
+export const LOGGER = createLogger({
+    level: getLogLevel(),
+    transports: [
+        new transports.Console({
+            stderrLevels: LOG_LEVELS
+        })
+    ],
+    format: format.combine(
+        format.splat(),
+        format.timestamp(),
+        format.prettyPrint(),
+        logFormat
+    )
+});
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const logError = (error: Error, message?: string, args?: any): void => {
+    // if message exists, logs it at the error level along with any objects
+    // (do not send the error as part of this)
+    // then logs the error object at the debug level
+    if (message) {
+        LOGGER.error(message, args);
+    }
+
+    LOGGER.debug('', { error });
 };

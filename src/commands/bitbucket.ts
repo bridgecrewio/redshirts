@@ -1,11 +1,11 @@
 import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { HelpGroup } from '../common/types';
+import { HelpGroup, SourceType } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
 export default class Bitbucket extends Command {
-    static description = 'Count active contributors for Bitbucket repos'
+    static summary = 'Count active contributors for Bitbucket repos'
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --username my_username --token ATBBXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat`,
@@ -37,6 +37,7 @@ export default class Bitbucket extends Command {
         const { flags } = await this.parse(Bitbucket);
 
         const sourceInfo = {
+            sourceType: SourceType.Bitbucket,
             url: 'https://api.bitbucket.org/2.0',
             token: flags.username + ':' + flags.token,
             repoTerm: 'repo',

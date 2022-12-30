@@ -31,9 +31,9 @@ export const commonFlags = {
         helpGroup: HelpGroup.REPO_SPEC
     }),
     'ca-cert': Flags.file({
-        description: "Path to certificate chain to use in HTTP requests",
+        description: "Path to certificate chain to use in HTTP requests. See https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a certificate chain for your environment.",
         required: false,
-        helpGroup: HelpGroup.OTHER
+        helpGroup: HelpGroup.CONNECTION
     }),
     days: Flags.integer({
         description: "The number of days for which to fetch commit history. Defaults to 90, which is the value used in the Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.",
@@ -46,6 +46,10 @@ export const commonFlags = {
         description: 'The output field on which to sort for CSV or console output: alphabetically by repo fully qualified name, or by descending contributor count (ignored for JSON)',
         options: Object.values(SortField),
         default: SortField.REPO,
+        helpGroup: HelpGroup.OUTPUT
+    }),
+    'exclude-empty': Flags.boolean({
+        description: 'Do not include repos with no commits in the output',
         helpGroup: HelpGroup.OUTPUT
     })
 };

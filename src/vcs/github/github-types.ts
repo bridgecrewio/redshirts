@@ -1,4 +1,4 @@
-import { Commit, RepoResponse } from "../../common/types";
+import { RepoResponse, VCSCommit } from "../../common/types";
 
 export type GithubAuthor = {
     name: string
@@ -6,7 +6,7 @@ export type GithubAuthor = {
     date: string
 }
 
-export interface GithubCommit extends Commit {
+export interface GithubCommit extends VCSCommit {
     author: {
         login: string
     }

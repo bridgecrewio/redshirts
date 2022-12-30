@@ -1,0 +1,13 @@
+Found unknown LOG_LEVEL environment variable: debugxx - reverting to "warn"
+2022-12-29T20:32:48.319Z [error]: Received an SSL error while connecting to the server: SELF_SIGNED_CERT_IN_CHAIN: self signed certificate in certificate chain. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain. 
+Error: self signed certificate in certificate chain
+    at Function.AxiosError.from (/Users/mikeurbanski/platform/redshirts/node_modules/axios/lib/core/AxiosError.js:89:14)
+    at RedirectableRequest.handleRequestError (/Users/mikeurbanski/platform/redshirts/node_modules/axios/lib/adapters/http.js:526:25)
+    at RedirectableRequest.emit (node:events:394:28)
+    at RedirectableRequest.emit (node:domain:475:12)
+    at ClientRequest.eventHandlers.<computed> (/Users/mikeurbanski/platform/redshirts/node_modules/follow-redirects/index.js:14:24)
+    at ClientRequest.emit (node:events:394:28)
+    at ClientRequest.emit (node:domain:475:12)
+    at TLSSocket.socketErrorListener (node:_http_client:447:9)
+    at TLSSocket.emit (node:events:394:28)
+    at TLSSocket.emit (node:domain:475:12)

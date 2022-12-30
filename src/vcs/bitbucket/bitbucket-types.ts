@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Commit, RepoResponse } from "../../common/types";
+import { RepoResponse, VCSCommit } from "../../common/types";
 
 export type BitbucketAuthor = {
     raw: string,
@@ -9,7 +9,7 @@ export type BitbucketAuthor = {
     }
 }
 
-export interface BitbucketCommit extends Commit {
+export interface BitbucketCommit extends VCSCommit {
     author: BitbucketAuthor,
     date: string
 }

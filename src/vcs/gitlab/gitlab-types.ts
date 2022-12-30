@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Commit, RepoResponse } from "../../common/types";
+import { RepoResponse, VCSCommit } from "../../common/types";
 
 export type GitlabAuthor = {
     name: string
@@ -7,7 +7,7 @@ export type GitlabAuthor = {
     date: string
 }
 
-export interface GitlabCommit extends Commit {
+export interface GitlabCommit extends VCSCommit {
     // TODO gitlab commits do not have a username. Need to handle?
     committer_name: string,
     committer_email: string,

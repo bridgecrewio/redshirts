@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { HelpGroup } from '../common/types';
+import { HelpGroup, SourceInfo, SourceType } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubRunner } from '../vcs/github/github-runner';
 
@@ -20,7 +20,7 @@ export default class Github extends Command {
             helpGroup: HelpGroup.AUTH
         }),
         orgs: Flags.string({
-            description: 'Organization names and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified org(s). Use the --skip-repos option to exclude individual repos that are a part of these org(s).',
+            description: 'Organization names and / or usernames for which to fetch repos. Note: due to limitations in the GitHub APIs, specifying a username here will only result in the user\'s public repositories being included. Use the --repos option to add additional specific repos on top of those in the specified users / orgs (including user private repos, if authorized). Use the --skip-repos option to exclude individual repos that are a part of these users / orgs.',
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
@@ -30,19 +30,24 @@ export default class Github extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Github);
 
-        const sourceInfo = {
-            url: 'https://api.github.com',
-            token: flags.token,
+        const sourceInfo = this.getSourceInfo(flags.token);
+
+        const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
+
+        await runner.execute();
+    }
+
+    getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): SourceInfo {
+        return {
+            sourceType: sourceType,
+            url: baseUrl,
+            token: token,
             repoTerm: 'repo',
             orgTerm: 'organization',
             orgFlagName: 'orgs',
             minPathLength: 2,
             maxPathLength: 2
         };
-
-        const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
-        const runner = new GithubRunner(sourceInfo, flags, apiManager);
-
-        await runner.execute();
     }
 }

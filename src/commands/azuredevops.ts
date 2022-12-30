@@ -1,7 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { commonFlags } from '../common/flags';
-import { HelpGroup } from '../common/types';
+import { HelpGroup, SourceType } from '../common/types';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
 
@@ -9,7 +9,10 @@ import { AzureRunner } from '../vcs/azure/azure-runner';
 // user must be at least "basic" in the ADO org (which is higher than you get by default if you add a user to a team)
 
 export default class AzureDevOps extends Command {
-    static description = 'Count active contributors for Azure DevOps repos. Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not possible to use a personal access token to fetch all orgs and repos for a user.'
+
+    static summary = 'Count active contributors for Azure DevOps repos'
+
+    static description = 'Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not possible to use a personal access token to fetch all orgs and repos for a user.'
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --token obnwxxx --repos org/project/repo,org/project/repo2,org/project2/repo`,
@@ -46,6 +49,7 @@ export default class AzureDevOps extends Command {
         const { flags } = (await this.parse(AzureDevOps));
 
         const sourceInfo = {
+            sourceType: SourceType.AzureRepos,
             url: 'https://dev.azure.com',
             token: ':' + flags.token,
             repoTerm: 'repo',

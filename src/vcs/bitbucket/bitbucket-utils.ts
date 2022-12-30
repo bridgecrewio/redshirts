@@ -1,6 +1,5 @@
 import { BitbucketCommit } from "./bitbucket-types";
 
-
 const RAW_EMAIL_REGEX = /.+<(.+)>/;
 
 export const getBitbucketDateCompareFunction = (date: Date): (cs: BitbucketCommit) => boolean => {

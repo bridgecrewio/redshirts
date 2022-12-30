@@ -1,5 +1,6 @@
 import { BaseRunner } from '../../common/base-runner';
 import { Repo, SourceInfo } from '../../common/types';
+import { LOGGER } from '../../common/utils';
 import { BitbucketApiManager } from './bitbucket-api-manager';
 import { BitbucketCommit, BitbucketRepoResponse } from './bitbucket-types';
 import { extractEmailFromRawUser } from './bitbucket-utils';
@@ -13,16 +14,18 @@ export class BitbucketRunner extends BaseRunner {
 
     aggregateCommitContributors(repo: Repo, commits: BitbucketCommit[]): void {
         // TODO exclude emails
-        console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
+        LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { author, date } = commitObject;
             const email = extractEmailFromRawUser(author.raw);
 
-            commitObject.username = author.user.nickname;
-            commitObject.commitDate = date;
-            commitObject.email = email || 'unknown_email';
+            const newCommit = {
+                username: author.user.nickname,
+                email: email || 'unknown_email',
+                commitDate: date
+            };
 
-            this.addContributor(repo.owner, repo.name, commitObject);
+            this.addContributor(repo.owner, repo.name, newCommit);
         }
     }
 

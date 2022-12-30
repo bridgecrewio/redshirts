@@ -1,6 +1,7 @@
 import { expect } from "chai";
-import { Repo } from "../../src/common/types";
+import { Commit, ContributorMap, Repo } from "../../src/common/types";
 import { getRepoListFromParams, repoMatches, splitRepos } from '../../src/common/utils';
+import { GithubRunner } from "../../src/vcs/github/github-runner";
 
 describe('utils', () => {
     it('parses the CSV repo list correctly', () => {
@@ -73,7 +74,7 @@ describe('utils', () => {
                     name: "repo2222"
                 }
             ]).and.to.have.length(2);
-        
+
         expect(getRepoListFromParams(2, 2, 'org1/repo1,org2/repo2', 'test/resources/repos1.txt')).to.have.deep.members(
             [
                 {
@@ -86,4 +87,116 @@ describe('utils', () => {
                 }
             ]).and.to.have.length(2);
     });
+});
+
+// describe('commit aggregation', () => {
+//     it('aggregates contributors', () => {
+//         const repos: Repo[] = [
+//             {
+//                 owner: "org1",
+//                 name: "repo1"
+//             },
+//             {
+//                 owner: "org2",
+//                 name: "repo2"
+//             }
+//         ];
+
+//         // 2D array to match repo array
+//         const commits: Commit[][] = [
+//             [
+//                 {
+//                     username: 'user1',
+//                     email: 'user1@email.com',
+//                     commitDate: '2022-12-28T16:36:16.351Z'
+//                 },
+//                 {
+//                     username: 'user2',
+//                     email: 'user2@email.com',
+//                     commitDate: '2022-12-27T12:36:16.351Z'
+//                 },
+//                 {
+//                     username: 'user1',
+//                     email: 'user1@email.com',
+//                     commitDate: '2022-12-27T16:36:16.351Z'
+//                 }
+//             ],
+//             [
+//                 {
+//                     username: 'user3',
+//                     email: 'user1@email.com',
+//                     commitDate: '2022-12-30T16:36:16.351Z'
+//                 },
+//                 {
+//                     username: 'user1',
+//                     email: 'user1@email.com',
+//                     commitDate: '2022-12-29T16:36:16.351Z'
+//                 },
+//                 {
+//                     username: 'user2',
+//                     email: 'user2@email.com',
+//                     commitDate: '2022-12-24T12:36:16.351Z'
+//                 }
+//             ]
+//         ];
+
+//         // need an instance
+//         const runner = new GithubRunner(null!, null!, null!);
+
+//         for (const [i, repo] of repos.entries()) {
+//             for (const commit of commits[i]) {
+//                 runner.addContributor(repo.owner, repo.name, commit);
+//             }
+//         }
+
+//         expect(runner.contributorsByUsername.size).to.equal(3);
+//         expect(runner.contributorsByUsername.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+//         expect(runner.contributorsByUsername.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+//         expect(runner.contributorsByUsername.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+
+//         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
+//         expect(repo1.size).to.equal(2);
+//         expect(repo1.get('user1')?.lastCommitDate).to.equal('2022-12-28T16:36:16.351Z');
+//         expect(repo1.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+
+//         const repo2 = runner.contributorsByRepo.get('org2/repo2') as ContributorMap;
+//         expect(repo2.size).to.equal(3);
+//         expect(repo2.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+//         expect(repo2.get('user2')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
+//         expect(repo2.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+//     });
+
+//     it('aggregates repos with no contributors', () => {
+//         const repos: Repo[] = [
+//             {
+//                 owner: "org1",
+//                 name: "repo1"
+//             }
+//         ];
+
+//         // need an instance
+//         const runner = new GithubRunner(null!, null!, null!);
+
+//         for (const [i, repo] of repos.entries()) {
+//             for (const commit of commits[i]) {
+//                 runner.addContributor(repo.owner, repo.name, commit);
+//             }
+//         }
+
+//         expect(runner.contributorsByUsername.size).to.equal(3);
+//         expect(runner.contributorsByUsername.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+//         expect(runner.contributorsByUsername.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+//         expect(runner.contributorsByUsername.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+
+//         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
+//         expect(repo1.size).to.equal(2);
+//         expect(repo1.get('user1')?.lastCommitDate).to.equal('2022-12-28T16:36:16.351Z');
+//         expect(repo1.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+
+//         const repo2 = runner.contributorsByRepo.get('org2/repo2') as ContributorMap;
+//         expect(repo2.size).to.equal(3);
+//         expect(repo2.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+//         expect(repo2.get('user2')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
+//         expect(repo2.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+//     });
 });

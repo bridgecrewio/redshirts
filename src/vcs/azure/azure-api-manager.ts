@@ -1,7 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiManager } from '../../common/api-manager';
-import { Repo, RepoResponse, SourceInfo, SourceType } from '../../common/types';
-import { getXDaysAgoDate } from '../../common/utils';
+import { Repo, RepoResponse } from '../../common/types';
+import { getXDaysAgoDate, LOGGER } from '../../common/utils';
 // import { getXDaysAgoDate } from '../../common/utils';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
@@ -14,10 +14,6 @@ export class AzureApiManager extends ApiManager {
         throw new Error('Method not implemented because this functionality does not work for Azure with PATs.');
     }
 
-    constructor(sourceInfo: SourceInfo, certPath?: string) {
-        super(sourceInfo, SourceType.Bitbucket, certPath);
-    }
-
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
             Authorization: `Basic ${Buffer.from(this.sourceInfo.token).toString('base64')}`,
@@ -27,7 +23,7 @@ export class AzureApiManager extends ApiManager {
     async getCommits(repo: Repo, numDays: number): Promise<AzureCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         const [org, project] = repo.owner.split('/', 2);
-        console.debug(`Getting commits for repo: ${repoPath}`);
+        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}/commits`,
             method: 'GET',
@@ -40,7 +36,7 @@ export class AzureApiManager extends ApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data.value || [];
-        console.debug(`Found ${commits.length} commits`);
+        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -80,7 +76,7 @@ export class AzureApiManager extends ApiManager {
     async getProjectRepos(project: AzureProjectsResponse): Promise<AzureRepoResponse[]> {
         const { owner, name } = project;
         const repoOwner = `${owner}/${name}`;
-        console.debug(`Getting repositories for project: ${repoOwner}`);
+        LOGGER.debug(`Getting repositories for project: ${repoOwner}`);
         const config: AxiosRequestConfig = {
             url: `${owner}/${name}/_apis/git/repositories`,
             method: 'GET',
@@ -97,7 +93,7 @@ export class AzureApiManager extends ApiManager {
     }
 
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-        console.debug(`Submitting request to ${config.url}`);
+        LOGGER.debug(`Submitting request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
 
         let total: number = response.data.count;
@@ -106,7 +102,7 @@ export class AzureApiManager extends ApiManager {
         while (response.data.count > 0) {
             config.params.$skip = total;
 
-            console.debug(`Fetching next page of request from ${config.url}`);
+            LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
             // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config);
@@ -114,7 +110,7 @@ export class AzureApiManager extends ApiManager {
             total += result.data.count;
         }
 
-        console.debug(`Fetched ${result.data.value.length} total items`);
+        LOGGER.debug(`Fetched ${result.data.value.length} total items`);
 
         return result;
     }

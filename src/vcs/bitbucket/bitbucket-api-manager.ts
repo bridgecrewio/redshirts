@@ -1,17 +1,13 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiManager } from '../../common/api-manager';
-import { Repo, SourceInfo, SourceType } from '../../common/types';
-import { getXDaysAgoDate } from '../../common/utils';
+import { Repo } from '../../common/types';
+import { getXDaysAgoDate, LOGGER } from '../../common/utils';
 import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, BitbucketWorkspaceResponse } from './bitbucket-types';
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
 
 export class BitbucketApiManager extends ApiManager {
-
-    constructor(sourceInfo: SourceInfo, certPath?: string) {
-        super(sourceInfo, SourceType.Bitbucket, certPath);
-    }
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
@@ -21,7 +17,7 @@ export class BitbucketApiManager extends ApiManager {
 
     async getCommits(repo: Repo, numDays: number): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        console.debug(`Getting commits for repo: ${repoPath}`);
+        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
@@ -35,7 +31,7 @@ export class BitbucketApiManager extends ApiManager {
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];
-        console.debug(`Found ${commits.length} commits`);
+        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -48,7 +44,7 @@ export class BitbucketApiManager extends ApiManager {
             repos.push(...await this.getOrgRepos(workspace));
         }
 
-        console.debug(`Found ${repos.length} repos across ${workspaces.length} workspaces`);
+        LOGGER.debug(`Found ${repos.length} repos across ${workspaces.length} workspaces`);
 
         return repos;
     }
@@ -59,7 +55,7 @@ export class BitbucketApiManager extends ApiManager {
 
         const userWorkspaces = userRepos.map(r => r.repository && r.repository.full_name && r.repository.full_name.split('/')[0]).filter(r => r);
 
-        console.debug(`Got the following workspaces from the user's repos: ${userWorkspaces}`);
+        LOGGER.debug(`Got the following workspaces from the user's repos: ${userWorkspaces}`);
 
         const config: AxiosRequestConfig = {
             url: 'workspaces',
@@ -69,7 +65,7 @@ export class BitbucketApiManager extends ApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const workspaces = result.data.values.map((w: BitbucketWorkspaceResponse) => w.slug);
-        console.debug(`Got the following workspaces explicitly for the user: ${workspaces}`);
+        LOGGER.debug(`Got the following workspaces explicitly for the user: ${workspaces}`);
 
         return [...new Set([...workspaces, ...userWorkspaces])];
     }
@@ -97,20 +93,20 @@ export class BitbucketApiManager extends ApiManager {
     }
 
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-        console.debug(`Submitting request to ${config.url}`);
+        LOGGER.debug(`Submitting request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
         const result = response;
         while (response.data.next) {
             config.url = response.data.next;
 
-            console.debug(`Fetching next page of request from ${config.url}`);
+            LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
             // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config);
             result.data.values = [...result.data.values, ...response.data.values];
         }
 
-        console.debug(`Fetched ${result.data.values.length} total items`);
+        LOGGER.debug(`Fetched ${result.data.values.length} total items`);
 
         return result;
     }
@@ -122,7 +118,7 @@ export class BitbucketApiManager extends ApiManager {
         // This means that the filter function must use the field by which the results for the 
         // request are sorted.
 
-        console.debug(`Submitting truncated request to ${config.url}`);
+        LOGGER.debug(`Submitting truncated request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
 
         // this is safe because we control the definition
@@ -130,7 +126,7 @@ export class BitbucketApiManager extends ApiManager {
         const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex(filterfn);
 
         if (oldCommitIndex !== -1) {
-            console.debug(`Found truncation marker at index ${oldCommitIndex}`);
+            LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
             response.data.values = response.data.values.slice(0, oldCommitIndex);
         }
 
@@ -139,7 +135,7 @@ export class BitbucketApiManager extends ApiManager {
         while (response.data.next) {
             config.url = response.data.next;
 
-            console.debug(`Fetching next page of request from ${config.url}`);
+            LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
             // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config);
@@ -150,13 +146,13 @@ export class BitbucketApiManager extends ApiManager {
             if (oldCommitIndex === -1) {
                 result.data.values = [...result.data.values, ...response.data.values];
             } else {
-                console.debug(`Found truncation marker at index ${oldCommitIndex}`);
+                LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
                 result.data.values = [...result.data.values, ...response.data.values.slice(0, oldCommitIndex)];
                 break;
             }
         }
 
-        console.debug(`Fetched ${result.data.values.length} total items`);
+        LOGGER.debug(`Fetched ${result.data.values.length} total items`);
 
         return result;
     }

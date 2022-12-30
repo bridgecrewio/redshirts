@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { HelpGroup, } from '../common/types';
+import { HelpGroup, SourceInfo, SourceType, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
@@ -30,19 +30,24 @@ export default class Gitlab extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
 
-        const sourceInfo = {
-            url: 'https://gitlab.com/api/v4',
-            token: flags.token,
+        const sourceInfo = this.getSourceInfo(flags.token);
+
+        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
+        const runner = new GitlabRunner(sourceInfo, flags, apiManager);
+
+        await runner.execute();
+    }
+
+    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Github): SourceInfo {
+        return {
+            sourceType: sourceType,
+            url: baseUrl,
+            token: token,
             repoTerm: 'project',
             orgTerm: 'group',
             orgFlagName: 'groups',
             minPathLength: 2,
             maxPathLength: 99
         };
-
-        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
-        const runner = new GitlabRunner(sourceInfo, flags, apiManager);
-
-        await runner.execute();
     }
 }

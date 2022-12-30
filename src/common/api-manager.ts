@@ -1,18 +1,16 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { Repo, Commit, SourceInfo, RepoResponse } from './types';
-import { getFileBuffer } from './utils';
+import { Repo, SourceInfo, RepoResponse, VCSCommit } from './types';
+import { getFileBuffer, LOGGER } from './utils';
 import https = require('https')
 
 export abstract class ApiManager {
     sourceInfo: SourceInfo
-    sourceType: string
     certPath?: string
     cert?: Buffer
     axiosInstance: AxiosInstance
 
-    constructor(sourceInfo: SourceInfo, sourceType: string, certPath?: string) {
+    constructor(sourceInfo: SourceInfo, certPath?: string) {
         this.sourceInfo = sourceInfo;
-        this.sourceType = sourceType;
         this.certPath = certPath;
         this.cert = certPath ? getFileBuffer(certPath) : undefined;
         this.axiosInstance = axios.create(this._getAxiosConfiguration());
@@ -30,13 +28,13 @@ export abstract class ApiManager {
     }
 
     abstract _getAxiosConfiguration(): any
-    abstract getCommits(repo: Repo, numDays: number): Promise<Commit[]>
+    abstract getCommits(repo: Repo, numDays: number): Promise<VCSCommit[]>
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>
     abstract getUserRepos(): Promise<RepoResponse[]>
 
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
         // generic pagination handler for systems that returned standardized 'Link' headers
-        console.debug(`Submitting request to ${config.url}`);
+        LOGGER.debug(`Submitting request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
         const result = response;
         while (response.headers.link) {
@@ -47,7 +45,7 @@ export abstract class ApiManager {
                 const endPos = nextPage.indexOf('>', startPos);
                 config.url = nextPage.slice(startPos, endPos);
 
-                console.debug(`Fetching next page of request from ${config.url}`);
+                LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
                 // eslint-disable-next-line no-await-in-loop
                 response = await this.axiosInstance.request(config);
@@ -57,7 +55,7 @@ export abstract class ApiManager {
             }
         }
 
-        console.debug(`Fetched ${result.data.length} total items`);
+        LOGGER.debug(`Fetched ${result.data.length} total items`);
 
         return result;
     }

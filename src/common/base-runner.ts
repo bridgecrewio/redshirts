@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios';
 import { ApiManager } from './api-manager';
 import { printSummary } from './output';
-import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo } from './types';
-import { DEFAULT_DAYS, filterRepoList, getExplicitRepoList, getRepoListFromParams, stringToArr } from './utils';
+import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit } from './types';
+import { DEFAULT_DAYS, filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER, stringToArr } from './utils';
 
 // TODO
 // - get commits from all branches for all VCSes and git log
@@ -10,6 +10,8 @@ import { DEFAULT_DAYS, filterRepoList, getExplicitRepoList, getRepoListFromParam
 // - default to private only repos
 // - document specific permissions needed
 // - public / private repos
+// - document getting a cert chain
+// - some sort of errored repo list that is easy to review
 
 export abstract class BaseRunner {
     sourceInfo: SourceInfo;
@@ -29,17 +31,25 @@ export abstract class BaseRunner {
         this.apiManager = apiManager;
     }
 
-    abstract aggregateCommitContributors(repo: Repo, commits: Commit[]): void
+    abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void
     abstract convertRepos(reposResponse: RepoResponse[]): Repo[];
 
     async execute(): Promise<void> {
         if (this.flags.days !== DEFAULT_DAYS) {
-            console.warn(`Warning: you specified a --days value of ${this.flags.days}, which is different from the value used in the Prisma Cloud platform (${DEFAULT_DAYS}). Your results here will differ.`);
+            LOGGER.warn(`Warning: you specified a --days value of ${this.flags.days}, which is different from the value used in the Prisma Cloud platform (${DEFAULT_DAYS}). Your results here will differ.`);
         }
 
-        const repos = await this.getRepoList();
+        try {
+            const repos = await this.getRepoList();
 
-        await this.processRepos(repos);
+            await this.processRepos(repos);
+        } catch (error) {
+            if (error instanceof AxiosError && isSslError(error)) {
+                logError(error, `Received an SSL error while connecting to the server: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
+            }
+
+            throw error;
+        }
 
         printSummary(this, this.flags.output, this.flags.sort);
     }
@@ -56,18 +66,18 @@ export abstract class BaseRunner {
 
         if (orgsString) {
             repos = await this.getOrgRepos(orgsString);
-            console.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
         }
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
 
         if (addedRepos.length > 0) {
-            console.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
 
         if (repos.length === 0) {
-            console.debug('No explicitly specified repos - getting all user repos');
+            LOGGER.debug('No explicitly specified repos - getting all user repos');
             repos = await this.getUserRepos();
         }
 
@@ -82,29 +92,28 @@ export abstract class BaseRunner {
         const repos: Repo[] = [];
         const orgs = stringToArr(orgsString);
         for (const org of orgs) {
-            console.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
+            LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
             try {
                 // eslint-disable-next-line no-await-in-loop
                 const orgRepos = (await this.apiManager.getOrgRepos(org));
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {
                 if (error instanceof AxiosError) {
-                    console.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
+                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
                 } else {
-                    console.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
-                    console.error(error);
+                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
+                    LOGGER.error(error);
                 }
             }
         }
 
-        console.debug(`Found ${repos.length} ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
+        LOGGER.debug(`Found ${repos.length} ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
         return repos;
     }
 
     async getUserRepos(): Promise<Repo[]> {
-        console.debug('No explicitly specified repos - getting all user repos');
         const userRepos = await this.apiManager.getUserRepos();
-        console.debug(`Found ${userRepos.length} repos for the user`);
+        LOGGER.debug(`Found ${userRepos.length} repos for the user`);
         const repos = this.convertRepos(userRepos);
         return repos;
     }
@@ -113,17 +122,17 @@ export abstract class BaseRunner {
         for (const repo of repos) {
             try {
                 // eslint-disable-next-line no-await-in-loop
-                const commits: Commit[] = await this.apiManager.getCommits(repo, this.flags.days);
+                const commits: VCSCommit[] = await this.apiManager.getCommits(repo, this.flags.days);
                 if (commits.length > 0) {
                     this.aggregateCommitContributors(repo, commits);
-                } else {
+                } else if (!this.flags['exclude-empty']) {
                     this.addEmptyRepo(repo);
                 }
             } catch (error) {
                 if (error instanceof AxiosError) {
-                    console.error(`Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. Reason: ${error.response?.data?.message}`);
+                    LOGGER.error(`Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. Reason: ${error.response?.data?.message}`);
                 } else {
-                    console.error(`Failed to get commits ${error}`);
+                    LOGGER.error(`Failed to get commits ${error}`);
                 }
             }
         }
@@ -143,7 +152,7 @@ export abstract class BaseRunner {
         let repoContributors = this.contributorsByRepo.get(repoPath);
 
         if (!repoContributors) {
-            console.debug(`Creating new contributors map for repo ${repoPath}`);
+            LOGGER.debug(`Creating new contributors map for repo ${repoPath}`);
             repoContributors = new Map();
             this.contributorsByRepo.set(repoPath, repoContributors);
         }
@@ -164,7 +173,7 @@ export abstract class BaseRunner {
                 contributor.lastCommitDate = commitDate;
             }
         } else {
-            console.debug(`Found new contributor: ${username}, ${email}`);
+            LOGGER.debug(`Found new contributor: ${username}, ${email}`);
             contributorMap.set(username, {
                 username,
                 emails: new Set([email]),

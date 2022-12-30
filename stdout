@@ -1,0 +1,3 @@
+{"level":"debug","message":"test debug"}
+No explicitly specified repos - getting all user repos
+Submitting request to /user/repos

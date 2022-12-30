@@ -1,17 +1,13 @@
 /* eslint-disable camelcase */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiManager } from '../../common/api-manager';
-import { Repo, SourceInfo, SourceType } from '../../common/types';
-import { getXDaysAgoDate } from '../../common/utils';
+import { Repo } from '../../common/types';
+import { getXDaysAgoDate, LOGGER } from '../../common/utils';
 import { GitlabCommit, GitlabGroupResponse, GitlabRepoResponse } from './gitlab-types';
 
 const MAX_PAGE_SIZE = 100;
 
 export class GitlabApiManager extends ApiManager {
-
-    constructor(sourceInfo: SourceInfo, certPath?: string) {
-        super(sourceInfo, SourceType.Gitlab, certPath);
-    }
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
@@ -22,7 +18,7 @@ export class GitlabApiManager extends ApiManager {
 
     async getCommits(repo: Repo, numDays: number): Promise<GitlabCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        console.debug(`Getting commits for repo: ${repoPath}`);
+        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}/repository/commits`,
             method: 'GET',
@@ -34,7 +30,7 @@ export class GitlabApiManager extends ApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data || [];
-        console.debug(`Found ${commits.length} commits`);
+        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -44,12 +40,13 @@ export class GitlabApiManager extends ApiManager {
         const groupRepos = [];
 
         for (const group of groups) {
+            // the groups call lists subgroups separately, so we don't need to get subgroups
             // eslint-disable-next-line no-await-in-loop
             const repos = await this.getOrgRepos(group.full_path, false);
             groupRepos.push(...repos);
         }
 
-        console.debug(`Found ${groupRepos.length} repos in group memberships`);
+        LOGGER.debug(`Found ${groupRepos.length} repos in group memberships`);
 
         const userId = await this.getUserId();
 
@@ -64,7 +61,7 @@ export class GitlabApiManager extends ApiManager {
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const userRepos: GitlabRepoResponse[] = result.data;
 
-        console.debug(`Found ${userRepos.length} user repos`);
+        LOGGER.debug(`Found ${userRepos.length} user repos`);
 
         return [...userRepos, ...groupRepos];
     }
@@ -81,7 +78,7 @@ export class GitlabApiManager extends ApiManager {
         };
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
-        console.debug(`Found ${result.data.length} explicit group memberships`);
+        LOGGER.debug(`Found ${result.data.length} explicit group memberships`);
 
         return result.data;
     }
@@ -103,7 +100,7 @@ export class GitlabApiManager extends ApiManager {
         }
         catch (error) {
             if (error instanceof AxiosError && error.response?.status === 404) {
-                console.debug(`Got 404 from ${config.url} call - attempting a user call`);
+                LOGGER.debug(`Got 404 from ${config.url} call - attempting a user call`);
                 config.url = `users/${encodeURIComponent(group)}/projects`;
                 const result: AxiosResponse = await this.submitPaginatedRequest(config);
                 return result.data;

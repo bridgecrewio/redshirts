@@ -1,6 +1,6 @@
 import { BaseRunner } from '../../common/base-runner';
 import { Repo, SourceInfo } from '../../common/types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams } from '../../common/utils';
+import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER } from '../../common/utils';
 import { AzureApiManager } from './azure-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
@@ -16,14 +16,17 @@ export class AzureRunner extends BaseRunner {
 
     aggregateCommitContributors(repo: Repo, commits: AzureCommit[]): void {
         // TODO exclude emails
-        console.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
+        LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { author } = commitObject;
-            commitObject.username = author.name;
-            commitObject.email = author.email;
-            commitObject.commitDate = author.date;
 
-            this.addContributor(repo.owner, repo.name, commitObject);
+            const newCommit = {
+                username: author.name,
+                email: author.email,
+                commitDate: author.date
+            };
+
+            this.addContributor(repo.owner, repo.name, newCommit);
         }
     }
 
@@ -58,7 +61,7 @@ export class AzureRunner extends BaseRunner {
 
         if (orgsString) {
             repos = await this.getOrgRepos(orgsString);
-            console.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
         }
 
         const explicitProjects = getRepoListFromParams(this.sourceInfo.minPathLength - 1, this.sourceInfo.maxPathLength - 1, projectsList).map(p => {
@@ -72,13 +75,13 @@ export class AzureRunner extends BaseRunner {
         }
         
         if (explicitProjects.length > 0) {
-            console.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...projectRepos);
         }
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
         if (addedRepos.length > 0) {
-            console.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
 
@@ -90,7 +93,7 @@ export class AzureRunner extends BaseRunner {
         const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
         repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
 
-        console.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
+        LOGGER.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
 
         return repos;
     }
