@@ -1,8 +1,8 @@
 {
     "name": "redshirts",
     "version": "0.0.0",
-    "description": "Counts contributors for a git repository",
-    "author": "Kartik Pande @kartikp10",
+    "description": "Counts contributors for git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. Use this tool to estimate the impact on credit consumption prior to connecting repos to the platform. Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform. Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts",
+    "author": "Palo Alto Networks",
     "bin": {
         "redshirts": "./bin/run"
     },
@@ -21,7 +21,8 @@
         "@oclif/errors": "^1.3.6",
         "@oclif/plugin-help": "^5",
         "axios": "^1.2.1",
-        "console-table-printer": "^2.11.1"
+        "console-table-printer": "^2.11.1",
+        "winston": "^3.8.2"
     },
     "devDependencies": {
         "@oclif/test": "^2.2.10",

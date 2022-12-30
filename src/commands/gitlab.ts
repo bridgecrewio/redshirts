@@ -1,12 +1,11 @@
 import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { RedshirtsCommand } from '../common/redshirts-command';
-import { HelpGroup, Repo, } from '../common/types';
+import RedshirtsVcsCommand from '../common/redshirts-command';
+import { HelpGroup, SourceInfo, SourceType, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
-import { GitlabCounter } from '../vcs/gitlab/gitlab-counter';
-import { GitlabRepoResponse } from '../vcs/gitlab/gitlab-types';
+import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
-export default class Gitlab extends RedshirtsCommand {
+export default class Gitlab extends RedshirtsVcsCommand {
     static description = 'Count active contributors for GitLab repos'
 
     static examples = [
@@ -32,32 +31,24 @@ export default class Gitlab extends RedshirtsCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
 
-        const sourceInfo = {
-            url: 'https://gitlab.com/api/v4',
-            token: flags.token,
+        const sourceInfo = this.getSourceInfo(flags.token);
+
+        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
+        const runner = new GitlabRunner(sourceInfo, flags, apiManager);
+
+        await runner.execute();
+    }
+
+    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): SourceInfo {
+        return {
+            sourceType: sourceType,
+            url: baseUrl,
+            token: token,
             repoTerm: 'project',
             orgTerm: 'group',
             orgFlagName: 'groups',
             minPathLength: 2,
             maxPathLength: 99
         };
-
-        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
-        const counter = new GitlabCounter();
-
-        await this.execute(flags, sourceInfo, apiManager, counter);
-    }
-
-    convertRepos(reposResponse: GitlabRepoResponse[]): Repo[] {
-        const filteredRepos: Repo[] = [];
-        for (const repo of reposResponse) {
-            filteredRepos.push({
-                name: repo.path,
-                owner: repo.namespace.full_path,
-                private: repo.visibility === 'private'
-            });
-        }
-
-        return filteredRepos;
     }
 }

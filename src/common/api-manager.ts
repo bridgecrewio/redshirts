@@ -1,18 +1,16 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { Repo, Commit, SourceInfo, RepoResponse } from './types';
-import { getFileBuffer } from './utils';
+import { Repo, SourceInfo, RepoResponse, VCSCommit } from './types';
+import { getFileBuffer, LOGGER } from './utils';
 import https = require('https')
 
 export abstract class ApiManager {
     sourceInfo: SourceInfo
-    sourceType: string
     certPath?: string
     cert?: Buffer
     axiosInstance: AxiosInstance
 
-    constructor(sourceInfo: SourceInfo, sourceType: string, certPath?: string) {
+    constructor(sourceInfo: SourceInfo, certPath?: string) {
         this.sourceInfo = sourceInfo;
-        this.sourceType = sourceType;
         this.certPath = certPath;
         this.cert = certPath ? getFileBuffer(certPath) : undefined;
         this.axiosInstance = axios.create(this._getAxiosConfiguration());
@@ -30,34 +28,111 @@ export abstract class ApiManager {
     }
 
     abstract _getAxiosConfiguration(): any
-    abstract getCommits(repo: Repo, numDays: number): Promise<Commit[]>
+    abstract getCommits(repo: Repo, numDays: number): Promise<VCSCommit[]>
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>
     abstract getUserRepos(): Promise<RepoResponse[]>
 
+    hasMorePages(response: AxiosResponse): boolean {
+        return response.headers.link !== undefined;
+    }
+
+    setNextPageConfig(config: AxiosRequestConfig, response: AxiosResponse): void {
+        // updates the request config in place so that it can be used to fetch the next page
+        const pages = response.headers.link!.split(',');
+        const nextPage = pages.find((item) => item.includes('rel="next"'));
+        if (nextPage) {
+            const startPos = nextPage.indexOf('<') + 1;
+            const endPos = nextPage.indexOf('>', startPos);
+            config.url = nextPage.slice(startPos, endPos);
+        } else {
+            throw new Error(`Failed to get next page data from link: ${response.headers.link}`);
+        }
+    }
+
+    appendDataPage(allPages: AxiosResponse, response: AxiosResponse): void {
+        // fetches the page of data from the response and appends it to the result
+        // APIs that have a different response structure should override this so that
+        // the right array gets set
+        allPages.data = [...allPages.data, ...response.data];
+    }
+
+    setDataPage(response: AxiosResponse, data: any[]): void {
+        // sets the array as the data for the result page
+        // APIs should override this to set a different field in the data object
+        response.data = data;
+    }
+
+    getDataPage(response: AxiosResponse): any[] {
+        return response.data;
+    }
+
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
         // generic pagination handler for systems that returned standardized 'Link' headers
-        console.debug(`Submitting request to ${config.url}`);
+        LOGGER.debug(`Submitting request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
         const result = response;
-        while (response.headers.link) {
-            const pages = response.headers.link.split(',');
-            const nextPage = pages.find((item) => item.includes('rel="next"'));
-            if (nextPage) {
-                const startPos = nextPage.indexOf('<') + 1;
-                const endPos = nextPage.indexOf('>', startPos);
-                config.url = nextPage.slice(startPos, endPos);
 
-                console.debug(`Fetching next page of request from ${config.url}`);
+        let page = 1;
 
-                // eslint-disable-next-line no-await-in-loop
-                response = await this.axiosInstance.request(config);
-                result.data = [...result.data, ...response.data];
+        while (this.hasMorePages(response)) {
+            this.setNextPageConfig(config, response);
+            page++;
+
+            LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
+            // eslint-disable-next-line no-await-in-loop
+            response = await this.axiosInstance.request(config);
+            this.appendDataPage(result, response);
+        }
+
+        return result;
+    }
+
+    async submitFilteredPaginatedRequest(config: AxiosRequestConfig, filterfn: (c: any) => boolean): Promise<AxiosResponse> {
+        // same as the regular pagination logic, except this one will run the filter function on each
+        // page of results, and if any of the elements in that page matches, then the function
+        // will stop pagination, slice off that item and everything after it, and return. 
+        // This means that the filter function must use the field by which the results for the 
+        // request are sorted.
+
+        LOGGER.debug(`Submitting filtered request to ${config.url}`);
+        let response = await this.axiosInstance.request(config);
+        let dataPage = this.getDataPage(response);
+
+        // this is safe because we control the definition
+        // eslint-disable-next-line unicorn/no-array-callback-reference
+        const oldCommitIndex = dataPage.findIndex(filterfn);
+
+        if (oldCommitIndex !== -1) {
+            LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
+            this.setDataPage(response, dataPage.slice(0, oldCommitIndex));
+            return response;
+        }
+
+        const result = response;
+
+        let page = 1;
+
+        while (this.hasMorePages(response)) {
+            this.setNextPageConfig(config, response);
+            page++;
+
+            LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
+
+            // eslint-disable-next-line no-await-in-loop
+            response = await this.axiosInstance.request(config);
+            dataPage = this.getDataPage(response);
+
+            // eslint-disable-next-line unicorn/no-array-callback-reference
+            const oldCommitIndex = dataPage.findIndex(filterfn);
+
+            if (oldCommitIndex === -1) {
+                this.appendDataPage(result, response);
             } else {
+                LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
+                this.setDataPage(result, [...result.data.values, ...dataPage.slice(0, oldCommitIndex)]);
                 break;
             }
         }
-
-        console.debug(`Fetched ${result.data.length} total items`);
 
         return result;
     }

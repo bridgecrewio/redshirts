@@ -1,4 +1,5 @@
 export type SourceInfo = {
+    sourceType: SourceType
     url: string
     token: string
     repoTerm: string
@@ -9,8 +10,8 @@ export type SourceInfo = {
 }
 
 export type Contributor = {
-    username: string
-    emails: Set<string>
+    email: string
+    usernames: Set<string>
     lastCommitDate: string
 }
 
@@ -30,6 +31,9 @@ export interface Commit {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RepoResponse { }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VCSCommit { }
 
 export interface Report {
     contributors: Contributor[];
@@ -66,7 +70,13 @@ export enum HelpGroup {
     REPO_SPEC = 'Repo specification',
     AUTH = 'Authentication',
     OUTPUT = 'Output',
+    CONNECTION = 'Connection',
     OTHER = 'Other'
+}
+
+export enum Protocol {
+    HTTP = 'http',
+    HTTPS = 'https'
 }
 
 export type OutputTableRow = { Repo: string, Contributors: number };

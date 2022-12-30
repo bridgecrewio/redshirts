@@ -1,5 +1,4 @@
-/* eslint-disable camelcase */
-import { Commit, RepoResponse } from "../../common/types";
+import { RepoResponse, VCSCommit } from "../../common/types";
 
 export type AzureAuthor = {
     name: string
@@ -7,7 +6,7 @@ export type AzureAuthor = {
     date: string
 }
 
-export interface AzureCommit extends Commit {
+export interface AzureCommit extends VCSCommit {
     author: AzureAuthor
 }
 
