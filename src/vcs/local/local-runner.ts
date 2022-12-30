@@ -1,20 +1,19 @@
+import path = require('path');
 import { BaseRunner } from '../../common/base-runner';
 import { Repo, SourceInfo } from '../../common/types';
 import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER } from '../../common/utils';
-import { AzureApiManager } from './azure-api-manager';
-import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
+import { LocalApiManager } from './local-api-manager';
+import { LocalCommit, LocalRepoResponse } from './local-types';
 
-export class AzureRunner extends BaseRunner {
-
-    apiManager: AzureApiManager  // need the explicit type for some calls
+export class LocalRunner extends BaseRunner {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, flags: any, apiManager: AzureApiManager) {
+    constructor(sourceInfo: SourceInfo, flags: any, apiManager: LocalApiManager) {
         super(sourceInfo, [], flags, apiManager);
         this.apiManager = apiManager;
     }
 
-    aggregateCommitContributors(repo: Repo, commits: AzureCommit[]): void {
+    aggregateCommitContributors(repo: Repo, commits: LocalCommit[]): void {
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { author } = commitObject;
@@ -29,13 +28,12 @@ export class AzureRunner extends BaseRunner {
         }
     }
 
-    convertRepos(reposResponse: AzureRepoResponse[]): Repo[] {
+    convertRepos(reposResponse: LocalRepoResponse[]): Repo[] {
         const filteredRepos: Repo[] = [];
         for (const repo of reposResponse) {
             filteredRepos.push({
-                name: repo.name,
-                owner: repo.owner,
-                private: repo.project.visibility === 'private',
+                name: path.basename(repo.path),
+                owner: path.dirname(repo.path)
             });
         }
 

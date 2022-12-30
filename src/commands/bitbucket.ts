@@ -1,10 +1,11 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
-import { HelpGroup, SourceType } from '../common/types';
+import RedshirtsVcsCommand from '../common/redshirts-command';
+import { HelpGroup, SourceInfo, SourceType } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
-export default class Bitbucket extends Command {
+export default class Bitbucket extends RedshirtsVcsCommand {
     static summary = 'Count active contributors for Bitbucket repos'
 
     static examples = [
@@ -26,7 +27,7 @@ export default class Bitbucket extends Command {
             helpGroup: HelpGroup.AUTH
         }),
         workspaces: Flags.string({
-            description: 'Workspace and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude individual repos that are a part of these workspace(s).',
+            description: 'A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude individual repos that are a part of these workspace(s).',
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
@@ -36,20 +37,24 @@ export default class Bitbucket extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Bitbucket);
 
-        const sourceInfo = {
-            sourceType: SourceType.Bitbucket,
-            url: 'https://api.bitbucket.org/2.0',
-            token: flags.username + ':' + flags.token,
+        const sourceInfo = this.getSourceInfo(`${flags.username}:${flags.token}`);
+
+        const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
+        const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
+
+        await runner.execute();
+    }
+
+    getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): SourceInfo {
+        return {
+            sourceType: sourceType,
+            url: baseUrl,
+            token: token,
             repoTerm: 'repo',
             orgTerm: 'workspace',
             orgFlagName: 'workspaces',
             minPathLength: 2,
             maxPathLength: 2
         };
-
-        const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
-        const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
-
-        await runner.execute();
     }
 }

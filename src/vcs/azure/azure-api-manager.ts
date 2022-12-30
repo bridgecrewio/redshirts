@@ -2,7 +2,6 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiManager } from '../../common/api-manager';
 import { Repo, RepoResponse } from '../../common/types';
 import { getXDaysAgoDate, LOGGER } from '../../common/utils';
-// import { getXDaysAgoDate } from '../../common/utils';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
 const MAX_PAGE_SIZE = 100;
@@ -93,6 +92,8 @@ export class AzureApiManager extends ApiManager {
     }
 
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
+        // azure paging doesn't fit the model nicely, because you have to go until you get no data
+        // (the server does not tell you when you are on the last page)
         LOGGER.debug(`Submitting request to ${config.url}`);
         let response = await this.axiosInstance.request(config);
 

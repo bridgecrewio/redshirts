@@ -2,7 +2,7 @@ import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
 import { HelpGroup, Protocol, SourceType } from '../common/types';
 import { getServerUrl } from '../common/utils';
-import { GithubServerRunner } from '../vcs/githubServer/github-runner';
+import { GithubServerRunner } from '../vcs/githubServer/github-server-runner';
 import { GithubServerApiManager } from '../vcs/githubServer/github-server-api-manager';
 import Github from './github';
 

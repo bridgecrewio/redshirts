@@ -92,68 +92,23 @@ export class BitbucketApiManager extends ApiManager {
         return result.data.values;
     }
 
-    async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-        LOGGER.debug(`Submitting request to ${config.url}`);
-        let response = await this.axiosInstance.request(config);
-        const result = response;
-        while (response.data.next) {
-            config.url = response.data.next;
-
-            LOGGER.debug(`Fetching next page of request from ${config.url}`);
-
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
-            result.data.values = [...result.data.values, ...response.data.values];
-        }
-
-        LOGGER.debug(`Fetched ${result.data.values.length} total items`);
-
-        return result;
+    hasMorePages(response: AxiosResponse): boolean {
+        return response.data.next;
     }
 
-    async submitFilteredPaginatedRequest(config: AxiosRequestConfig, filterfn: (c: BitbucketCommit) => boolean): Promise<AxiosResponse> {
-        // same as the regular pagination logic, except this one will run the filter function on each
-        // page of results, and if any of the elements in that page matches, then the function
-        // will stop pagination, slice off that item and everything after it, and return. 
-        // This means that the filter function must use the field by which the results for the 
-        // request are sorted.
+    setNextPageConfig(config: AxiosRequestConfig, response: AxiosResponse): void {
+        config.url = response.data.next;
+    }
 
-        LOGGER.debug(`Submitting truncated request to ${config.url}`);
-        let response = await this.axiosInstance.request(config);
+    appendDataPage(result: AxiosResponse, response: AxiosResponse): void {
+        result.data.values = [...result.data.values, ...response.data.values];
+    }
 
-        // this is safe because we control the definition
-        // eslint-disable-next-line unicorn/no-array-callback-reference
-        const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex(filterfn);
+    setDataPage(result: AxiosResponse, data: any[]): void {
+        result.data.values = data;
+    }
 
-        if (oldCommitIndex !== -1) {
-            LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
-            response.data.values = response.data.values.slice(0, oldCommitIndex);
-        }
-
-        const result = response;
-
-        while (response.data.next) {
-            config.url = response.data.next;
-
-            LOGGER.debug(`Fetching next page of request from ${config.url}`);
-
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
-
-            // eslint-disable-next-line unicorn/no-array-callback-reference
-            const oldCommitIndex = (response.data.values as BitbucketCommit[]).findIndex(filterfn);
-
-            if (oldCommitIndex === -1) {
-                result.data.values = [...result.data.values, ...response.data.values];
-            } else {
-                LOGGER.debug(`Found truncation marker at index ${oldCommitIndex}`);
-                result.data.values = [...result.data.values, ...response.data.values.slice(0, oldCommitIndex)];
-                break;
-            }
-        }
-
-        LOGGER.debug(`Fetched ${result.data.values.length} total items`);
-
-        return result;
+    getDataPage(response: AxiosResponse): any[] {
+        return response.data.values;
     }
 }

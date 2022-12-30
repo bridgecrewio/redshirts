@@ -1,10 +1,11 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
+import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceInfo, SourceType, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
-export default class Gitlab extends Command {
+export default class Gitlab extends RedshirtsVcsCommand {
     static description = 'Count active contributors for GitLab repos'
 
     static examples = [
@@ -38,7 +39,7 @@ export default class Gitlab extends Command {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Github): SourceInfo {
+    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): SourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

@@ -8,7 +8,6 @@ export class GitlabRunner extends BaseRunner {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: SourceInfo, flags: any, apiManager: GitlabApiManager) {
-        // TODO excluded emails
         super(sourceInfo, [], flags, apiManager);
     }
 

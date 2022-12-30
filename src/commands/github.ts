@@ -1,10 +1,11 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
 import { commonFlags } from '../common/flags';
+import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceInfo, SourceType } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubRunner } from '../vcs/github/github-runner';
 
-export default class Github extends Command {
+export default class Github extends RedshirtsVcsCommand {
     static description = 'Count active contributors for GitHub repos'
 
     static examples = [

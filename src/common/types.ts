@@ -10,8 +10,8 @@ export type SourceInfo = {
 }
 
 export type Contributor = {
-    username: string
-    emails: Set<string>
+    email: string
+    usernames: Set<string>
     lastCommitDate: string
 }
 

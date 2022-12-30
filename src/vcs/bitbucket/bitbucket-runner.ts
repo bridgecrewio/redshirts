@@ -9,11 +9,10 @@ export class BitbucketRunner extends BaseRunner {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: SourceInfo, flags: any, apiManager: BitbucketApiManager) {
-        super(sourceInfo, ['noreply@github.com'], flags, apiManager); // TODO emails
+        super(sourceInfo, [], flags, apiManager);
     }
 
     aggregateCommitContributors(repo: Repo, commits: BitbucketCommit[]): void {
-        // TODO exclude emails
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { author, date } = commitObject;

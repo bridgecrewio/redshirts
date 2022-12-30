@@ -7,11 +7,10 @@ import { GithubCommit, GithubRepoResponse } from './github-types';
 export class GithubRunner extends BaseRunner {
 
     constructor(sourceInfo: SourceInfo, flags: any, apiManager: GithubApiManager) {
-        super(sourceInfo, ['noreply@github.com'], flags, apiManager);
+        super(sourceInfo, [], flags, apiManager);
     }
 
     aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {
-        // TODO exclude emails
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { commit, author } = commitObject;

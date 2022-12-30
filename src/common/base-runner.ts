@@ -6,29 +6,35 @@ import { DEFAULT_DAYS, filterRepoList, getExplicitRepoList, getRepoListFromParam
 
 // TODO
 // - get commits from all branches for all VCSes and git log
-// - unique user identification per VCS
-// - default to private only repos
+// - default to private only repos - should we explicitly check each repo for its visibility?
 // - document specific permissions needed
-// - public / private repos
+// - public / private repos - include in output?
 // - document getting a cert chain
 // - some sort of errored repo list that is easy to review
+// - author vs committer
+// - rate limiting
+
+const EXCLUDED_EMAIL_REGEXES = [
+    /noreply/,
+    /no-reply/
+];
 
 export abstract class BaseRunner {
     sourceInfo: SourceInfo;
-    excludedUsers: string[];
+    excludedEmailRegexes: RegExp[];
     contributorsByUsername: ContributorMap;
     contributorsByRepo: Map<string, ContributorMap>;
     flags: any;
     apiManager: ApiManager;
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, excludedUsers: Array<string>, flags: any, apiManager: ApiManager) {
+    constructor(sourceInfo: SourceInfo, excludedEmailRegexes: Array<string>, flags: any, apiManager: ApiManager) {
         this.sourceInfo = sourceInfo;
-        this.excludedUsers = excludedUsers;
+        this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes.map(s => new RegExp(s))];
         this.contributorsByUsername = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
-        this.apiManager = apiManager;
+        this.apiManager = apiManager; 
     }
 
     abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void
@@ -45,7 +51,7 @@ export abstract class BaseRunner {
             await this.processRepos(repos);
         } catch (error) {
             if (error instanceof AxiosError && isSslError(error)) {
-                logError(error, `Received an SSL error while connecting to the server: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
+                logError(error, `Received an SSL error while connecting to the server at url ${this.sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
             }
 
             throw error;
@@ -129,11 +135,7 @@ export abstract class BaseRunner {
                     this.addEmptyRepo(repo);
                 }
             } catch (error) {
-                if (error instanceof AxiosError) {
-                    LOGGER.error(`Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. Reason: ${error.response?.data?.message}`);
-                } else {
-                    LOGGER.error(`Failed to get commits ${error}`);
-                }
+                logError(error as Error, `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`);
             }
         }
     }
@@ -144,10 +146,19 @@ export abstract class BaseRunner {
         this.contributorsByRepo.set(repoPath, new Map());
     }
 
+    skipUser(email: string): boolean {
+        return this.excludedEmailRegexes.some(re => re.exec(email) !== null);
+    }
+
     addContributor(repoOwner: string, repoName: string, commit: Commit): void {
         // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
 
         const repoPath = repoOwner + '/' + repoName;
+
+        if (this.skipUser(commit.email)) {
+            LOGGER.debug(`Skipping email ${commit.email} for repo ${repoPath}`);
+            return;
+        }
 
         let repoContributors = this.contributorsByRepo.get(repoPath);
 
@@ -165,18 +176,18 @@ export abstract class BaseRunner {
     }
 
     upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
-        const contributor = contributorMap.get(username);
+        const contributor = contributorMap.get(email);
 
         if (contributor) {
-            contributor.emails.add(email);
+            contributor.usernames.add(email);
             if (contributor.lastCommitDate < commitDate) {
                 contributor.lastCommitDate = commitDate;
             }
         } else {
-            LOGGER.debug(`Found new contributor: ${username}, ${email}`);
+            LOGGER.debug(`Found new contributor: ${email}, ${username}`);
             contributorMap.set(username, {
-                username,
-                emails: new Set([email]),
+                email,
+                usernames: new Set([username]),
                 lastCommitDate: commitDate
             });
         }
