@@ -1,14 +1,14 @@
-import { BaseRunner } from '../../common/base-runner';
-import { Repo, SourceInfo } from '../../common/types';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
+import { VcsRunner } from '../../common/vcs-runner';
 import { BitbucketApiManager } from './bitbucket-api-manager';
 import { BitbucketCommit, BitbucketRepoResponse } from './bitbucket-types';
 import { extractEmailFromRawUser } from './bitbucket-utils';
 
-export class BitbucketRunner extends BaseRunner {
+export class BitbucketRunner extends VcsRunner {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, flags: any, apiManager: BitbucketApiManager) {
+    constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: BitbucketApiManager) {
         super(sourceInfo, [], flags, apiManager);
     }
 
@@ -20,7 +20,7 @@ export class BitbucketRunner extends BaseRunner {
 
             const newCommit = {
                 username: author.user.nickname,
-                email: email || 'unknown_email',
+                email: email || author.raw,
                 commitDate: date
             };
 

@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
+import { vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
-import { HelpGroup, SourceInfo, SourceType, } from '../common/types';
+import { HelpGroup, SourceType, VcsSourceInfo, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
@@ -25,7 +25,7 @@ export default class Gitlab extends RedshirtsVcsCommand {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...commonFlags,
+        ...vcsFlags,
     }
 
     async run(): Promise<void> {
@@ -39,7 +39,7 @@ export default class Gitlab extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): SourceInfo {
+    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

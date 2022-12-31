@@ -1,3 +1,4 @@
+import { LOGGER } from "../../common/utils";
 import { BitbucketCommit } from "./bitbucket-types";
 
 const RAW_EMAIL_REGEX = /.+<(.+)>/;
@@ -14,5 +15,10 @@ export const getBitbucketDateCompareFunction = (date: Date): (cs: BitbucketCommi
 
 export const extractEmailFromRawUser = (raw: string): string | null => {
     const match = raw.match(RAW_EMAIL_REGEX);
-    return match ? match[1] : null;
+    if (!match) {
+        LOGGER.debug(`Failed to extract email from raw user: ${raw}`);
+        return null;
+    }
+
+    return match[1];
 };

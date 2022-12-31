@@ -1,10 +1,11 @@
 import { RepoResponse, VCSCommit } from "../../common/types";
 
 export interface LocalCommit extends VCSCommit {
-    author: string
+    name: string
+    email: string
+    timestamp: number
 }
 
 export interface LocalRepoResponse extends RepoResponse {
     path: string
-    remoteUrl: string
 }

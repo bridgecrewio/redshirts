@@ -1,6 +1,5 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
-import { HelpGroup, Protocol, SourceInfo, SourceType } from '../common/types';
+import { HelpGroup, Protocol, SourceType, VcsSourceInfo } from '../common/types';
 import { deleteFlagKey, getServerUrl } from '../common/utils';
 import { BitbucketServerApiManager } from '../vcs/bitbucketServer/bitbucket-server-api-manager';
 import { BitbucketServerRunner } from '../vcs/bitbucketServer/bitbucket-server-runner';
@@ -42,8 +41,7 @@ export default class BitbucketServer extends Bitbucket {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...deleteFlagKey(Bitbucket.flags, 'workspaces'),
-        ...commonFlags,
+        ...deleteFlagKey(Bitbucket.flags, 'workspaces')
     } as any;
 
     async run(): Promise<void> {
@@ -60,7 +58,7 @@ export default class BitbucketServer extends Bitbucket {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl: string, sourceType = SourceType.BitbucketServer): SourceInfo {
+    getSourceInfo(token: string, baseUrl: string, sourceType = SourceType.BitbucketServer): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

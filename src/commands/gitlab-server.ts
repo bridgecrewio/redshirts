@@ -1,5 +1,4 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
 import { HelpGroup, Protocol, SourceType } from '../common/types';
 import { getServerUrl } from '../common/utils';
 import { GitlabServerApiManager } from '../vcs/gitlabServer/gitlab-server-api-manager';
@@ -37,7 +36,6 @@ export default class GitlabServer extends Gitlab {
             helpGroup: HelpGroup.CONNECTION
         }),
         ...Gitlab.flags,
-        ...commonFlags,
     }
 
     async run(): Promise<void> {

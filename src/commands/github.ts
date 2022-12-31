@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
+import { vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
-import { HelpGroup, SourceInfo, SourceType } from '../common/types';
+import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubRunner } from '../vcs/github/github-runner';
 
@@ -25,7 +25,7 @@ export default class Github extends RedshirtsVcsCommand {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...commonFlags,
+        ...vcsFlags,
     }
 
     async run(): Promise<void> {
@@ -39,7 +39,7 @@ export default class Github extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): SourceInfo {
+    getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

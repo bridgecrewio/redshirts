@@ -1,13 +1,13 @@
-import { BaseRunner } from '../../common/base-runner';
-import { Repo, SourceInfo } from '../../common/types';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
+import { VcsRunner } from '../../common/vcs-runner';
 import { GitlabApiManager } from './gitlab-api-manager';
 import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 
-export class GitlabRunner extends BaseRunner {
+export class GitlabRunner extends VcsRunner {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, flags: any, apiManager: GitlabApiManager) {
+    constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GitlabApiManager) {
         super(sourceInfo, [], flags, apiManager);
     }
 

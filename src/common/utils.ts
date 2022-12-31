@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { readFileSync } from 'node:fs';
-import { Protocol, Repo, SourceInfo } from './types';
-import { createLogger, transports, format } from 'winston';
+import { Protocol, Repo, VcsSourceInfo } from './types';
+import * as winston from 'winston';
 import { FlagBase } from '@oclif/core/lib/interfaces';
 
 export const DEFAULT_DAYS = 90;
@@ -55,8 +55,12 @@ export const splitRepos = (repoString: string, minPathLength = 2, maxPathLength 
     return getRepos(stringToArr(repoString), minPathLength, maxPathLength);
 };
 
+export const fileToLines = (path: string): string[] => {
+    return getFileContents(path).split('\n').map(s => s.trim()).filter(s => s);
+};
+
 export const readRepoFile = (path: string, minPathLength = 2, maxPathLength = 2): Repo[] => {
-    return getRepos(getFileContents(path).split('\n').map(s => s.trim()), minPathLength, maxPathLength);
+    return getRepos(fileToLines(path), minPathLength, maxPathLength);
 };
 
 export const mapIterable = <T, U>(it: Iterable<T>, callbackfn: (value: T, index: number, it: Iterable<T>) => U): U[] => {
@@ -98,7 +102,7 @@ export const getRepoListFromParams = (minPathLength: number, maxPathLength: numb
     return repos;
 };
 
-export const getExplicitRepoList = (sourceInfo: SourceInfo, repos: Repo[], reposList?: string, reposFile?: string): Repo[] => {
+export const getExplicitRepoList = (sourceInfo: VcsSourceInfo, repos: Repo[], reposList?: string, reposFile?: string): Repo[] => {
     const explicitRepos = getRepoListFromParams(sourceInfo.minPathLength, sourceInfo.maxPathLength, reposList, reposFile);
 
     const addedRepos: Repo[] = [];
@@ -158,7 +162,7 @@ export const isSslError = (error: AxiosError): boolean => {
 };
 
 
-const logFormat = format.printf(({ level, message, timestamp, ...rest }) => {
+const logFormat = winston.format.printf(({ level, message, timestamp, ...rest }) => {
     const argumentsString = JSON.stringify({ ...rest });
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
@@ -178,17 +182,17 @@ const getLogLevel = (): string => {
     }
 };
 
-export const LOGGER = createLogger({
+export const LOGGER = winston.createLogger({
     level: getLogLevel(),
     transports: [
-        new transports.Console({
+        new winston.transports.Console({
             stderrLevels: LOG_LEVELS
         })
     ],
-    format: format.combine(
-        format.splat(),
-        format.timestamp(),
-        format.prettyPrint(),
+    format: winston.format.combine(
+        winston.format.splat(),
+        winston.format.timestamp(),
+        winston.format.prettyPrint(),
         logFormat
     )
 });
@@ -208,22 +212,6 @@ export const logError = (error: Error, message?: string, args?: any): void => {
 export const deleteFlagKey = (obj: {[key: string]: FlagBase<any, any>}, ...keys: string[]): {[key: string]: FlagBase<any, any>} => {
     for (const key of keys) {
         delete obj[key];
-    }
-
-    return obj;
-};
-
-export const replaceFlagMetadata = (obj: {[key: string]: FlagBase<any, any>}, descriptions?: Map<string, string>, defaults?: Map<string, any>): {[key: string]: FlagBase<any, any>} => {
-    if (descriptions) {
-        for (const [flag, description] of descriptions) {
-            obj[flag].description = description;
-        }
-    }
-
-    if (defaults) {
-        for (const [flag, def] of defaults) {
-            (obj[flag] as any).default = def;
-        }
     }
 
     return obj;

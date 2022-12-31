@@ -1,12 +1,12 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GithubCommit, GithubRepoResponse } from './github-types';
-import { ApiManager } from '../../common/api-manager';
 import { Repo } from '../../common/types';
 import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { VcsApiManager } from '../../common/vcs-api-manager';
 
 const MAX_PAGE_SIZE = 100;
 const API_VERSION = '2022-11-28';
-export class GithubApiManager extends ApiManager {
+export class GithubApiManager extends VcsApiManager {
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {

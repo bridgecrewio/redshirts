@@ -1,13 +1,13 @@
 /* eslint-disable camelcase */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiManager } from '../../common/api-manager';
 import { Repo } from '../../common/types';
 import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { VcsApiManager } from '../../common/vcs-api-manager';
 import { GitlabCommit, GitlabGroupResponse, GitlabRepoResponse } from './gitlab-types';
 
 const MAX_PAGE_SIZE = 100;
 
-export class GitlabApiManager extends ApiManager {
+export class GitlabApiManager extends VcsApiManager {
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {

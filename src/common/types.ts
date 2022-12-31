@@ -1,9 +1,12 @@
-export type SourceInfo = {
+export interface SourceInfo {
     sourceType: SourceType
-    url: string
-    token: string
     repoTerm: string
     orgTerm: string
+}
+
+export interface VcsSourceInfo extends SourceInfo {
+    url: string
+    token: string
     orgFlagName: string,
     minPathLength: number,
     maxPathLength: number

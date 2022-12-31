@@ -1,15 +1,15 @@
-import { BaseRunner } from '../../common/base-runner';
-import { Repo, SourceInfo } from '../../common/types';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER } from '../../common/utils';
+import { VcsRunner } from '../../common/vcs-runner';
 import { AzureApiManager } from './azure-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
-export class AzureRunner extends BaseRunner {
+export class AzureRunner extends VcsRunner {
 
     apiManager: AzureApiManager  // need the explicit type for some calls
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, flags: any, apiManager: AzureApiManager) {
+    constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: AzureApiManager) {
         super(sourceInfo, [], flags, apiManager);
         this.apiManager = apiManager;
     }

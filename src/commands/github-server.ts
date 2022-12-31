@@ -1,5 +1,4 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
 import { HelpGroup, Protocol, SourceType } from '../common/types';
 import { getServerUrl } from '../common/utils';
 import { GithubServerRunner } from '../vcs/githubServer/github-server-runner';
@@ -36,8 +35,7 @@ export default class GithubServer extends Github {
             default: Protocol.HTTPS,
             helpGroup: HelpGroup.CONNECTION
         }),
-        ...Github.flags,
-        ...commonFlags,
+        ...Github.flags
     }
 
     async run(): Promise<void> {

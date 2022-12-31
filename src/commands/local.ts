@@ -1,12 +1,9 @@
-import { Command } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { commonFlags } from '../common/flags';
-import { SourceInfo, SourceType } from '../common/types';
-import { replaceFlagMetadata } from '../common/utils';
-import { AzureRunner } from '../vcs/azure/azure-runner';
-
-// TODO access notes:
-// user must be at least "basic" in the ADO org (which is higher than you get by default if you add a user to a team)
+import { HelpGroup, SourceType } from '../common/types';
+import { LocalApiManager } from '../vcs/local/local-api-manager';
+import { LocalRunner } from '../vcs/local/local-runner';
 
 export default class Local extends Command {
 
@@ -20,36 +17,53 @@ export default class Local extends Command {
     ]
 
     static flags = {
-        ...replaceFlagMetadata(
-            commonFlags, 
-            new Map([
-                [
-                    'repos',
-                    'A comma-separated list of relative or absolute paths to directories on the file system that contain git repositories. The tool will traverse this directory recursively, stopping at any directories with a .git directory (the root of a repo) - it will not traverse more deeply than that. This means that if you have a repo with a submodule, you should specify the submodule directory explicitly here. If you have directories with commas in the name, use the --repo-file option.'
-                ],
-                [
-                    'skip-repos',
-                    'A comma-separated list of relative or absolute paths of directories within the directories of --repos to skip. Relative paths will be skipped if they are relative to any of the specified --repo directories. It is recommended to use absolute paths for skipping directories. Once any skipped directory is reached, traversing of that part of the directory tree immediately stops.'
-                ]
-            ]),
-            new Map([
-                [
-                    'repos',
-                    '.'
-                ]
-            ]))
-    } as any;
+        directories: Flags.string({
+            description: '(One of --directories or --directory-file is required.) A comma-separated list of relative or absolute paths to directories on the file system that contain git repositories. The tool will traverse this directory recursively, stopping at any directories with a .git directory (the root of a repo) - it will not traverse more deeply than that. This means that if you have a repo with a submodule, you should specify the submodule directory explicitly here. If you have directories with commas in the name, use the --directory-file option.',
+            required: false,
+            aliases: ['dirs'],
+            helpGroup: HelpGroup.REPO_SPEC
+        }),
+        'directory-file': Flags.string({
+            description: '(One of --directories or --directory-file is required.) A file containing a list of directories to scan, one per line. See --directories for more details.',
+            required: false,
+            aliases: ['dir-file'],
+            helpGroup: HelpGroup.REPO_SPEC
+        }),
+        'skip-directories': Flags.string({
+            description: 'A comma-separated list of relative or absolute paths of directories within the directories of --directories to skip. Relative paths are based on the directory from which you run the tool, not relative to the directories in the --directory list. It is recommended to use absolute paths for skipping directories. Once any skipped directory is reached, traversing of that part of the directory tree immediately stops.',
+            required: false,
+            aliases: ['skip-dirs'],
+            helpGroup: HelpGroup.REPO_SPEC
+        }),
+        'skip-directory-file': Flags.string({
+            description: 'A file containing a list of directories to scan, one per line. See --skip-directories for more details.',
+            required: false,
+            aliases: ['skip-dir-file'],
+            helpGroup: HelpGroup.REPO_SPEC
+        }),
+        ...commonFlags
+    };
 
     async run(): Promise<void> {
         const { flags } = (await this.parse(Local));
 
-        const sourceInfo = this.getSourceInfo(':' + flags.token);
-
-        const runner = new AzureRunner(sourceInfo, flags, apiManager);
-
-        if (!(flags.orgs || flags.projects || flags.repos || flags['repo-file'])) {
-            throw new CLIError('At least one of --orgs, --projects, --repos, or --repo-file is required for Azure DevOps');
+        if (!(flags.directories || flags['directory-file'])) {
+            throw new CLIError('At least one of --directories or --directory-file is required for running locally.');
         }
+
+        const sourceInfo = {
+            sourceType: SourceType.Local,
+            url: '',
+            token: '',
+            repoTerm: 'repo',
+            orgTerm: 'directory',
+            orgFlagName: '',
+            minPathLength: 1,
+            maxPathLength: 9999
+        };
+
+        const apiManager = new LocalApiManager(sourceInfo);
+        const runner = new LocalRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();
     }

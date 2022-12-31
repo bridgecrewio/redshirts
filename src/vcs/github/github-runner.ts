@@ -1,12 +1,12 @@
-import { BaseRunner } from '../../common/base-runner';
-import { Repo, SourceInfo } from '../../common/types';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
+import { VcsRunner } from '../../common/vcs-runner';
 import { GithubApiManager } from './github-api-manager';
 import { GithubCommit, GithubRepoResponse } from './github-types';
 
-export class GithubRunner extends BaseRunner {
+export class GithubRunner extends VcsRunner {
 
-    constructor(sourceInfo: SourceInfo, flags: any, apiManager: GithubApiManager) {
+    constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GithubApiManager) {
         super(sourceInfo, [], flags, apiManager);
     }
 

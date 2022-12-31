@@ -1,8 +1,8 @@
 import { Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
-import { commonFlags } from '../common/flags';
+import { vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
-import { HelpGroup, SourceInfo, SourceType } from '../common/types';
+import { HelpGroup, SourceInfo, SourceType, VcsSourceInfo } from '../common/types';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
 
@@ -43,7 +43,7 @@ export default class AzureDevOps extends RedshirtsVcsCommand {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...commonFlags,
+        ...vcsFlags,
     }
 
     async run(): Promise<void> {
@@ -61,7 +61,7 @@ export default class AzureDevOps extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): SourceInfo {
+    getSourceInfo(token: string, baseUrl = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

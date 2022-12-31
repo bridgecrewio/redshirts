@@ -1,7 +1,8 @@
+import { existsSync, lstatSync, readdirSync } from 'node:fs';
 import path = require('path');
 import { BaseRunner } from '../../common/base-runner';
 import { Repo, SourceInfo } from '../../common/types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER } from '../../common/utils';
+import { fileToLines, LOGGER, stringToArr } from '../../common/utils';
 import { LocalApiManager } from './local-api-manager';
 import { LocalCommit, LocalRepoResponse } from './local-types';
 
@@ -16,12 +17,11 @@ export class LocalRunner extends BaseRunner {
     aggregateCommitContributors(repo: Repo, commits: LocalCommit[]): void {
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
-            const { author } = commitObject;
 
             const newCommit = {
-                username: author.name,
-                email: author.email,
-                commitDate: author.date
+                username: commitObject.name,
+                email: commitObject.email,
+                commitDate: new Date(commitObject.timestamp).toISOString()
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);
@@ -41,57 +41,80 @@ export class LocalRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
-        // Because ADO has org > 0 or more projects > 0 or more repos,
-        // we have to inject the extra project level while reusing as much from the parent as possible
-        // so basically we are copying the flow but making the same helper function calls
-        // so the amount of actual duplicated logic is minimal
+
+        const reposList: string | undefined = this.flags.directories;
+        const reposFile: string | undefined = this.flags['directory-file'];
+        const skipReposList: string | undefined = this.flags['skip-directories'];
+        const skipReposFile: string | undefined = this.flags['skip-directory-file'];
+
+        // we already checked for repos or file being present
+        const directoriesToScan = reposList ? stringToArr(reposList) : fileToLines(reposFile!);
+        const directoriesToSkip = skipReposList ? stringToArr(skipReposList) : skipReposFile ? fileToLines(skipReposFile) : [];
         
-        const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
-        const reposList: string | undefined = this.flags.repos;
-        const reposFile: string | undefined = this.flags['repo-file'];
-        const skipReposList: string | undefined = this.flags['skip-repos'];
-        const skipReposFile: string | undefined = this.flags['skip-repo-file'];
-        const projectsList: string | undefined = this.flags.projects;
-        const skipProjectsList: string | undefined = this.flags['skip-projects'];
+        const repos = this.findRepoDirectories(directoriesToScan, directoriesToSkip);
 
-        let repos: Repo[] = [];
+        LOGGER.debug(`Final repo list: ${repos.map(r => r.path)}`);
 
-        if (orgsString) {
-            repos = await this.getOrgRepos(orgsString);
-            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+        return this.convertRepos(repos);
+    }
+
+    findRepoDirectories(directoriesToScan: string[], directoriesToSkip: string[]): LocalRepoResponse[] {
+        const scanAbsPaths = directoriesToScan.map(r => path.resolve(r)).filter(p => {
+            if (existsSync(p)) {
+                return true;
+            } else {
+                LOGGER.debug(`Skipping non-existent path ${p}`);
+                return false;
+            }
+        });
+        const skipAbsPaths = directoriesToSkip.map(r => path.resolve(r));
+        
+        LOGGER.debug(scanAbsPaths);
+        LOGGER.debug(skipAbsPaths);
+
+        const foundRepos: string[] = [];
+        for (const p of scanAbsPaths) {
+            LOGGER.debug(`Looking for .git in ${p} and subdirectories`);
+            this.searchForGitRepos(p, skipAbsPaths, foundRepos);
         }
 
-        const explicitProjects = getRepoListFromParams(this.sourceInfo.minPathLength - 1, this.sourceInfo.maxPathLength - 1, projectsList).map(p => {
-            return p as AzureProjectsResponse;
+        return foundRepos.map(r => { 
+            return { path: r }; 
         });
+    }
 
-        const projectRepos: Repo[] = [];
-        for (const project of explicitProjects) {
-            // eslint-disable-next-line no-await-in-loop
-            projectRepos.push(...this.convertRepos(await this.apiManager.getProjectRepos(project)));
+    searchForGitRepos(start: string, skip: string[], foundRepos: string[]): void {
+        // traverses the directory tree starting at `start`, looking for .git directories
+        // once .git is found, that directory is not traversed deeper
+        // appends all repo directories (the parent of the .git directory) to the specified array
+        if (!lstatSync(start).isDirectory()) {
+            LOGGER.debug(`searchForGitRepos called on non-directory: ${start} - skipping`);
+            return;
+        }
+
+        if (skip.includes(start)) {
+            LOGGER.debug(`searchForGitRepos called on directory in the skip list: ${start} - skipping`);
+            return;
         }
         
-        if (explicitProjects.length > 0) {
-            LOGGER.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
-            repos.push(...projectRepos);
+        const dotGitPath = path.join(start, '.git');
+
+        // base case
+        if (existsSync(dotGitPath) && lstatSync(dotGitPath).isDirectory()) {
+            console.debug(`Found ${dotGitPath}`);
+            foundRepos.push(start);
+            return;
         }
 
-        const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
-        if (addedRepos.length > 0) {
-            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
-            repos.push(...addedRepos);
+        try {
+            for (const p of readdirSync(start)) {
+                const absPath = path.join(start, p);
+                if (lstatSync(absPath).isDirectory()) {
+                    this.searchForGitRepos(absPath, skip, foundRepos);
+                }
+            }
+        } catch (error) {
+            LOGGER.debug(`Got error traversing directory: ${start}. Skipping. ${error}`);
         }
-
-        const skipProjects = getRepoListFromParams(this.sourceInfo.minPathLength - 1, this.sourceInfo.maxPathLength - 1, skipProjectsList).map(p => {
-            return p as AzureProjectsResponse;
-        });
-        repos = filterRepoList(repos, skipProjects, 'project', (repo, project) => repo.owner === `${project.owner}/${project.name}`);
-
-        const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
-        repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
-
-        LOGGER.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
-
-        return repos;
     }
 }

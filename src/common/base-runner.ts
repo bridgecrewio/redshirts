@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios';
 import { ApiManager } from './api-manager';
 import { printSummary } from './output';
-import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit } from './types';
-import { DEFAULT_DAYS, filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER, stringToArr } from './utils';
+import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsSourceInfo } from './types';
+import { DEFAULT_DAYS, isSslError, logError, LOGGER } from './utils';
 
 // TODO
 // - get commits from all branches for all VCSes and git log
@@ -39,89 +39,28 @@ export abstract class BaseRunner {
 
     abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void
     abstract convertRepos(reposResponse: RepoResponse[]): Repo[];
+    abstract getRepoList(): Promise<Repo[]>;
 
     async execute(): Promise<void> {
         if (this.flags.days !== DEFAULT_DAYS) {
             LOGGER.warn(`Warning: you specified a --days value of ${this.flags.days}, which is different from the value used in the Prisma Cloud platform (${DEFAULT_DAYS}). Your results here will differ.`);
         }
 
+        // TODO better error handling
+
         try {
             const repos = await this.getRepoList();
-
             await this.processRepos(repos);
         } catch (error) {
             if (error instanceof AxiosError && isSslError(error)) {
-                logError(error, `Received an SSL error while connecting to the server at url ${this.sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
+                const sourceInfo = this.sourceInfo as VcsSourceInfo;
+                logError(error, `Received an SSL error while connecting to the server at url ${sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
             }
 
             throw error;
         }
 
         printSummary(this, this.flags.output, this.flags.sort);
-    }
-
-    async getRepoList(): Promise<Repo[]> {
-
-        const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
-        const reposList: string | undefined = this.flags.repos;
-        const reposFile: string | undefined = this.flags['repo-file'];
-        const skipReposList: string | undefined = this.flags['skip-repos'];
-        const skipReposFile: string | undefined = this.flags['skip-repo-file'];
-
-        let repos: Repo[] = [];
-
-        if (orgsString) {
-            repos = await this.getOrgRepos(orgsString);
-            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
-        }
-
-        const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
-
-        if (addedRepos.length > 0) {
-            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
-            repos.push(...addedRepos);
-        }
-
-        if (repos.length === 0) {
-            LOGGER.debug('No explicitly specified repos - getting all user repos');
-            repos = await this.getUserRepos();
-        }
-
-        const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
-
-        repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
-
-        return repos;
-    }
-
-    async getOrgRepos(orgsString: string): Promise<Repo[]> {
-        const repos: Repo[] = [];
-        const orgs = stringToArr(orgsString);
-        for (const org of orgs) {
-            LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
-            try {
-                // eslint-disable-next-line no-await-in-loop
-                const orgRepos = (await this.apiManager.getOrgRepos(org));
-                repos.push(...this.convertRepos(orgRepos));
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
-                } else {
-                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
-                    LOGGER.error(error);
-                }
-            }
-        }
-
-        LOGGER.debug(`Found ${repos.length} ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
-        return repos;
-    }
-
-    async getUserRepos(): Promise<Repo[]> {
-        const userRepos = await this.apiManager.getUserRepos();
-        LOGGER.debug(`Found ${userRepos.length} repos for the user`);
-        const repos = this.convertRepos(userRepos);
-        return repos;
     }
 
     async processRepos(repos: Repo[]): Promise<void> {

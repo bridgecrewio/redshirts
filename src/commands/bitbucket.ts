@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
-import { commonFlags } from '../common/flags';
+import { vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
-import { HelpGroup, SourceInfo, SourceType } from '../common/types';
+import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
@@ -31,7 +31,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...commonFlags,
+        ...vcsFlags,
     }
 
     async run(): Promise<void> {
@@ -45,7 +45,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): SourceInfo {
+    getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,
