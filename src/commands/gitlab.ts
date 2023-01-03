@@ -6,7 +6,9 @@ import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
 export default class Gitlab extends RedshirtsVcsCommand {
-    static description = 'Count active contributors for GitLab repos'
+    static summary = 'Count active contributors for GitLab repos'
+
+    static description = `About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.`
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --token glpat_xxxx --repos bridgecrewio/checkov,group/subgroup/terragoat`,

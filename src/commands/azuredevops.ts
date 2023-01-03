@@ -13,7 +13,9 @@ export default class AzureDevOps extends RedshirtsVcsCommand {
 
     static summary = 'Count active contributors for Azure DevOps repos'
 
-    static description = 'Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not possible to use a personal access token to fetch all orgs and repos for a user.'
+    static description = `Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not possible to use a personal access token to fetch all orgs and repos for a user.
+    
+    About rate limiting: For Azure DevOps, this tool will attempt to submit requests in a burst until a rate limit is hit, and then respect the rate limit reset information provided in the response. Azure DevOps does not consistently provide rate limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.`
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --token obnwxxx --repos org/project/repo,org/project/repo2,org/project2/repo`,

@@ -9,6 +9,8 @@ import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 export default class Bitbucket extends RedshirtsVcsCommand {
     static summary = 'Count active contributors for Bitbucket repos'
 
+    static description = `About rate limiting: Bitbucket uses an hourly rate limit that rolls over every minute. Thus, this tool will attempt to submit requests in as much of a burst as possible while respecting the rolling limit.`
+
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --username my_username --token ATBBXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat`,
         `$ <%= config.bin %> <%= command.id %> --username my_username --token ATBBXXX --workspaces bridgecrewio,try-bridgecrew`,
