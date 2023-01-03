@@ -1,13 +1,19 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Repo, RepoResponse } from '../../common/types';
+import { RateLimitVcsApiManager } from '../../common/rate-limit-vcs-api-manager';
+import { Repo, RepoResponse, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
-import { VcsApiManager } from '../../common/vcs-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
 const MAX_PAGE_SIZE = 100;
 const API_VERSION = '7.1-preview.1';
+const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
+const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 
-export class AzureApiManager extends VcsApiManager {
+export class AzureApiManager extends RateLimitVcsApiManager {
+
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
+        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, undefined, certPath);
+    }
 
     getUserRepos(): Promise<RepoResponse[]> {
         throw new Error('Method not implemented because this functionality does not work for Azure with PATs.');

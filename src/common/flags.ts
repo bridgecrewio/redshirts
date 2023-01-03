@@ -1,4 +1,5 @@
 import { Flags } from "@oclif/core";
+import { OptionFlag } from "@oclif/core/lib/interfaces";
 import { HelpGroup, OutputFormat, SortField } from "./types";
 import { DEFAULT_DAYS } from "./utils";
 
@@ -62,4 +63,24 @@ export const repoFlags = {
 export const vcsFlags = {
     ...commonFlags,
     ...repoFlags
+};
+
+export const throttlingFlags = {
+    'requests-per-hour': Flags.integer({
+        description: 'The maximum number of requests to the server per hour. Requests will be throttled and spread to achieve this limit. For example, if you specify a value of 60 here, one request per minute will be submitted. Use this to adjust the throttling of the API calls in the event that the rate limit is being consumed by other sources simultaneously.',
+        required: false,
+        default: 1000,
+        helpGroup: HelpGroup.CONNECTION
+    }),
+};
+
+export const getThrottlingFlag = (defaultRequestsPerHour: number): { 'requests-per-hour': OptionFlag<number>; } => {
+    return {
+        'requests-per-hour': Flags.integer({
+            description: 'The maximum number of requests to the server per hour. Requests will be throttled and spread to achieve this limit. For example, if you specify a value of 3600 here, approximately one request per second will be submitted. Use this to adjust the throttling of the API calls in the event that the rate limit is being consumed by other sources simultaneously. If you are running in a self-hosted server environment without API rate limits, you can also set this to a very high number to effectively disable throttling, but this may impact server performance.',
+            required: false,
+            default: defaultRequestsPerHour,
+            helpGroup: HelpGroup.CONNECTION
+        }),
+    };
 };

@@ -7,9 +7,14 @@ export interface SourceInfo {
 export interface VcsSourceInfo extends SourceInfo {
     url: string
     token: string
-    orgFlagName: string,
-    minPathLength: number,
+    orgFlagName: string
+    minPathLength: number
     maxPathLength: number
+}
+
+export type RateLimitStatus = {
+    remaining: number
+    reset: Date
 }
 
 export type Contributor = {

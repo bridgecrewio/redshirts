@@ -101,7 +101,7 @@ export class LocalRunner extends BaseRunner {
 
         // base case
         if (existsSync(dotGitPath) && lstatSync(dotGitPath).isDirectory()) {
-            console.debug(`Found ${dotGitPath}`);
+            LOGGER.debug(`Found ${dotGitPath}`);
             foundRepos.push(start);
             return;
         }

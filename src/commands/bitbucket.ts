@@ -1,10 +1,11 @@
 import { Flags } from '@oclif/core';
-import { vcsFlags } from '../common/flags';
+import { getThrottlingFlag, vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
+// TODO notes about rate limiting
 export default class Bitbucket extends RedshirtsVcsCommand {
     static summary = 'Count active contributors for Bitbucket repos'
 
@@ -32,6 +33,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
             helpGroup: HelpGroup.REPO_SPEC
         }),
         ...vcsFlags,
+        ...getThrottlingFlag(1000)
     }
 
     async run(): Promise<void> {
@@ -39,7 +41,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
 
         const sourceInfo = this.getSourceInfo(`${flags.username}:${flags.token}`);
 
-        const apiManager = new BitbucketApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new BitbucketApiManager(sourceInfo, flags['requests-per-hour'], flags['ca-cert']);
         const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

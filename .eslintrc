@@ -6,6 +6,7 @@
   ],
   "rules": {
     "no-else-return": "off",
+    "radix": off,
     "max-params": [
       1, 
       {

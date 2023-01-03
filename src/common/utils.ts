@@ -228,3 +228,11 @@ export const splitAndCombine = (stringToSplit: string, delimiter: string, limit:
 
     return parts;
 };
+
+export const sleepUntilDateTime = async (until: Date): Promise<void> => {
+    LOGGER.debug(`Sleeping until ${until.toLocaleString()}`);
+    const now = new Date();
+    const ms = until.getTime() - now.getTime();
+    // eslint-disable-next-line no-promise-executor-return
+    return new Promise(resolve => setTimeout(resolve, ms));
+};

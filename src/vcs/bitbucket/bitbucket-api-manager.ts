@@ -1,13 +1,15 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ThrottledVcsApiManager } from '../../common/throttled-vcs-api-manager';
 import { Repo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
-import { VcsApiManager } from '../../common/vcs-api-manager';
 import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, BitbucketWorkspaceResponse } from './bitbucket-types';
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
 
-export class BitbucketApiManager extends VcsApiManager {
+// TODO /commits returns all branches by default. To do otherwise, we need to know the name of the main branch
+
+export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {

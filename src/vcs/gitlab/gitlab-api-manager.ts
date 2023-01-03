@@ -1,13 +1,20 @@
 /* eslint-disable camelcase */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Repo } from '../../common/types';
+import { RateLimitVcsApiManager } from '../../common/rate-limit-vcs-api-manager';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
-import { VcsApiManager } from '../../common/vcs-api-manager';
 import { GitlabCommit, GitlabGroupResponse, GitlabRepoResponse } from './gitlab-types';
 
 const MAX_PAGE_SIZE = 100;
+const RATE_LIMIT_REMAINING_HEADER = 'ratelimit-remaining';
+const RATE_LIMIT_RESET_HEADER = 'ratelimit-reset';
+const RATE_LIMIT_ENDPOINT = 'user';
 
-export class GitlabApiManager extends VcsApiManager {
+export class GitlabApiManager extends RateLimitVcsApiManager {
+
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
+        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
+    }
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
@@ -17,6 +24,7 @@ export class GitlabApiManager extends VcsApiManager {
     }
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<GitlabCommit[]> {
+
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {

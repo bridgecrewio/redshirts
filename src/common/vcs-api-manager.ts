@@ -32,9 +32,10 @@ export abstract class VcsApiManager extends ApiManager {
     abstract _getAxiosConfiguration(): any
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>
     abstract getUserRepos(): Promise<RepoResponse[]>
+    abstract submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse>
 
     hasMorePages(response: AxiosResponse): boolean {
-        return response.headers.link !== undefined;
+        return response.headers.link !== undefined && response.headers.link.includes('rel="next"');
     }
 
     setNextPageConfig(config: AxiosRequestConfig, response: AxiosResponse): void {
@@ -70,7 +71,7 @@ export abstract class VcsApiManager extends ApiManager {
     async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
         // generic pagination handler for systems that returned standardized 'Link' headers
         LOGGER.debug(`Submitting request to ${config.url}`);
-        let response = await this.axiosInstance.request(config);
+        let response = await this.submitRequest(config);
         const result = response;
 
         let page = 1;
@@ -81,7 +82,7 @@ export abstract class VcsApiManager extends ApiManager {
 
             LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
             // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
+            response = await this.submitRequest(config, response);
             this.appendDataPage(result, response);
         }
 
@@ -94,9 +95,8 @@ export abstract class VcsApiManager extends ApiManager {
         // will stop pagination, slice off that item and everything after it, and return. 
         // This means that the filter function must use the field by which the results for the 
         // request are sorted.
-
         LOGGER.debug(`Submitting filtered request to ${config.url}`);
-        let response = await this.axiosInstance.request(config);
+        let response = await this.submitRequest(config);
         let dataPage = this.getDataPage(response);
 
         // this is safe because we control the definition
@@ -120,7 +120,7 @@ export abstract class VcsApiManager extends ApiManager {
             LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
 
             // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
+            response = await this.submitRequest(config, response);
             dataPage = this.getDataPage(response);
 
             // eslint-disable-next-line unicorn/no-array-callback-reference
@@ -137,5 +137,4 @@ export abstract class VcsApiManager extends ApiManager {
 
         return result;
     }
-
 }

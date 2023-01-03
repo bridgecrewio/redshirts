@@ -5,7 +5,7 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - get commits from all branches for all VCSes and git log
+// - all branches? (no?)
 // - default to private only repos - should we explicitly check each repo for its visibility?
 // - document specific permissions needed
 // - public / private repos - include in output?

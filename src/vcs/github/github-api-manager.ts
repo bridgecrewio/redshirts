@@ -1,12 +1,19 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GithubCommit, GithubRepoResponse } from './github-types';
-import { Repo } from '../../common/types';
+import { Repo, VcsSourceInfo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
-import { VcsApiManager } from '../../common/vcs-api-manager';
+import { RateLimitVcsApiManager } from '../../common/rate-limit-vcs-api-manager';
 
 const MAX_PAGE_SIZE = 100;
 const API_VERSION = '2022-11-28';
-export class GithubApiManager extends VcsApiManager {
+const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
+const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
+const RATE_LIMIT_ENDPOINT = 'rate_limit';
+export class GithubApiManager extends RateLimitVcsApiManager {
+
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
+        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
+    }
 
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
