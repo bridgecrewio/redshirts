@@ -7,5 +7,5 @@ export abstract class ApiManager {
         this.sourceInfo = sourceInfo;
     }
 
-    abstract getCommits(repo: Repo, numDays: number): Promise<VCSCommit[]>
+    abstract getCommits(repo: Repo, sinceDate: Date): Promise<VCSCommit[]>
 }

@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 import { ApiManager } from './api-manager';
 import { printSummary } from './output';
 import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsSourceInfo } from './types';
-import { DEFAULT_DAYS, isSslError, logError, LOGGER } from './utils';
+import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
 // - get commits from all branches for all VCSes and git log
@@ -13,6 +13,8 @@ import { DEFAULT_DAYS, isSslError, logError, LOGGER } from './utils';
 // - some sort of errored repo list that is easy to review
 // - author vs committer
 // - rate limiting
+// - clean up logging
+// - test on windows
 
 const EXCLUDED_EMAIL_REGEXES = [
     /noreply/,
@@ -22,7 +24,7 @@ const EXCLUDED_EMAIL_REGEXES = [
 export abstract class BaseRunner {
     sourceInfo: SourceInfo;
     excludedEmailRegexes: RegExp[];
-    contributorsByUsername: ContributorMap;
+    contributorsByEmail: ContributorMap;
     contributorsByRepo: Map<string, ContributorMap>;
     flags: any;
     apiManager: ApiManager;
@@ -31,7 +33,7 @@ export abstract class BaseRunner {
     constructor(sourceInfo: SourceInfo, excludedEmailRegexes: Array<string>, flags: any, apiManager: ApiManager) {
         this.sourceInfo = sourceInfo;
         this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes.map(s => new RegExp(s))];
-        this.contributorsByUsername = new Map();
+        this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
         this.apiManager = apiManager; 
@@ -46,11 +48,13 @@ export abstract class BaseRunner {
             LOGGER.warn(`Warning: you specified a --days value of ${this.flags.days}, which is different from the value used in the Prisma Cloud platform (${DEFAULT_DAYS}). Your results here will differ.`);
         }
 
+        const sinceDate = getXDaysAgoDate(this.flags.days);
+
         // TODO better error handling
 
         try {
             const repos = await this.getRepoList();
-            await this.processRepos(repos);
+            await this.processRepos(repos, sinceDate);
         } catch (error) {
             if (error instanceof AxiosError && isSslError(error)) {
                 const sourceInfo = this.sourceInfo as VcsSourceInfo;
@@ -63,11 +67,11 @@ export abstract class BaseRunner {
         printSummary(this, this.flags.output, this.flags.sort);
     }
 
-    async processRepos(repos: Repo[]): Promise<void> {
+    async processRepos(repos: Repo[], sinceDate: Date): Promise<void> {
         for (const repo of repos) {
             try {
                 // eslint-disable-next-line no-await-in-loop
-                const commits: VCSCommit[] = await this.apiManager.getCommits(repo, this.flags.days);
+                const commits: VCSCommit[] = await this.apiManager.getCommits(repo, sinceDate);
                 if (commits.length > 0) {
                     this.aggregateCommitContributors(repo, commits);
                 } else if (!this.flags['exclude-empty']) {
@@ -111,7 +115,7 @@ export abstract class BaseRunner {
 
         // handle the 2 maps separately so that we can track commit dates per repo and globally
         this.upsertContributor(repoContributors, username, email, commitDate);
-        this.upsertContributor(this.contributorsByUsername, username, email, commitDate);
+        this.upsertContributor(this.contributorsByEmail, username, email, commitDate);
     }
 
     upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
@@ -124,7 +128,7 @@ export abstract class BaseRunner {
             }
         } else {
             LOGGER.debug(`Found new contributor: ${email}, ${username}`);
-            contributorMap.set(username, {
+            contributorMap.set(email, {
                 email,
                 usernames: new Set([username]),
                 lastCommitDate: commitDate

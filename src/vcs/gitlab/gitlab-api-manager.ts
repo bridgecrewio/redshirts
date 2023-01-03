@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Repo } from '../../common/types';
-import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { LOGGER } from '../../common/utils';
 import { VcsApiManager } from '../../common/vcs-api-manager';
 import { GitlabCommit, GitlabGroupResponse, GitlabRepoResponse } from './gitlab-types';
 
@@ -16,7 +16,7 @@ export class GitlabApiManager extends VcsApiManager {
         });
     }
 
-    async getCommits(repo: Repo, numDays: number): Promise<GitlabCommit[]> {
+    async getCommits(repo: Repo, sinceDate: Date): Promise<GitlabCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
@@ -24,7 +24,7 @@ export class GitlabApiManager extends VcsApiManager {
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                since: getXDaysAgoDate(numDays).toISOString(),
+                since: sinceDate.toISOString(),
             },
         };
 

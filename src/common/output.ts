@@ -14,7 +14,7 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
 
         case OutputFormat.CSV:
             console.log('Repo,Unique contributors');
-            console.log(`Total,${counter.contributorsByUsername.size}`);
+            console.log(`Total,${counter.contributorsByEmail.size}`);
 
             const repos = mapIterable(counter.contributorsByRepo.entries(), (value): OutputTableRow => {
                 return {
@@ -35,7 +35,7 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
             // TODO determine tabular output format (mainly the header with total)
 
             const table = new Table({
-                title: `Total unique contributors: ${counter.contributorsByUsername.size}`,
+                title: `Total unique contributors: ${counter.contributorsByEmail.size}`,
                 columns: [
                     {
                         name: 'Repo',
@@ -77,8 +77,8 @@ const generateReportObject = (counter: BaseRunner): SummaryReport => {
     }
 
     const report: SummaryReport = {
-        totalContributors: counter.contributorsByUsername.size,
-        contributors: [...counter.contributorsByUsername.values()],
+        totalContributors: counter.contributorsByEmail.size,
+        contributors: [...counter.contributorsByEmail.values()],
         repos
     };
 

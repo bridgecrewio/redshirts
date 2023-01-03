@@ -1,7 +1,7 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GithubCommit, GithubRepoResponse } from './github-types';
 import { Repo } from '../../common/types';
-import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { LOGGER } from '../../common/utils';
 import { VcsApiManager } from '../../common/vcs-api-manager';
 
 const MAX_PAGE_SIZE = 100;
@@ -16,7 +16,7 @@ export class GithubApiManager extends VcsApiManager {
         });
     }
 
-    async getCommits(repo: Repo, numDays: number): Promise<GithubCommit[]> {
+    async getCommits(repo: Repo, sinceDate: Date): Promise<GithubCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
@@ -25,7 +25,7 @@ export class GithubApiManager extends VcsApiManager {
             params: {
                 // eslint-disable-next-line camelcase
                 per_page: MAX_PAGE_SIZE,
-                since: getXDaysAgoDate(numDays).toISOString(),
+                since: sinceDate.toISOString(),
             },
         };
 

@@ -1,13 +1,13 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiManager } from '../../common/api-manager';
 import { Repo, RepoResponse } from '../../common/types';
-import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { LOGGER } from '../../common/utils';
+import { VcsApiManager } from '../../common/vcs-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
 const MAX_PAGE_SIZE = 100;
 const API_VERSION = '7.1-preview.1';
 
-export class AzureApiManager extends ApiManager {
+export class AzureApiManager extends VcsApiManager {
 
     getUserRepos(): Promise<RepoResponse[]> {
         throw new Error('Method not implemented because this functionality does not work for Azure with PATs.');
@@ -19,7 +19,7 @@ export class AzureApiManager extends ApiManager {
         });
     }
 
-    async getCommits(repo: Repo, numDays: number): Promise<AzureCommit[]> {
+    async getCommits(repo: Repo, sinceDate: Date): Promise<AzureCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         const [org, project] = repo.owner.split('/', 2);
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
@@ -28,7 +28,7 @@ export class AzureApiManager extends ApiManager {
             method: 'GET',
             params: {
                 $top: MAX_PAGE_SIZE,
-                'searchCriteria.fromDate': getXDaysAgoDate(numDays).toISOString(),
+                'searchCriteria.fromDate': sinceDate.toISOString(),
                 'api-version': API_VERSION
             },
         };

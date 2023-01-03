@@ -1,6 +1,6 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Repo } from '../../common/types';
-import { getXDaysAgoDate, LOGGER } from '../../common/utils';
+import { LOGGER } from '../../common/utils';
 import { VcsApiManager } from '../../common/vcs-api-manager';
 import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, BitbucketWorkspaceResponse } from './bitbucket-types';
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
@@ -15,7 +15,7 @@ export class BitbucketApiManager extends VcsApiManager {
         });
     }
 
-    async getCommits(repo: Repo, numDays: number): Promise<BitbucketCommit[]> {
+    async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
@@ -27,7 +27,7 @@ export class BitbucketApiManager extends VcsApiManager {
         };
 
         // Bitbucket does not support a 'since' filter, so we have to do it manually
-        const filterfn = getBitbucketDateCompareFunction(getXDaysAgoDate(numDays));
+        const filterfn = getBitbucketDateCompareFunction(sinceDate);
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];

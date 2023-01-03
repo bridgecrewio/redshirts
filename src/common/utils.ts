@@ -163,7 +163,8 @@ export const isSslError = (error: AxiosError): boolean => {
 
 
 const logFormat = winston.format.printf(({ level, message, timestamp, ...rest }) => {
-    const argumentsString = JSON.stringify({ ...rest });
+    const error = rest.error && rest.error instanceof Error ? { error: { message: rest.error.message, stack: rest.error.stack}} : {};
+    const argumentsString = JSON.stringify({ ...rest, ...error });
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
 
@@ -215,4 +216,15 @@ export const deleteFlagKey = (obj: {[key: string]: FlagBase<any, any>}, ...keys:
     }
 
     return obj;
+};
+
+export const splitAndCombine = (stringToSplit: string, delimiter: string, limit: number): string[] => {
+    // splits a string and returns an array no longer than limit, but concatenates all remaining parts
+    // of the string (inlike string.split with limit, which truncates the extra parts)
+    let parts = stringToSplit.split(delimiter);
+    if (parts.length >= limit) {
+        parts = [...parts.slice(0, limit - 1), parts.slice(limit - 1).join(delimiter)];
+    }
+
+    return parts;
 };

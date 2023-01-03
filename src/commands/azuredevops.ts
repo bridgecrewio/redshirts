@@ -2,7 +2,7 @@ import { Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { vcsFlags } from '../common/flags';
 import RedshirtsVcsCommand from '../common/redshirts-command';
-import { HelpGroup, SourceInfo, SourceType, VcsSourceInfo } from '../common/types';
+import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
 
