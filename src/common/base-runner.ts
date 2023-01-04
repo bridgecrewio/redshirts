@@ -16,8 +16,8 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // - test on windows
 
 const EXCLUDED_EMAIL_REGEXES: RegExp[] = [
-    // /noreply/,
-    // /no-reply/
+    /noreply/,
+    /no-reply/
 ];
 
 export abstract class BaseRunner {
