@@ -44,7 +44,7 @@ export default class GitlabServer extends Gitlab {
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v4`;
-        const sourceInfo = this.getSourceInfo(flags.token, baseUrl, SourceType.GithubServer);
+        const sourceInfo = Gitlab.getSourceInfo(flags.token, baseUrl, SourceType.GitlabServer);
 
         const apiManager = new GitlabServerApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GitlabServerRunner(sourceInfo, flags, apiManager);
