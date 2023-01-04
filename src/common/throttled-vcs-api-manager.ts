@@ -1,6 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { RepoResponse, VcsSourceInfo } from './types';
-import { LOGGER } from './utils';
 import https = require('https')
 import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
@@ -39,27 +38,5 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
 
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
         return this.bottleneck.schedule(() => this.axiosInstance.request(config));
-    }
-
-    async submitPaginatedRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-        // generic pagination handler for systems that returned standardized 'Link' headers
-                
-        LOGGER.debug(`Submitting page 1 of request to ${config.url}`);
-        let response = await this.submitRequest(config);
-        const result = response;
-
-        let page = 1;
-
-        while (this.hasMorePages(response)) {
-            this.setNextPageConfig(config, response);
-            page++;
-
-            LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
-            this.appendDataPage(result, response);
-        }
-
-        return result;
     }
 }

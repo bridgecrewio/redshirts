@@ -94,41 +94,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         // Not 0 for a small concurrency buffer for other uses of this token
         if (rateLimitStatus && rateLimitStatus.remaining <= 5) {
             LOGGER.warn('Hit rate limit for VCS');
-            await sleepUntilDateTime(new Date(rateLimitStatus.reset!.getTime() + 10_000)); // 10 second buffer
+            await sleepUntilDateTime(new Date(rateLimitStatus.reset!.getTime() + 10000)); // 10 second buffer
         }
-    }
-
-    hasMorePages(response: AxiosResponse): boolean {
-        return response.headers.link !== undefined && response.headers.link.includes('rel="next"');
-    }
-
-    setNextPageConfig(config: AxiosRequestConfig, response: AxiosResponse): void {
-        // updates the request config in place so that it can be used to fetch the next page
-        const pages = response.headers.link!.split(',');
-        const nextPage = pages.find((item) => item.includes('rel="next"'));
-        if (nextPage) {
-            const startPos = nextPage.indexOf('<') + 1;
-            const endPos = nextPage.indexOf('>', startPos);
-            config.url = nextPage.slice(startPos, endPos);
-        } else {
-            throw new Error(`Failed to get next page data from link: ${response.headers.link}`);
-        }
-    }
-
-    appendDataPage(allPages: AxiosResponse, response: AxiosResponse): void {
-        // fetches the page of data from the response and appends it to the result
-        // APIs that have a different response structure should override this so that
-        // the right array gets set
-        allPages.data = [...allPages.data, ...response.data];
-    }
-
-    setDataPage(response: AxiosResponse, data: any[]): void {
-        // sets the array as the data for the result page
-        // APIs should override this to set a different field in the data object
-        response.data = data;
-    }
-
-    getDataPage(response: AxiosResponse): any[] {
-        return response.data;
     }
 }
