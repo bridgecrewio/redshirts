@@ -140,11 +140,11 @@ export const filterRepoList = (
 
 export const getServerUrl = (hostname: string, port?: number, protocol = Protocol.HTTPS): string => {
     // builds a server URL from the parts, with some validation
+    // it will strip off any leading protocol and rely on the passed protocol
+    // it assumes any hostname specified with a protocol is a mistake
 
-    if (hostname.startsWith('https://')) {
-        hostname = hostname.slice(8);
-    } else if (hostname.startsWith('http://')) {
-        hostname = hostname.slice(7);
+    if (hostname.startsWith('https://') || hostname.startsWith('http://')) {
+        throw new Error('Hostname specified with a protocol. Use the --protocol option instead.');
     }
 
     let url = `${protocol}://${hostname}`;
@@ -187,7 +187,8 @@ export const LOGGER = winston.createLogger({
     level: getLogLevel(),
     transports: [
         new winston.transports.Console({
-            stderrLevels: LOG_LEVELS
+            stderrLevels: LOG_LEVELS,
+            silent: process.env.DISABLE_LOGS === 'true'
         })
     ],
     format: winston.format.combine(

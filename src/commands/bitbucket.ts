@@ -1,12 +1,11 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { getThrottlingFlag, vcsFlags } from '../common/flags';
-import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
 // TODO notes about rate limiting
-export default class Bitbucket extends RedshirtsVcsCommand {
+export default class Bitbucket extends Command {
     static summary = 'Count active contributors for Bitbucket repos'
 
     static description = `About rate limiting: Bitbucket uses an hourly rate limit that rolls over every minute. Thus, this tool will attempt to submit requests in as much of a burst as possible while respecting the rolling limit.`
@@ -41,7 +40,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(Bitbucket);
 
-        const sourceInfo = this.getSourceInfo(`${flags.username}:${flags.token}`);
+        const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`);
 
         const apiManager = new BitbucketApiManager(sourceInfo, flags['requests-per-hour'], flags['ca-cert']);
         const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
@@ -49,7 +48,7 @@ export default class Bitbucket extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): VcsSourceInfo {
+    static getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

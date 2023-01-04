@@ -43,23 +43,23 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
             method: 'GET',
         };
 
-        let requestNum = 0;
-        while (requestNum++ < 2000) {
-            LOGGER.debug(`Submitting request ${requestNum}`);
+        // let requestNum = 0;
+        // while (requestNum++ < 2000) {
+        //     LOGGER.debug(`Submitting request ${requestNum}`);
 
-            let r: AxiosResponse | undefined;
+        //     let r: AxiosResponse | undefined;
             
-            try {
-                // eslint-disable-next-line no-await-in-loop
-                r = await this.submitRequest(config, r);
-                console.debug(r.status);
-                console.debug(Object.keys(r.headers));
-            } catch (error) {
-                console.debug('Caught error');
-                console.debug(error);
-                throw error;
-            }
-        }
+        //     try {
+        //         // eslint-disable-next-line no-await-in-loop
+        //         r = await this.submitRequest(config, r);
+        //         console.debug(r.status);
+        //         console.debug(Object.keys(r.headers));
+        //     } catch (error) {
+        //         console.debug('Caught error');
+        //         console.debug(error);
+        //         throw error;
+        //     }
+        // }
 
         const response = await this.axiosInstance.request(config);
 

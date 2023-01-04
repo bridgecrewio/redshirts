@@ -86,6 +86,26 @@ describe('github runner', () => {
                             date: '2022-12-27T16:36:16.351Z'
                         }
                     }
+                },
+                {
+                    author: { login: 'user1' },
+                    commit: {
+                        author: {
+                            name: 'noreply',
+                            email: 'doesntcount@no-reply.com',
+                            date: '2022-12-27T16:35:16.351Z'
+                        }
+                    }
+                },
+                {
+                    author: { login: 'user1' },
+                    commit: {
+                        author: {
+                            name: 'noreply',
+                            email: 'alsodoesntcount@noreply.com',
+                            date: '2022-12-27T16:34:16.351Z'
+                        }
+                    }
                 }
             ],
             [
@@ -94,7 +114,7 @@ describe('github runner', () => {
                     commit: {
                         author: {
                             name: 'user3',
-                            email: 'user1@email.com',
+                            email: 'user3@email.com',
                             date: '2022-12-30T16:36:16.351Z'
                         }
                     }
@@ -128,20 +148,20 @@ describe('github runner', () => {
             runner.aggregateCommitContributors(repo, commits[i]);
         }
 
-        expect(runner.contributorsByUsername.size).to.equal(3);
-        expect(runner.contributorsByUsername.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
-        expect(runner.contributorsByUsername.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
-        expect(runner.contributorsByUsername.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+        expect(runner.contributorsByEmail.size).to.equal(3);
+        expect(runner.contributorsByEmail.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+        expect(runner.contributorsByEmail.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+        expect(runner.contributorsByEmail.get('user3@email.com')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
 
         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
         expect(repo1.size).to.equal(2);
-        expect(repo1.get('user1')?.lastCommitDate).to.equal('2022-12-28T16:36:16.351Z');
-        expect(repo1.get('user2')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+        expect(repo1.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-28T16:36:16.351Z');
+        expect(repo1.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
 
         const repo2 = runner.contributorsByRepo.get('org2/repo2') as ContributorMap;
         expect(repo2.size).to.equal(3);
-        expect(repo2.get('user1')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
-        expect(repo2.get('user2')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
-        expect(repo2.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+        expect(repo2.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
+        expect(repo2.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
+        expect(repo2.get('user3@email.com')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
     });
 });

@@ -44,7 +44,7 @@ export class GithubApiManager extends RateLimitVcsApiManager {
 
     async getUserRepos(): Promise<GithubRepoResponse[]> {
         const config: AxiosRequestConfig = {
-            url: '/user/repos',
+            url: 'user/repos',
             method: 'GET',
             // eslint-disable-next-line camelcase
             params: { per_page: MAX_PAGE_SIZE },
@@ -57,7 +57,7 @@ export class GithubApiManager extends RateLimitVcsApiManager {
         // first attempts as an org, then attempts as a user
 
         const config: AxiosRequestConfig = {
-            url: `/orgs/${org}/repos`,
+            url: `orgs/${org}/repos`,
             method: 'GET',
             // eslint-disable-next-line camelcase
             params: { per_page: MAX_PAGE_SIZE },
@@ -77,16 +77,5 @@ export class GithubApiManager extends RateLimitVcsApiManager {
 
             throw error;
         }
-    }
-
-    async getUserOrgs(): Promise<unknown[]> {
-        const config: AxiosRequestConfig = {
-            url: '/user/orgs',
-            method: 'GET',
-            // eslint-disable-next-line camelcase
-            params: { per_page: MAX_PAGE_SIZE },
-        };
-        const result: AxiosResponse = await this.submitPaginatedRequest(config);
-        return result.data;
     }
 }

@@ -1,11 +1,10 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { vcsFlags } from '../common/flags';
-import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubRunner } from '../vcs/github/github-runner';
 
-export default class Github extends RedshirtsVcsCommand {
+export default class Github extends Command {
     static description = 'Count active contributors for GitHub repos'
 
     static examples = [
@@ -31,7 +30,7 @@ export default class Github extends RedshirtsVcsCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(Github);
 
-        const sourceInfo = this.getSourceInfo(flags.token);
+        const sourceInfo = Github.getSourceInfo(flags.token);
 
         const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GithubRunner(sourceInfo, flags, apiManager);
@@ -39,7 +38,7 @@ export default class Github extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): VcsSourceInfo {
+    static getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

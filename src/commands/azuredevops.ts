@@ -1,7 +1,6 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { vcsFlags } from '../common/flags';
-import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
@@ -9,7 +8,7 @@ import { AzureRunner } from '../vcs/azure/azure-runner';
 // TODO access notes:
 // user must be at least "basic" in the ADO org (which is higher than you get by default if you add a user to a team)
 
-export default class AzureDevOps extends RedshirtsVcsCommand {
+export default class AzureDevOps extends Command {
 
     static summary = 'Count active contributors for Azure DevOps repos'
 
@@ -51,7 +50,7 @@ export default class AzureDevOps extends RedshirtsVcsCommand {
     async run(): Promise<void> {
         const { flags } = (await this.parse(AzureDevOps));
 
-        const sourceInfo = this.getSourceInfo(':' + flags.token);
+        const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token);
 
         const apiManager = new AzureApiManager(sourceInfo, flags['ca-cert']);
         const runner = new AzureRunner(sourceInfo, flags, apiManager);
@@ -63,7 +62,7 @@ export default class AzureDevOps extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): VcsSourceInfo {
+    static getSourceInfo(token: string, baseUrl = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,

@@ -1,7 +1,7 @@
+import { Flags } from "@oclif/core";
 import { expect } from "chai";
-import { Commit, ContributorMap, Repo } from "../../src/common/types";
-import { getRepoListFromParams, repoMatches, splitRepos } from '../../src/common/utils';
-import { GithubRunner } from "../../src/vcs/github/github-runner";
+import { Protocol, Repo } from "../../src/common/types";
+import { deleteFlagKey, getRepoListFromParams, getServerUrl, repoMatches, splitAndCombine, splitRepos } from '../../src/common/utils';
 
 describe('utils', () => {
     it('parses the CSV repo list correctly', () => {
@@ -86,6 +86,32 @@ describe('utils', () => {
                     name: "repo2"
                 }
             ]).and.to.have.length(2);
+    });
+
+    it('splits and combines', () => {
+        expect(splitAndCombine('author:abc', ':', 2)).to.deep.equal(['author', 'abc']);
+        expect(splitAndCombine('author:abc:xyz', ':', 2)).to.deep.equal(['author', 'abc:xyz']);
+        expect(splitAndCombine('author', ':', 2)).to.deep.equal(['author']);
+    });
+
+    it('deletes a key', () => {
+
+        const flags = {
+            a: Flags.integer(),
+            b: Flags.boolean(),
+            c: Flags.string()
+        };
+
+        expect(deleteFlagKey(flags, 'b', 'c', 'd')).to.deep.equal({a: Flags.integer()});
+    });
+
+    it('generates a server URL', () => {
+        expect(getServerUrl('xyz.com')).to.equal('https://xyz.com');
+        expect(() => getServerUrl('https://xyz.com')).to.throw(Error);
+        expect(() => getServerUrl('http://xyz.com')).to.throw(Error);
+        expect(getServerUrl('xyz.com', undefined, Protocol.HTTP)).to.equal('http://xyz.com');
+        expect(getServerUrl('xyz.com', undefined, Protocol.HTTPS)).to.equal('https://xyz.com');
+        expect(getServerUrl('xyz.com', 123, Protocol.HTTPS)).to.equal('https://xyz.com:123');
     });
 });
 
@@ -199,4 +225,4 @@ describe('utils', () => {
 //         expect(repo2.get('user2')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
 //         expect(repo2.get('user3')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
 //     });
-});
+// });

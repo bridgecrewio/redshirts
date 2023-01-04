@@ -6,7 +6,7 @@
   ],
   "rules": {
     "no-else-return": "off",
-    "radix": off,
+    "radix": "off",
     "max-params": [
       1, 
       {
@@ -16,6 +16,7 @@
     "semi": [
       2,
       "always"
-    ]
+    ],
+    "unicorn/numeric-separators-style": ["error", {"onlyIfContainsSeparator": true }]
   }
 }

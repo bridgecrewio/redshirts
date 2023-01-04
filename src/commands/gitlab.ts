@@ -1,11 +1,10 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { vcsFlags } from '../common/flags';
-import RedshirtsVcsCommand from '../common/redshirts-command';
 import { HelpGroup, SourceType, VcsSourceInfo, } from '../common/types';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
-export default class Gitlab extends RedshirtsVcsCommand {
+export default class Gitlab extends Command {
     static summary = 'Count active contributors for GitLab repos'
 
     static description = `About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.`
@@ -33,7 +32,7 @@ export default class Gitlab extends RedshirtsVcsCommand {
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
 
-        const sourceInfo = this.getSourceInfo(flags.token);
+        const sourceInfo = Gitlab.getSourceInfo(flags.token);
 
         const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GitlabRunner(sourceInfo, flags, apiManager);
@@ -41,7 +40,7 @@ export default class Gitlab extends RedshirtsVcsCommand {
         await runner.execute();
     }
 
-    getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): VcsSourceInfo {
+    static getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): VcsSourceInfo {
         return {
             sourceType: sourceType,
             url: baseUrl,
