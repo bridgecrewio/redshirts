@@ -12,7 +12,6 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // - document getting a cert chain
 // - some sort of errored repo list that is easy to review
 // - author vs committer
-// - rate limiting
 // - clean up logging
 // - test on windows
 
