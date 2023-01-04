@@ -100,7 +100,7 @@ export class LocalRunner extends BaseRunner {
         const dotGitPath = path.join(start, '.git');
 
         // base case
-        if (existsSync(dotGitPath) && lstatSync(dotGitPath).isDirectory()) {
+        if (existsSync(dotGitPath)) {
             LOGGER.debug(`Found ${dotGitPath}`);
             foundRepos.push(start);
             return;
