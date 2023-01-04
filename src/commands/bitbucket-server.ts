@@ -1,5 +1,6 @@
 import { Flags } from '@oclif/core';
-import { HelpGroup, Protocol, SourceType, VcsSourceInfo } from '../common/types';
+import { vcsServerFlags } from '../common/flags';
+import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { deleteFlagKey, getServerUrl } from '../common/utils';
 import { BitbucketServerApiManager } from '../vcs/bitbucketServer/bitbucket-server-api-manager';
 import { BitbucketServerRunner } from '../vcs/bitbucketServer/bitbucket-server-runner';
@@ -20,25 +21,7 @@ export default class BitbucketServer extends Bitbucket {
 
     // we can reuse most of the Bitbucket args, but `workspaces` is not relevant, so we can do this fun thing
     static flags = {
-        hostname: Flags.string({
-            description: 'The hostname of your Bitbucket server, e.g. `github.mycompany.com`. Do not include the port and protocol here (see --port and --protocol).',
-            char: 'h',
-            required: true,
-            helpGroup: HelpGroup.CONNECTION
-        }),
-        port: Flags.integer({
-            description: 'The port of your Bitbucket server, if not a standard port (443 for https, or 80 for http).',
-            char: 'p',
-            required: false,
-            helpGroup: HelpGroup.CONNECTION
-        }),
-        protocol: Flags.enum({
-            description: 'Protocol for your server, https (default) or http. Affects the default port value if you do not specify a port.',
-            options: Object.values(Protocol),
-            required: false,
-            default: Protocol.HTTPS,
-            helpGroup: HelpGroup.CONNECTION
-        }),
+        ...vcsServerFlags,
         projects: Flags.string({
             description: 'A comma separated list of projects and / or usernames for which to fetch repos. Use the --repos option to add additional specific repos on top of those in the specified project(s). Use the --skip-repos option to exclude individual repos that are a part of these project(s). For users, use the value you would use in the git clone URL: `~username`.',
             required: false,
