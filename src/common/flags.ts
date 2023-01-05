@@ -1,6 +1,6 @@
 import { Flags } from "@oclif/core";
 import { OptionFlag } from "@oclif/core/lib/interfaces";
-import { HelpGroup, OutputFormat, SortField } from "./types";
+import { HelpGroup, OutputFormat, Protocol, SortField } from "./types";
 import { DEFAULT_DAYS } from "./utils";
 
 export const commonFlags = {
@@ -67,6 +67,28 @@ export const repoFlags = {
 export const vcsFlags = {
     ...commonFlags,
     ...repoFlags
+};
+
+export const vcsServerFlags = {
+    hostname: Flags.string({
+        description: 'The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and protocol here (see --port and --protocol).',
+        char: 'h',
+        required: true,
+        helpGroup: HelpGroup.CONNECTION
+    }),
+    port: Flags.integer({
+        description: 'The port of your server, if not a standard port (443 for https, or 80 for http).',
+        char: 'p',
+        required: false,
+        helpGroup: HelpGroup.CONNECTION
+    }),
+    protocol: Flags.enum({
+        description: 'Protocol for your server, https (default) or http. Affects the default port value if you do not specify a port. You must specify a protocol here, not in the hostname.',
+        options: Object.values(Protocol),
+        required: false,
+        default: Protocol.HTTPS,
+        helpGroup: HelpGroup.CONNECTION
+    })
 };
 
 export const throttlingFlags = {

@@ -13,7 +13,7 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // - clean up logging
 // - test on windows
 
-const EXCLUDED_EMAIL_REGEXES = [
+const EXCLUDED_EMAIL_REGEXES: RegExp[] = [
     /noreply/,
     /no-reply/
 ];
