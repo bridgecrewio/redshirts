@@ -8,8 +8,6 @@ const GIT_COMMAND = 'git';
 const COMMIT_MARKER = '--commit--';
 const GIT_LOG_ARGS = [
     'log',
-    // TODO verify
-    // '--all',
     '--date=raw',
     `--format="${COMMIT_MARKER}%nauthor:%an%nemail:%ae%ndate:%at%n"`,
     '--since'
