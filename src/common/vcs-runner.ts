@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { BaseRunner } from './base-runner';
 import { Repo, VcsSourceInfo } from './types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER, stringToArr } from './utils';
+import { filterRepoList, getExplicitRepoList, getRepoListFromParams, logError, LOGGER, stringToArr } from './utils';
 import { VcsApiManager } from './vcs-api-manager';
 
 // TODO
@@ -37,12 +37,24 @@ export abstract class VcsRunner extends BaseRunner {
 
         if (orgsString) {
             repos = await this.getOrgRepos(orgsString);
-            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from ${this.sourceInfo.orgTerm}(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
         }
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
 
         if (addedRepos.length > 0) {
+            if (!this.sourceInfo.includePublic) {
+                LOGGER.debug(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
+                for (const repo of addedRepos) {
+                    try {
+                        // eslint-disable-next-line no-await-in-loop
+                        repo.private = !await this.apiManager.isRepoPublic(repo);
+                    } catch (error) {
+                        logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
+                    }
+                }
+            }
+
             LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
@@ -55,6 +67,21 @@ export abstract class VcsRunner extends BaseRunner {
         const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
 
         repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
+
+        // now that we have all the repos and their visibility, we can remove the public ones if needed
+        if (!this.sourceInfo.includePublic) {
+            repos = repos.filter(repo => {
+                if (repo.private === undefined) {
+                    LOGGER.debug(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    return false;
+                } else if (repo.private) {
+                    return true;
+                } else {
+                    LOGGER.debug(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
+                    return false;
+                }
+            });
+        }
 
         return repos;
     }

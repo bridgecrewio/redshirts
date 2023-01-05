@@ -62,8 +62,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             url: `/users/${userId}/projects`,
             method: 'GET',
             params: {
-                per_page: MAX_PAGE_SIZE,
-                simple: true
+                per_page: MAX_PAGE_SIZE
             },
         };
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
@@ -97,8 +96,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                include_subgroups: includeSubgroups,
-                simple: true
+                include_subgroups: includeSubgroups
             },
         };
 
@@ -126,5 +124,17 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
         };
         const result: AxiosResponse = await this.axiosInstance.request(config);
         return result.data.id;
+    }
+
+    async isRepoPublic(repo: Repo): Promise<boolean> {
+        const config: AxiosRequestConfig = {
+            url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}`,
+            method: 'GET'
+        };
+
+        LOGGER.debug(`Submitting request to ${config.url}`);
+        const response = await this.submitRequest(config);
+        const data: GitlabRepoResponse = response.data;
+        return data.visibility === 'public';
     }
 }

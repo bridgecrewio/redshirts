@@ -53,7 +53,7 @@ export default class BitbucketServer extends Bitbucket {
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/rest/api/1.0`;
-        const sourceInfo = BitbucketServer.getSourceInfo(`${flags.username}:${flags.token}`, baseUrl);
+        const sourceInfo = BitbucketServer.getSourceInfo(`${flags.username}:${flags.token}`, flags['include-public'], baseUrl);
 
         const apiManager = new BitbucketServerApiManager(sourceInfo, flags['ca-cert']);
         const runner = new BitbucketServerRunner(sourceInfo, flags, apiManager);
@@ -61,16 +61,17 @@ export default class BitbucketServer extends Bitbucket {
         await runner.execute();
     }
 
-    static getSourceInfo(token: string, baseUrl: string, sourceType = SourceType.BitbucketServer): VcsSourceInfo {
+    static getSourceInfo(token: string, includePublic: boolean, url: string, sourceType = SourceType.BitbucketServer): VcsSourceInfo {
         return {
-            sourceType: sourceType,
-            url: baseUrl,
-            token: token,
+            sourceType,
+            url,
+            token,
             repoTerm: 'repo',
             orgTerm: 'project',
             orgFlagName: 'projects',
             minPathLength: 2,
-            maxPathLength: 2
+            maxPathLength: 2,
+            includePublic
         };
     }
 }

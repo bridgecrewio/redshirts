@@ -46,7 +46,7 @@ export default class GithubServer extends Github {
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v3`;
-        const sourceInfo = Github.getSourceInfo(flags.token, baseUrl, SourceType.GithubServer);
+        const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public'], baseUrl, SourceType.GithubServer);
 
         const apiManager = new GithubServerApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GithubServerRunner(sourceInfo, flags, apiManager);

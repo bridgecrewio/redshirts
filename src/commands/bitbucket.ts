@@ -40,7 +40,7 @@ export default class Bitbucket extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Bitbucket);
 
-        const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`);
+        const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`, flags['include-public']);
 
         const apiManager = new BitbucketApiManager(sourceInfo, flags['requests-per-hour'], flags['ca-cert']);
         const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
@@ -48,16 +48,17 @@ export default class Bitbucket extends Command {
         await runner.execute();
     }
 
-    static getSourceInfo(token: string, baseUrl = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): VcsSourceInfo {
+    static getSourceInfo(token: string, includePublic: boolean, url = 'https://api.bitbucket.org/2.0', sourceType = SourceType.Bitbucket): VcsSourceInfo {
         return {
-            sourceType: sourceType,
-            url: baseUrl,
-            token: token,
+            sourceType,
+            url,
+            token,
             repoTerm: 'repo',
             orgTerm: 'workspace',
             orgFlagName: 'workspaces',
             minPathLength: 2,
-            maxPathLength: 2
+            maxPathLength: 2,
+            includePublic
         };
     }
 }

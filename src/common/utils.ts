@@ -237,3 +237,9 @@ export const sleepUntilDateTime = async (until: Date): Promise<void> => {
     // eslint-disable-next-line no-promise-executor-return
     return new Promise(resolve => setTimeout(resolve, ms));
 };
+
+export const sleepForDuration = async (ms: number): Promise<void> => {
+    LOGGER.debug(`Sleeping for ${ms} ms`);
+    // eslint-disable-next-line no-promise-executor-return
+    return new Promise(resolve => setTimeout(resolve, ms));
+};

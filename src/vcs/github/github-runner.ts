@@ -15,7 +15,7 @@ export class GithubRunner extends VcsRunner {
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
             const { commit, author } = commitObject;
-            const username = author.login; // we need to use this object, because the nested commit object has the display name at the time of the commit
+            const username = author?.login; // we need to use this object, because the nested commit object has the display name at the time of the commit
 
             // TODO do we need null checks here?
             const email: string = commit?.author?.email;

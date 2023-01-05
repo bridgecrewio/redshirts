@@ -2,6 +2,7 @@ import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { commonFlags } from '../common/flags';
 import { HelpGroup, SourceType } from '../common/types';
+import { deleteFlagKey } from '../common/utils';
 import { LocalApiManager } from '../vcs/local/local-api-manager';
 import { LocalRunner } from '../vcs/local/local-runner';
 
@@ -9,7 +10,7 @@ export default class Local extends Command {
 
     static summary = 'Count active contributors in local directories using `git log`'
 
-    static description = ''
+    static description = 'Note that `local` mode has no way to determine if a repo is public or private. Thus, all repos will be counted, and this may cause different behavior in the platform, which does not include public repos in the contributor count.'
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --repos . --skip-repos ./terragoat`,
@@ -41,7 +42,7 @@ export default class Local extends Command {
             aliases: ['skip-dir-file'],
             helpGroup: HelpGroup.REPO_SPEC
         }),
-        ...commonFlags
+        ...deleteFlagKey(commonFlags, 'include-public', 'ca-cert')
     };
 
     async run(): Promise<void> {

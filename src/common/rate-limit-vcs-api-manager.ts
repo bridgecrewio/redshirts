@@ -9,6 +9,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     rateLimitRemainingHeader: string
     rateLimitResetHeader: string
     rateLimitEndpoint?: string
+    lastResponse?: AxiosResponse
 
     constructor(sourceInfo: VcsSourceInfo, rateLimitRemainingHeader: string, rateLimitResetHeader: string, rateLimitEndpoint?: string, certPath?: string) {
         super(sourceInfo, certPath);
@@ -66,17 +67,20 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         return this.getRateLimitStatus(response);
     }
 
-    getRateLimitStatus(response: AxiosResponse<any, any>): RateLimitStatus | undefined {
-        return this.rateLimitRemainingHeader in response.headers ? {
-            remaining: Number.parseInt(response.headers[this.rateLimitRemainingHeader]!),
-            reset: new Date(Number.parseInt(response.headers[this.rateLimitResetHeader]!) * 1000)
+    getRateLimitStatus(response?: AxiosResponse<any, any>): RateLimitStatus | undefined {
+        // returns the rate limit status from this response, if present, otherwise from this.lastResponse, otherwise undefined
+        const r = response || this.lastResponse || undefined;
+        return r && this.rateLimitRemainingHeader in r.headers ? {
+            remaining: Number.parseInt(r.headers[this.rateLimitRemainingHeader]!),
+            reset: new Date(Number.parseInt(r.headers[this.rateLimitResetHeader]!) * 1000)
         } : undefined;
     }
 
     async submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse> {
         await this.handleRateLimit(previousResponse);
         try {
-            return await this.axiosInstance.request(config);
+            this.lastResponse = await this.axiosInstance.request(config);
+            return this.lastResponse;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 429) {
                 // now we expect the rate limit details to be in the header
@@ -88,7 +92,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     }
 
     async handleRateLimit(response?: AxiosResponse): Promise<void> {
-        const rateLimitStatus = response ? this.getRateLimitStatus(response) : undefined;
+        const rateLimitStatus = this.getRateLimitStatus(response) || await this.checkRateLimitStatus();
         LOGGER.debug(`Rate limit remaining: ${rateLimitStatus ? rateLimitStatus.remaining : 'unknown'}`);
         // <= to handle a weird edge case I encountered but coult not reproduce
         // Not 0 for a small concurrency buffer for other uses of this token

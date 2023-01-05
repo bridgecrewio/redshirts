@@ -32,6 +32,10 @@ export const commonFlags = {
     'exclude-empty': Flags.boolean({
         description: 'Do not include repos with no commits in the output',
         helpGroup: HelpGroup.OUTPUT
+    }),
+    'include-public': Flags.boolean({
+        description: 'The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying private repos, or mostly private repos, using --repos, --orgs, etc.',
+        helpGroup: HelpGroup.REPO_SPEC
     })
 };
 

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { RepoResponse, VcsSourceInfo } from './types';
+import { Repo, RepoResponse, VcsSourceInfo } from './types';
 import { getFileBuffer, LOGGER } from './utils';
 import https = require('https')
 import { ApiManager } from './api-manager';
@@ -32,6 +32,7 @@ export abstract class VcsApiManager extends ApiManager {
     abstract _getAxiosConfiguration(): any
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>
     abstract getUserRepos(): Promise<RepoResponse[]>
+    abstract isRepoPublic(repo: Repo): Promise<boolean>;
     abstract submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse>
 
     hasMorePages(response: AxiosResponse): boolean {

@@ -53,6 +53,18 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
         return result.data.values;
     }
 
+    async isRepoPublic(repo: Repo): Promise<boolean> {
+        const config: AxiosRequestConfig = {
+            url: `repos/${repo.owner}/${repo.name}`, // TODO find endpoint
+            method: 'GET'
+        };
+
+        LOGGER.debug(`Submitting request to ${config.url}`);
+        const response = await this.submitRequest(config);
+        const data: BitbucketServerRepoResponse = response.data; // TODO response.data?
+        return !data.is_private;
+    }
+
     hasMorePages(response: AxiosResponse): boolean {
         return response.data.nextPageStart;
     }

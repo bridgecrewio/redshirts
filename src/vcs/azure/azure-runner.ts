@@ -1,5 +1,5 @@
 import { Repo, VcsSourceInfo } from '../../common/types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, LOGGER } from '../../common/utils';
+import { filterRepoList, getExplicitRepoList, getRepoListFromParams, logError, LOGGER } from '../../common/utils';
 import { VcsRunner } from '../../common/vcs-runner';
 import { AzureApiManager } from './azure-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
@@ -47,6 +47,9 @@ export class AzureRunner extends VcsRunner {
         // we have to inject the extra project level while reusing as much from the parent as possible
         // so basically we are copying the flow but making the same helper function calls
         // so the amount of actual duplicated logic is minimal
+
+        // TODO optimization for the future - we can actually filter out public repos at the project level,
+        // because that is what determines visibility
         
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
@@ -80,6 +83,18 @@ export class AzureRunner extends VcsRunner {
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
         if (addedRepos.length > 0) {
+            if (!this.sourceInfo.includePublic) {
+                LOGGER.debug(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
+                for (const repo of addedRepos) {
+                    try {
+                        // eslint-disable-next-line no-await-in-loop
+                        repo.private = !await this.apiManager.isRepoPublic(repo);
+                    } catch (error) {
+                        logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
+                    }
+                }
+            }
+
             LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
@@ -91,6 +106,21 @@ export class AzureRunner extends VcsRunner {
 
         const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
         repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
+
+        // now that we have all the repos and their visibility, we can remove the public ones if needed
+        if (!this.sourceInfo.includePublic) {
+            repos = repos.filter(repo => {
+                if (repo.private === undefined) {
+                    LOGGER.debug(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    return false;
+                } else if (repo.private) {
+                    return true;
+                } else {
+                    LOGGER.debug(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
+                    return false;
+                }
+            });
+        }
 
         LOGGER.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
 
