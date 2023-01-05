@@ -1,5 +1,5 @@
-import { Flags } from '@oclif/core';
-import { HelpGroup, Protocol, SourceType } from '../common/types';
+import { vcsServerFlags } from '../common/flags';
+import { SourceType } from '../common/types';
 import { getServerUrl } from '../common/utils';
 import { GitlabServerApiManager } from '../vcs/gitlabServer/gitlab-server-api-manager';
 import { GitlabServerRunner } from '../vcs/gitlabServer/gitlab-server-runner';
@@ -16,25 +16,7 @@ export default class GitlabServer extends Gitlab {
     ]
 
     static flags = {
-        hostname: Flags.string({
-            description: 'The hostname of your GitHub server, e.g. `github.mycompany.com`. Do not include the port and protocol here (see --port and --protocol).',
-            char: 'h',
-            required: true,
-            helpGroup: HelpGroup.CONNECTION
-        }),
-        port: Flags.integer({
-            description: 'The port of your GitHub server, if not a standard port (443 for https, or 80 for http).',
-            char: 'p',
-            required: false,
-            helpGroup: HelpGroup.CONNECTION
-        }),
-        protocol: Flags.enum({
-            description: 'Protocol for your server, https (default) or http. Affects the default port value if you do not specify a port.',
-            options: Object.values(Protocol),
-            required: false,
-            default: Protocol.HTTPS,
-            helpGroup: HelpGroup.CONNECTION
-        }),
+        ...vcsServerFlags,
         ...Gitlab.flags,
     }
 
