@@ -50,7 +50,7 @@ export default class AzureDevOps extends Command {
     async run(): Promise<void> {
         const { flags } = (await this.parse(AzureDevOps));
 
-        const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token);
+        const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token, flags['include-public']);
 
         const apiManager = new AzureApiManager(sourceInfo, flags['ca-cert']);
         const runner = new AzureRunner(sourceInfo, flags, apiManager);
@@ -62,16 +62,17 @@ export default class AzureDevOps extends Command {
         await runner.execute();
     }
 
-    static getSourceInfo(token: string, baseUrl = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): VcsSourceInfo {
+    static getSourceInfo(token: string, includePublic: boolean, url = 'https://dev.azure.com', sourceType = SourceType.AzureRepos): VcsSourceInfo {
         return {
-            sourceType: sourceType,
-            url: baseUrl,
-            token: token,
+            sourceType,
+            url,
+            token,
             repoTerm: 'repo',
             orgTerm: 'organization',
             orgFlagName: 'orgs',
             minPathLength: 3,
-            maxPathLength: 3
+            maxPathLength: 3,
+            includePublic
         };
     }
 }

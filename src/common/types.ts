@@ -10,6 +10,7 @@ export interface VcsSourceInfo extends SourceInfo {
     orgFlagName: string
     minPathLength: number
     maxPathLength: number
+    includePublic: boolean
 }
 
 export type RateLimitStatus = {

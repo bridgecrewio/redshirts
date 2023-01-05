@@ -5,13 +5,11 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - all branches? (no?)
-// - default to private only repos - should we explicitly check each repo for its visibility?
+// - all branches? (no?) - remove all branches from the BB call, remote git log --all
 // - document specific permissions needed
-// - public / private repos - include in output?
 // - document getting a cert chain
 // - some sort of errored repo list that is easy to review
-// - author vs committer
+// - author vs committer - use author always (not committer)
 // - clean up logging
 // - test on windows
 

@@ -3,6 +3,7 @@ import { RepoResponse, VcsSourceInfo } from './types';
 import https = require('https')
 import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
+import { LOGGER } from './utils';
 
 
 export abstract class ThrottledVcsApiManager extends VcsApiManager {
@@ -17,7 +18,7 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
             reservoirRefreshInterval: 3600 * 1000,
             reservoirRefreshAmount: requestsPerHour,
             maxConcurrent: 1,
-            minTime: Math.ceil(1000 * 60 * 60 / requestsPerHour)  // delay time in ms between requests
+            minTime: 100
         });
     }
 
@@ -37,6 +38,12 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
     abstract getUserRepos(): Promise<RepoResponse[]>
 
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
-        return this.bottleneck.schedule(() => this.axiosInstance.request(config));
+        const response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
+        
+        if (LOGGER.level === 'debug') {
+            LOGGER.debug(`Reservoir remaining: ${await this.bottleneck.currentReservoir()}`);
+        }
+        
+        return response;
     }
 }

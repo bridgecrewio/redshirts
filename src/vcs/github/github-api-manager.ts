@@ -36,10 +36,20 @@ export class GithubApiManager extends RateLimitVcsApiManager {
             },
         };
 
-        const result: AxiosResponse = await this.submitPaginatedRequest(config);
-        const commits = result?.data || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
-        return commits;
+        try {
+            const result: AxiosResponse = await this.submitPaginatedRequest(config);
+            const commits = result?.data || [];
+            LOGGER.debug(`Found ${commits.length} commits`);
+            return commits;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 409 && error.response.data.message === 'Git Repository is empty.') {
+                LOGGER.debug(`Repo ${repoPath} is empty`);
+                return [];
+            }
+
+            throw error;
+        }
+        
     }
 
     async getUserRepos(): Promise<GithubRepoResponse[]> {
@@ -77,5 +87,17 @@ export class GithubApiManager extends RateLimitVcsApiManager {
 
             throw error;
         }
+    }
+
+    async isRepoPublic(repo: Repo): Promise<boolean> {
+        const config: AxiosRequestConfig = {
+            url: `repos/${repo.owner}/${repo.name}`,
+            method: 'GET'
+        };
+
+        LOGGER.debug(`Submitting request to ${config.url}`);
+        const response = await this.submitRequest(config);
+        const data: GithubRepoResponse = response.data;
+        return !data.private;
     }
 }

@@ -239,6 +239,11 @@ export const sleepUntilDateTime = async (until: Date): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
+export const sleepForDuration = async (ms: number): Promise<void> => {
+    LOGGER.debug(`Sleeping for ${ms} ms`);
+    // eslint-disable-next-line no-promise-executor-return
+    return new Promise(resolve => setTimeout(resolve, ms));
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const objectToString = (obj: any): string => {
     return `{${Object.keys(obj).map(k => `${k}: ${obj[k]}`).join(', ')}}`;

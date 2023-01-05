@@ -30,7 +30,7 @@ export default class Github extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Github);
 
-        const sourceInfo = Github.getSourceInfo(flags.token);
+        const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public']);
 
         const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GithubRunner(sourceInfo, flags, apiManager);
@@ -38,16 +38,17 @@ export default class Github extends Command {
         await runner.execute();
     }
 
-    static getSourceInfo(token: string, baseUrl = 'https://api.github.com', sourceType = SourceType.Github): VcsSourceInfo {
+    static getSourceInfo(token: string, includePublic: boolean, url = 'https://api.github.com', sourceType = SourceType.Github): VcsSourceInfo {
         return {
-            sourceType: sourceType,
-            url: baseUrl,
-            token: token,
+            sourceType,
+            url,
+            token,
             repoTerm: 'repo',
             orgTerm: 'organization',
             orgFlagName: 'orgs',
             minPathLength: 2,
-            maxPathLength: 2
+            maxPathLength: 2,
+            includePublic
         };
     }
 }

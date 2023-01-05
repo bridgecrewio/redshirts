@@ -1,7 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ThrottledVcsApiManager } from '../../common/throttled-vcs-api-manager';
 import { Repo } from '../../common/types';
-import { LOGGER } from '../../common/utils';
+import { LOGGER, mapIterable } from '../../common/utils';
 import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, BitbucketWorkspaceResponse } from './bitbucket-types';
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
@@ -55,9 +55,9 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
         // get the unique workspaces for the user's own repos and the workspaces of which they are a member
         const userRepos = await this.getUserRepoPermissions();
 
-        const userWorkspaces = userRepos.map(r => r.repository && r.repository.full_name && r.repository.full_name.split('/')[0]).filter(r => r);
+        const userWorkspaces = new Set(userRepos.map(r => r.repository && r.repository.full_name && r.repository.full_name.split('/')[0]).filter(r => r));
 
-        LOGGER.debug(`Got the following workspaces from the user's repos: ${userWorkspaces}`);
+        LOGGER.debug(`Got the following workspaces from the user's repos: ${mapIterable(userWorkspaces, w => w)}`);
 
         const config: AxiosRequestConfig = {
             url: 'workspaces',
@@ -92,6 +92,18 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
         };
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         return result.data.values;
+    }
+
+    async isRepoPublic(repo: Repo): Promise<boolean> {
+        const config: AxiosRequestConfig = {
+            url: `repositories/${repo.owner}/${repo.name}`,
+            method: 'GET'
+        };
+
+        LOGGER.debug(`Submitting request to ${config.url}`);
+        const response = await this.submitRequest(config);
+        const data: BitbucketRepoResponse = response.data;
+        return !data.is_private;
     }
 
     hasMorePages(response: AxiosResponse): boolean {

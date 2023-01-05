@@ -32,7 +32,7 @@ export default class Gitlab extends Command {
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
 
-        const sourceInfo = Gitlab.getSourceInfo(flags.token);
+        const sourceInfo = Gitlab.getSourceInfo(flags.token, flags['include-public']);
 
         const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
         const runner = new GitlabRunner(sourceInfo, flags, apiManager);
@@ -40,16 +40,17 @@ export default class Gitlab extends Command {
         await runner.execute();
     }
 
-    static getSourceInfo(token: string, baseUrl = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): VcsSourceInfo {
+    static getSourceInfo(token: string, includePublic: boolean, url = 'https://gitlab.com/api/v4', sourceType = SourceType.Gitlab): VcsSourceInfo {
         return {
-            sourceType: sourceType,
-            url: baseUrl,
-            token: token,
+            sourceType,
+            url,
+            token,
             repoTerm: 'project',
             orgTerm: 'group',
             orgFlagName: 'groups',
             minPathLength: 2,
-            maxPathLength: 99
+            maxPathLength: 99,
+            includePublic
         };
     }
 }

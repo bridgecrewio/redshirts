@@ -20,5 +20,5 @@ export interface GithubRepoResponse extends RepoResponse {
     owner: {
         login: string
     }
-    private?: boolean
+    private: boolean
 }
