@@ -48,7 +48,8 @@ export default class Github extends Command {
             orgFlagName: 'orgs',
             minPathLength: 2,
             maxPathLength: 2,
-            includePublic
+            includePublic,
+            requiresEnrichment: false
         };
     }
 }

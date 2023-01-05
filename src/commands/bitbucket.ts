@@ -58,7 +58,8 @@ export default class Bitbucket extends Command {
             orgFlagName: 'workspaces',
             minPathLength: 2,
             maxPathLength: 2,
-            includePublic
+            includePublic,
+            requiresEnrichment: true
         };
     }
 }

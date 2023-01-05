@@ -36,6 +36,7 @@ export class BitbucketRunner extends VcsRunner {
                 name: nameParts[1],
                 owner: nameParts[0],
                 private: repo.is_private,
+                defaultBranch: repo.mainbranch.name
             });
         }
 

@@ -20,13 +20,20 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
+        
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
             params: {
-                pagelen: MAX_PAGE_SIZE,
+                pagelen: MAX_PAGE_SIZE
             },
         };
+
+        if (repo.defaultBranch) {
+            config.params.include = repo.defaultBranch;
+        } else {
+            LOGGER.debug(`The repo ${repoPath} does not have a known default branch, so commits from all branches will be included. Was there an error earlier on?`);
+        }
 
         // Bitbucket does not support a 'since' filter, so we have to do it manually
         const filterfn = getBitbucketDateCompareFunction(sinceDate);
@@ -94,7 +101,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
         return result.data.values;
     }
 
-    async isRepoPublic(repo: Repo): Promise<boolean> {
+    async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}`,
             method: 'GET'
@@ -103,7 +110,8 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
         LOGGER.debug(`Submitting request to ${config.url}`);
         const response = await this.submitRequest(config);
         const data: BitbucketRepoResponse = response.data;
-        return !data.is_private;
+        repo.private = data.is_private;
+        repo.defaultBranch = data.mainbranch.name;
     }
 
     hasMorePages(response: AxiosResponse): boolean {

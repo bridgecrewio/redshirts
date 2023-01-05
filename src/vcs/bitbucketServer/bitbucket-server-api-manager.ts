@@ -53,7 +53,7 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
         return result.data.values;
     }
 
-    async isRepoPublic(repo: Repo): Promise<boolean> {
+    async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `repos/${repo.owner}/${repo.name}`, // TODO find endpoint
             method: 'GET'
@@ -62,7 +62,8 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
         LOGGER.debug(`Submitting request to ${config.url}`);
         const response = await this.submitRequest(config);
         const data: BitbucketServerRepoResponse = response.data; // TODO response.data?
-        return !data.is_private;
+        // TODO does it return all commits? Need default branch?
+        repo.private = data.is_private;
     }
 
     hasMorePages(response: AxiosResponse): boolean {

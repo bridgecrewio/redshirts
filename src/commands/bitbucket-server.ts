@@ -54,7 +54,8 @@ export default class BitbucketServer extends Bitbucket {
             orgFlagName: 'projects',
             minPathLength: 2,
             maxPathLength: 2,
-            includePublic
+            includePublic,
+            requiresEnrichment: false // TODO
         };
     }
 }

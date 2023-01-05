@@ -126,7 +126,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
         return result.data.id;
     }
 
-    async isRepoPublic(repo: Repo): Promise<boolean> {
+    async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}`,
             method: 'GET'
@@ -135,6 +135,6 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
         LOGGER.debug(`Submitting request to ${config.url}`);
         const response = await this.submitRequest(config);
         const data: GitlabRepoResponse = response.data;
-        return data.visibility === 'public';
+        repo.private = data.visibility !== 'public';
     }
 }
