@@ -1,20 +1,17 @@
-oclif-hello-world
-=================
+# Redshirts
 
-oclif example Hello World CLI
-
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![CircleCI](https://circleci.com/gh/oclif/hello-world/tree/main.svg?style=shield)](https://circleci.com/gh/oclif/hello-world/tree/main)
-[![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
+Counts contributors for git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. Use this tool to estimate the impact on credit consumption prior to connecting repos to the platform. Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform. Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
 
 <!-- toc -->
-* [Usage](#usage)
-* [Commands](#commands)
+
+-  [Usage](#usage)
+-  [Commands](#commands)
 <!-- tocstop -->
+
 # Usage
+
 <!-- usage -->
+
 ```sh-session
 $ npm install -g redshirts
 $ redshirts COMMAND
@@ -26,12 +23,19 @@ USAGE
   $ redshirts COMMAND
 ...
 ```
+
 <!-- usagestop -->
+
 # Commands
+
 <!-- commands -->
-* [`redshirts github`](#redshirts-github)
-* [`redshirts gitlab [FILE]`](#redshirts-gitlab-file)
-* [`redshirts help [COMMAND]`](#redshirts-help-command)
+
+- [Redshirts](#redshirts)
+- [Usage](#usage)
+- [Commands](#commands)
+  - [`redshirts github`](#redshirts-github)
+  - [`redshirts gitlab [FILE]`](#redshirts-gitlab-file)
+  - [`redshirts help [COMMAND]`](#redshirts-help-command)
 
 ## `redshirts github`
 
@@ -95,4 +99,5 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.19/src/commands/help.ts)_
+
 <!-- commandsstop -->
