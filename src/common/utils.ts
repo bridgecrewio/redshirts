@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Protocol, Repo, VcsSourceInfo } from './types';
 import * as winston from 'winston';
 import { FlagBase } from '@oclif/core/lib/interfaces';
+import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
 
 export const DEFAULT_DAYS = 90;
 
@@ -236,4 +237,39 @@ export const sleepUntilDateTime = async (until: Date): Promise<void> => {
     const ms = until.getTime() - now.getTime();
     // eslint-disable-next-line no-promise-executor-return
     return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const objectToString = (obj: any): string => {
+    return `{${Object.keys(obj).map(k => `${k}: ${obj[k]}`).join(', ')}}`;
+};
+
+export const exec = (command: string, args: string[], options: SpawnOptionsWithoutStdio): Promise<string> => {
+    return new Promise((resolve, reject) => {        
+        let stdout = '';
+        let stderr = '';
+
+        LOGGER.debug(`Executing command: ${command} ${args.join(' ')} with options ${objectToString(options)}`);
+
+        const git = spawn(command, args, options);
+
+        git.stdout.on('data', (data) => {
+            stdout += data;
+        });
+        git.stderr.on('data', (data) => {
+            stderr += data;
+        });
+        git.on('close', (code) => {
+            LOGGER.debug(`${command} command exited with code ${code}`);
+            if (code === 0) {
+                resolve(stdout);
+            } else {
+                reject(new Error(stderr));
+            }
+        });
+
+        git.on("error", (err) => {
+            reject(err);
+        });
+    });
 };
