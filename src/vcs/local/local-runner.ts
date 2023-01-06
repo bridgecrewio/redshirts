@@ -7,21 +7,19 @@ import { LocalApiManager } from './local-api-manager';
 import { LocalCommit, LocalRepoResponse } from './local-types';
 
 export class LocalRunner extends BaseRunner {
-
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: SourceInfo, flags: any, apiManager: LocalApiManager) {
-        super(sourceInfo, [], flags, apiManager);
+        super(sourceInfo, [], flags, apiManager, path.sep);
         this.apiManager = apiManager;
     }
 
     aggregateCommitContributors(repo: Repo, commits: LocalCommit[]): void {
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commitObject of commits) {
-
             const newCommit = {
                 username: commitObject.name,
                 email: commitObject.email,
-                commitDate: new Date(commitObject.timestamp).toISOString()
+                commitDate: new Date(commitObject.timestamp).toISOString(),
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);
@@ -33,7 +31,7 @@ export class LocalRunner extends BaseRunner {
         for (const repo of reposResponse) {
             filteredRepos.push({
                 name: path.basename(repo.path),
-                owner: path.dirname(repo.path)
+                owner: path.dirname(repo.path),
             });
         }
 
@@ -41,7 +39,6 @@ export class LocalRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
-
         const reposList: string | undefined = this.flags.directories;
         const reposFile: string | undefined = this.flags['directory-file'];
         const skipReposList: string | undefined = this.flags['skip-directories'];
@@ -49,26 +46,32 @@ export class LocalRunner extends BaseRunner {
 
         // we already checked for repos or file being present
         const directoriesToScan = reposList ? stringToArr(reposList) : fileToLines(reposFile!);
-        const directoriesToSkip = skipReposList ? stringToArr(skipReposList) : skipReposFile ? fileToLines(skipReposFile) : [];
-        
+        const directoriesToSkip = skipReposList
+            ? stringToArr(skipReposList)
+            : skipReposFile
+            ? fileToLines(skipReposFile)
+            : [];
+
         const repos = this.findRepoDirectories(directoriesToScan, directoriesToSkip);
 
-        LOGGER.debug(`Final repo list: ${repos.map(r => r.path)}`);
+        LOGGER.debug(`Final repo list: ${repos.map((r) => r.path)}`);
 
         return this.convertRepos(repos);
     }
 
     findRepoDirectories(directoriesToScan: string[], directoriesToSkip: string[]): LocalRepoResponse[] {
-        const scanAbsPaths = directoriesToScan.map(r => path.resolve(r)).filter(p => {
-            if (existsSync(p)) {
-                return true;
-            } else {
-                LOGGER.debug(`Skipping non-existent path ${p}`);
-                return false;
-            }
-        });
-        const skipAbsPaths = directoriesToSkip.map(r => path.resolve(r));
-        
+        const scanAbsPaths = directoriesToScan
+            .map((r) => path.resolve(r))
+            .filter((p) => {
+                if (existsSync(p)) {
+                    return true;
+                } else {
+                    LOGGER.debug(`Skipping non-existent path ${p}`);
+                    return false;
+                }
+            });
+        const skipAbsPaths = directoriesToSkip.map((r) => path.resolve(r));
+
         LOGGER.debug(scanAbsPaths);
         LOGGER.debug(skipAbsPaths);
 
@@ -78,8 +81,8 @@ export class LocalRunner extends BaseRunner {
             this.searchForGitRepos(p, skipAbsPaths, foundRepos);
         }
 
-        return foundRepos.map(r => { 
-            return { path: r }; 
+        return foundRepos.map((r) => {
+            return { path: r };
         });
     }
 
@@ -96,7 +99,7 @@ export class LocalRunner extends BaseRunner {
             LOGGER.debug(`searchForGitRepos called on directory in the skip list: ${start} - skipping`);
             return;
         }
-        
+
         const dotGitPath = path.join(start, '.git');
 
         // base case
