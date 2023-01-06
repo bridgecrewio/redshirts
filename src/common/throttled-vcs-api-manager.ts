@@ -6,7 +6,7 @@ import Bottleneck from 'bottleneck';
 import { LOGGER } from './utils';
 
 const DEFAULT_MAX_REQUESTS_PER_SECOND = 10;
-const MAX_REQUESTS_PER_SECOND_VAR = 'MAX_REQUESTS_PER_SECOND';
+export const MAX_REQUESTS_PER_SECOND_VAR = 'MAX_REQUESTS_PER_SECOND';
 export abstract class ThrottledVcsApiManager extends VcsApiManager {
     requestsPerHour: number
     bottleneck: Bottleneck
@@ -47,6 +47,10 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
         
         if (LOGGER.level === 'debug') {
             LOGGER.debug(`Reservoir remaining: ${await this.bottleneck.currentReservoir()}`);
+        }
+
+        if (this.logApiResponses) {
+            LOGGER.debug(response);
         }
         
         return response;

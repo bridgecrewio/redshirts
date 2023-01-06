@@ -1,10 +1,12 @@
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { readFileSync } from 'node:fs';
 import { Protocol, Repo, VcsSourceInfo } from './types';
 import * as winston from 'winston';
 import { FlagBase } from '@oclif/core/lib/interfaces';
 import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
 import { EOL } from 'node:os';
+import { MAX_REQUESTS_PER_SECOND_VAR } from './throttled-vcs-api-manager';
+import { LOG_API_RESPONSES_ENV } from './api-manager';
 
 export const DEFAULT_DAYS = 90;
 export const DEFAULT_LOG_LEVEL = 'warn';
@@ -168,6 +170,17 @@ export const isSslError = (error: AxiosError): boolean => {
 
 
 const logFormat = winston.format.printf(({ level, message, timestamp, ...rest }) => {
+    if (rest.response) {
+        const response: AxiosResponse = rest.response;
+        const respObject = {
+            status: response.status,
+            data: response.data,
+            headers: response.headers,
+            url: response.config.url
+        };
+        rest.response = respObject;
+    }
+    
     const error = rest.error && rest.error instanceof Error ? { error: { message: rest.error.message, stack: rest.error.stack}} : {};
     const argumentsString = JSON.stringify({ ...rest, ...error });
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
@@ -316,4 +329,13 @@ export const logParams = (flags: any): void => {
 
     const maskedFlags = Object.keys(flags).map(flag => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`);
     LOGGER.debug(`Parsed flags:${EOL}${maskedFlags}`);
+
+    LOGGER.debug('Relevant environment variables:');
+    const relevantEnvVars = [MAX_REQUESTS_PER_SECOND_VAR, LOG_API_RESPONSES_ENV];
+    for (const envVar of relevantEnvVars) {
+        const val = process.env[envVar];
+        if (val) {
+            LOGGER.debug(`${envVar}=${val}`);
+        }
+    }
 };

@@ -120,6 +120,7 @@ export abstract class VcsApiManager extends ApiManager {
             LOGGER.debug(`Fetching page ${page} of request from ${config.url}`);
 
             response = await this.submitRequest(config, response);
+
             dataPage = this.getDataPage(response);
 
             // eslint-disable-next-line unicorn/no-array-callback-reference

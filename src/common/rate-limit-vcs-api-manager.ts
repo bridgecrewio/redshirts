@@ -62,6 +62,9 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         // }
 
         const response = await this.axiosInstance.request(config);
+        if (this.logApiResponses) {
+            LOGGER.debug('', { response });
+        }
 
         return this.getRateLimitStatus(response);
     }
@@ -79,6 +82,10 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         await this.handleRateLimit(previousResponse);
         try {
             this.lastResponse = await this.axiosInstance.request(config);
+            if (this.logApiResponses) {
+                LOGGER.debug('', { response: this.lastResponse });
+            }
+
             return this.lastResponse;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 429) {

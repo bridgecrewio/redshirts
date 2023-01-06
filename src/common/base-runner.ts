@@ -72,7 +72,12 @@ export abstract class BaseRunner {
                     this.addEmptyRepo(repo);
                 }
             } catch (error) {
-                logError(error as Error, `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`);
+                let message = `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`;
+                if (error instanceof AxiosError) {
+                    message += ` - the API returned an error: ${error.message}`;
+                }
+
+                logError(error as Error, message);
             }
         }
     }

@@ -32,7 +32,7 @@ export class LocalApiManager extends ApiManager {
 
         const gitLog = await exec(GIT_COMMAND, args, opts);
 
-        if (process.env.LOG_API_RESPONSES?.toLowerCase() === 'true') {
+        if (this.logApiResponses) {
             LOGGER.debug(gitLog);
         }
 
