@@ -52,6 +52,7 @@ export abstract class BaseRunner {
             await this.processRepos(repos, sinceDate);
         } catch (error) {
             if (error instanceof AxiosError && isSslError(error)) {
+                // if we ever encounter an SSL error, we cannot continue. This method expects getRepoList to raise any SSL error it encounters, as soon as it encounters one
                 const sourceInfo = this.sourceInfo as VcsSourceInfo;
                 logError(error, `Received an SSL error while connecting to the server at url ${sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
             }
@@ -72,6 +73,10 @@ export abstract class BaseRunner {
                     this.addEmptyRepo(repo);
                 }
             } catch (error) {
+                if (error instanceof AxiosError && isSslError(error)) {
+                    throw error;
+                }
+                
                 let message = `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`;
                 if (error instanceof AxiosError) {
                     message += ` - the API returned an error: ${error.message}`;

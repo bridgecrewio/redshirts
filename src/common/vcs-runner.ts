@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { BaseRunner } from './base-runner';
 import { Repo, VcsSourceInfo } from './types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, logError, LOGGER, stringToArr } from './utils';
+import { filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER, stringToArr } from './utils';
 import { VcsApiManager } from './vcs-api-manager';
 
 export abstract class VcsRunner extends BaseRunner {
@@ -16,6 +16,13 @@ export abstract class VcsRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
+
+        // we must throw any SSL error that we encounter here - it is possible in a very
+        // specific set of conditions that we will not make any API calls here:
+        // if the only repo spec argument is --repos, and --include-public is set,
+        // and this VCS does not require enrichment (everything but bitbucket),
+        // then our first API call will be actually getting commits. Otherwise, our first
+        // API call will be here (getting org repos or getting repo visibility)
 
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
@@ -39,6 +46,11 @@ export abstract class VcsRunner extends BaseRunner {
                     try {
                         await this.apiManager.enrichRepo(repo);
                     } catch (error) {
+                        // eslint-disable-next-line max-depth
+                        if (error instanceof AxiosError && isSslError(error)) {
+                            throw error;
+                        }
+                        
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
                     }
                 }
@@ -85,6 +97,10 @@ export abstract class VcsRunner extends BaseRunner {
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {
                 if (error instanceof AxiosError) {
+                    if (isSslError(error)) {
+                        throw error;
+                    }
+
                     LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
                 } else {
                     LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
