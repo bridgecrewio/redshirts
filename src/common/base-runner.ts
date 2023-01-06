@@ -18,15 +18,23 @@ export abstract class BaseRunner {
     contributorsByRepo: Map<string, ContributorMap>;
     flags: any;
     apiManager: ApiManager;
+    repoSeparator: string;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: SourceInfo, excludedEmailRegexes: Array<string>, flags: any, apiManager: ApiManager) {
+    constructor(
+        sourceInfo: SourceInfo,
+        excludedEmailRegexes: Array<string>,
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        flags: any,
+        apiManager: ApiManager,
+        repoSeparator = '/'
+    ) {
         this.sourceInfo = sourceInfo;
         this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes.map((s) => new RegExp(s))];
         this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
         this.apiManager = apiManager;
+        this.repoSeparator = repoSeparator;
     }
 
     abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void;
@@ -124,7 +132,7 @@ export abstract class BaseRunner {
     addContributor(repoOwner: string, repoName: string, commit: Commit): void {
         // Adds a contributor for the repo and the global list, updating the contributor metadata if necessary (email and last commit)
 
-        const repoPath = repoOwner + '/' + repoName;
+        const repoPath = repoOwner + this.repoSeparator + repoName;
 
         if (this.skipUser(commit.email)) {
             LOGGER.debug(`Skipping email ${commit.email} for repo ${repoPath}`);
