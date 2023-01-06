@@ -45,17 +45,25 @@ export const getFileContents = (path: string): string => {
 
 export const getRepos = (repos: string[], minPathLength = 2, maxPathLength = 2): Repo[] => {
     // converts a string[] of repo names to Repo objects, validating that they have at least 1 slash
-    return repos.filter(r => r.length).map(r => {
-        const s = r.split('/');
-        if (s.length < minPathLength || s.length > maxPathLength) {
-            throw new Error(`Invalid repo name (must have ${minPathLength === maxPathLength ? `exactly ${minPathLength}` : `at least ${minPathLength} and max ${maxPathLength}`} parts): ${r}`);
-        }
+    return repos
+        .filter((r) => r.length)
+        .map((r) => {
+            const s = r.split('/');
+            if (s.length < minPathLength || s.length > maxPathLength) {
+                throw new Error(
+                    `Invalid repo name (must have ${
+                        minPathLength === maxPathLength
+                            ? `exactly ${minPathLength}`
+                            : `at least ${minPathLength} and max ${maxPathLength}`
+                    } parts): ${r}`
+                );
+            }
 
-        return {
-            owner: s.slice(0, -1).join('/'),
-            name: s[s.length - 1]
-        };
-    });
+            return {
+                owner: s.slice(0, -1).join('/'),
+                name: s[s.length - 1],
+            };
+        });
 };
 
 export const splitRepos = (repoString: string, minPathLength = 2, maxPathLength = 2): Repo[] => {
@@ -63,14 +71,20 @@ export const splitRepos = (repoString: string, minPathLength = 2, maxPathLength 
 };
 
 export const fileToLines = (path: string): string[] => {
-    return getFileContents(path).split('\n').map(s => s.trim()).filter(s => s);
+    return getFileContents(path)
+        .split('\n')
+        .map((s) => s.trim())
+        .filter((s) => s);
 };
 
 export const readRepoFile = (path: string, minPathLength = 2, maxPathLength = 2): Repo[] => {
     return getRepos(fileToLines(path), minPathLength, maxPathLength);
 };
 
-export const mapIterable = <T, U>(it: Iterable<T>, callbackfn: (value: T, index: number, it: Iterable<T>) => U): U[] => {
+export const mapIterable = <T, U>(
+    it: Iterable<T>,
+    callbackfn: (value: T, index: number, it: Iterable<T>) => U
+): U[] => {
     const arr = [];
 
     let i = 0;
@@ -82,7 +96,11 @@ export const mapIterable = <T, U>(it: Iterable<T>, callbackfn: (value: T, index:
     return arr;
 };
 
-export const reduceIterable = <T, U>(it: Iterable<T>, callbackfn: (prev: U, next: T, index: number, it: Iterable<T>) => U, initial: U): U => {
+export const reduceIterable = <T, U>(
+    it: Iterable<T>,
+    callbackfn: (prev: U, next: T, index: number, it: Iterable<T>) => U,
+    initial: U
+): U => {
     // simple 'reduce' implementation that requires an initial value (and thus removes a lot of the edge cases)
     let i = 0;
     for (const e of it) {
@@ -97,7 +115,12 @@ export const repoMatches = (repo1: Repo, repo2: Repo): boolean => {
     return repo1.owner === repo2.owner && repo1.name === repo2.name;
 };
 
-export const getRepoListFromParams = (minPathLength: number, maxPathLength: number, reposList?: string, reposFile?: string): Repo[] => {
+export const getRepoListFromParams = (
+    minPathLength: number,
+    maxPathLength: number,
+    reposList?: string,
+    reposFile?: string
+): Repo[] => {
     let repos: Repo[] = [];
 
     if (reposList) {
@@ -109,14 +132,26 @@ export const getRepoListFromParams = (minPathLength: number, maxPathLength: numb
     return repos;
 };
 
-export const getExplicitRepoList = (sourceInfo: VcsSourceInfo, repos: Repo[], reposList?: string, reposFile?: string): Repo[] => {
-    const explicitRepos = getRepoListFromParams(sourceInfo.minPathLength, sourceInfo.maxPathLength, reposList, reposFile);
+export const getExplicitRepoList = (
+    sourceInfo: VcsSourceInfo,
+    repos: Repo[],
+    reposList?: string,
+    reposFile?: string
+): Repo[] => {
+    const explicitRepos = getRepoListFromParams(
+        sourceInfo.minPathLength,
+        sourceInfo.maxPathLength,
+        reposList,
+        reposFile
+    );
 
     const addedRepos: Repo[] = [];
 
     for (const repo of explicitRepos) {
-        if (repos.some(r => repoMatches(r, repo))) {
-            LOGGER.debug(`Skipping adding ${sourceInfo.repoTerm} ${repo.owner}/${repo.name} as we already got it from the ${sourceInfo.orgTerm}`);
+        if (repos.some((r) => repoMatches(r, repo))) {
+            LOGGER.debug(
+                `Skipping adding ${sourceInfo.repoTerm} ${repo.owner}/${repo.name} as we already got it from the ${sourceInfo.orgTerm}`
+            );
         } else {
             addedRepos.push(repo);
         }
@@ -127,13 +162,13 @@ export const getExplicitRepoList = (sourceInfo: VcsSourceInfo, repos: Repo[], re
 
 export const filterRepoList = (
     repos: Repo[],
-    filterList: { owner: string, name: string }[],
+    filterList: { owner: string; name: string }[],
     objectType: string,
-    filterfn: (repo: { owner: string, name: string }, filter: { owner: string, name: string }) => boolean = repoMatches
+    filterfn: (repo: { owner: string; name: string }, filter: { owner: string; name: string }) => boolean = repoMatches
 ): Repo[] => {
     if (filterList.length > 0) {
-        repos = repos.filter(r => {
-            if (filterList.some(s => filterfn(r, s))) {
+        repos = repos.filter((r) => {
+            if (filterList.some((s) => filterfn(r, s))) {
                 LOGGER.debug(`Removing explicitly skipped ${objectType} ${r.owner}/${r.name}`);
                 return false;
             } else {
@@ -165,9 +200,8 @@ export const getServerUrl = (hostname: string, port?: number, protocol = Protoco
 
 export const isSslError = (error: AxiosError): boolean => {
     const keywords = ['CERT', 'SSL', 'VERIFY'];
-    return keywords.some(k => error.code && error.code.includes(k));
+    return keywords.some((k) => error.code && error.code.includes(k));
 };
-
 
 const logFormat = winston.format.printf(({ level, message, timestamp, ...rest }) => {
     if (rest.response) {
@@ -176,12 +210,15 @@ const logFormat = winston.format.printf(({ level, message, timestamp, ...rest })
             status: response.status,
             data: response.data,
             headers: response.headers,
-            url: response.config.url
+            url: response.config.url,
         };
         rest.response = respObject;
     }
-    
-    const error = rest.error && rest.error instanceof Error ? { error: { message: rest.error.message, stack: rest.error.stack}} : {};
+
+    const error =
+        rest.error && rest.error instanceof Error
+            ? { error: { message: rest.error.message, stack: rest.error.stack } }
+            : {};
     const argumentsString = JSON.stringify({ ...rest, ...error });
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
@@ -193,7 +230,9 @@ const getLogLevel = (): string => {
     } else if (LOG_LEVELS.includes(envLevel.toLowerCase())) {
         return envLevel.toLowerCase();
     } else {
-        console.warn(`Found unknown LOG_LEVEL environment variable: ${envLevel}. Expected one of: ${LOG_LEVELS}. Reverting to "${DEFAULT_LOG_LEVEL}".`);
+        console.warn(
+            `Found unknown LOG_LEVEL environment variable: ${envLevel}. Expected one of: ${LOG_LEVELS}. Reverting to "${DEFAULT_LOG_LEVEL}".`
+        );
         return DEFAULT_LOG_LEVEL;
     }
 };
@@ -203,15 +242,15 @@ export const LOGGER = winston.createLogger({
     transports: [
         new winston.transports.Console({
             stderrLevels: LOG_LEVELS,
-            silent: process.env[DISABLE_LOG_ENV_VAR]?.toLowerCase() === 'true'
-        })
+            silent: process.env[DISABLE_LOG_ENV_VAR]?.toLowerCase() === 'true',
+        }),
     ],
     format: winston.format.combine(
         winston.format.splat(),
         winston.format.timestamp(),
         winston.format.prettyPrint(),
         logFormat
-    )
+    ),
 });
 
 export const setLogLevel = (level: typeof LOG_LEVELS[number]): void => {
@@ -231,9 +270,12 @@ export const logError = (error: Error, message?: string, args?: any): void => {
     LOGGER.debug('', { error });
 };
 
-export const deleteFlagKey = (obj: {[key: string]: FlagBase<any, any>}, ...keys: string[]): {[key: string]: FlagBase<any, any>} => {
+export const deleteFlagKey = (
+    obj: { [key: string]: FlagBase<any, any> },
+    ...keys: string[]
+): { [key: string]: FlagBase<any, any> } => {
     const ret: typeof obj = {};
-    
+
     for (const key of Object.keys(obj)) {
         if (!keys.includes(key) && key in obj) {
             ret[key] = obj[key];
@@ -259,22 +301,24 @@ export const sleepUntilDateTime = async (until: Date): Promise<void> => {
     const now = new Date();
     const ms = until.getTime() - now.getTime();
     // eslint-disable-next-line no-promise-executor-return
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 export const sleepForDuration = async (ms: number): Promise<void> => {
     LOGGER.debug(`Sleeping for ${ms} ms`);
     // eslint-disable-next-line no-promise-executor-return
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const objectToString = (obj: any): string => {
-    return `{${Object.keys(obj).map(k => `${k}: ${obj[k]}`).join(', ')}}`;
+    return `{${Object.keys(obj)
+        .map((k) => `${k}: ${obj[k]}`)
+        .join(', ')}}`;
 };
 
 export const exec = (command: string, args: string[], options: SpawnOptionsWithoutStdio): Promise<string> => {
-    return new Promise((resolve, reject) => {        
+    return new Promise((resolve, reject) => {
         let stdout = '';
         let stderr = '';
 
@@ -297,7 +341,7 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
             }
         });
 
-        git.on("error", (err) => {
+        git.on('error', (err) => {
             reject(err);
         });
     });
@@ -314,7 +358,7 @@ export const init = (flags: any): void => {
 export const logParams = (flags: any): void => {
     const tokenParams = new Set(['-t', '--token']);
     const tokenFlags = new Set(['token']);
-    
+
     const maskedArgs = [];
     for (let i = 0; i < process.argv.length; i++) {
         const arg = process.argv[i];
@@ -327,7 +371,9 @@ export const logParams = (flags: any): void => {
 
     LOGGER.debug(`Command args:${EOL}${maskedArgs.join(EOL)}`);
 
-    const maskedFlags = Object.keys(flags).map(flag => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`);
+    const maskedFlags = Object.keys(flags).map(
+        (flag) => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`
+    );
     LOGGER.debug(`Parsed flags:${EOL}${maskedFlags}`);
 
     LOGGER.debug('Relevant environment variables:');

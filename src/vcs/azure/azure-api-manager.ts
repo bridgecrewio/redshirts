@@ -10,7 +10,6 @@ const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
 const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 
 export class AzureApiManager extends RateLimitVcsApiManager {
-
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, undefined, certPath);
     }
@@ -33,7 +32,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             params: {
                 $top: MAX_PAGE_SIZE,
                 'searchCriteria.fromDate': sinceDate.toISOString(),
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
@@ -43,13 +42,12 @@ export class AzureApiManager extends RateLimitVcsApiManager {
     }
 
     async getOrgRepos(org: string): Promise<AzureRepoResponse[]> {
-
         const projects = await this.getOrgProjects(org);
 
         const repos: AzureRepoResponse[] = [];
 
         for (const project of projects) {
-            repos.push(...await this.getProjectRepos(project));
+            repos.push(...(await this.getProjectRepos(project)));
         }
 
         return repos;
@@ -61,7 +59,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             method: 'GET',
             params: {
                 $top: MAX_PAGE_SIZE,
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
@@ -80,7 +78,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             url: `${owner}/${name}/_apis/git/repositories`,
             method: 'GET',
             params: {
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
@@ -123,7 +121,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         const [org, project] = repo.owner.split('/', 2);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);

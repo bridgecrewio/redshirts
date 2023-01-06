@@ -1,14 +1,14 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { Repo, RepoResponse, VcsSourceInfo } from './types';
 import { getFileBuffer, LOGGER } from './utils';
-import https = require('https')
+import https = require('https');
 import { ApiManager } from './api-manager';
 
 export abstract class VcsApiManager extends ApiManager {
     sourceInfo: VcsSourceInfo;
-    certPath?: string
-    cert?: Buffer
-    axiosInstance: AxiosInstance
+    certPath?: string;
+    cert?: Buffer;
+    axiosInstance: AxiosInstance;
 
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo);
@@ -19,21 +19,23 @@ export abstract class VcsApiManager extends ApiManager {
     }
 
     _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert ? {
-            baseURL,
-            headers,
-            httpsAgent: new https.Agent({ ca: this.cert })
-        } : {
-            baseURL,
-            headers,
-        };
+        return this.cert
+            ? {
+                  baseURL,
+                  headers,
+                  httpsAgent: new https.Agent({ ca: this.cert }),
+              }
+            : {
+                  baseURL,
+                  headers,
+              };
     }
 
-    abstract _getAxiosConfiguration(): any
-    abstract getOrgRepos(group: string): Promise<RepoResponse[]>
-    abstract getUserRepos(): Promise<RepoResponse[]>
+    abstract _getAxiosConfiguration(): any;
+    abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
+    abstract getUserRepos(): Promise<RepoResponse[]>;
     abstract enrichRepo(repo: Repo): Promise<void>;
-    abstract submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse>
+    abstract submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse>;
 
     hasMorePages(response: AxiosResponse): boolean {
         return response.headers.link !== undefined && response.headers.link.includes('rel="next"');
@@ -89,11 +91,14 @@ export abstract class VcsApiManager extends ApiManager {
         return result;
     }
 
-    async submitFilteredPaginatedRequest(config: AxiosRequestConfig, filterfn: (c: any) => boolean): Promise<AxiosResponse> {
+    async submitFilteredPaginatedRequest(
+        config: AxiosRequestConfig,
+        filterfn: (c: any) => boolean
+    ): Promise<AxiosResponse> {
         // same as the regular pagination logic, except this one will run the filter function on each
         // page of results, and if any of the elements in that page matches, then the function
-        // will stop pagination, slice off that item and everything after it, and return. 
-        // This means that the filter function must use the field by which the results for the 
+        // will stop pagination, slice off that item and everything after it, and return.
+        // This means that the filter function must use the field by which the results for the
         // request are sorted.
         LOGGER.debug(`Submitting filtered request to ${config.url}`);
         let response = await this.submitRequest(config);
