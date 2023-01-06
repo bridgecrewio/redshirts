@@ -4,16 +4,6 @@ import { Repo, VcsSourceInfo } from './types';
 import { filterRepoList, getExplicitRepoList, getRepoListFromParams, logError, LOGGER, stringToArr } from './utils';
 import { VcsApiManager } from './vcs-api-manager';
 
-// TODO
-// - get commits from all branches for all VCSes and git log
-// - default to private only repos - should we explicitly check each repo for its visibility?
-// - document specific permissions needed
-// - public / private repos - include in output?
-// - document getting a cert chain
-// - some sort of errored repo list that is easy to review
-// - author vs committer
-// - rate limiting
-
 export abstract class VcsRunner extends BaseRunner {
     sourceInfo: VcsSourceInfo;
     apiManager: VcsApiManager;
