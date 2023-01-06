@@ -107,7 +107,15 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     }
 
     async handleRateLimit(response?: AxiosResponse): Promise<void> {
-        const rateLimitStatus = this.getRateLimitStatus(response) || (await this.checkRateLimitStatus());
+        // only explicitly check the rate limit status if we do not have a previous response yet
+        // this prevents unnecessary calls to the check rate limit endpoint in the case where
+        // rate limiting is not enabled or the system does not send data in the response headers consistently
+        const rateLimitStatus = response
+            ? this.getRateLimitStatus(response)
+            : this.lastResponse
+            ? this.getRateLimitStatus(this.lastResponse)
+            : await this.checkRateLimitStatus();
+
         LOGGER.debug(`Rate limit remaining: ${rateLimitStatus ? rateLimitStatus.remaining : 'unknown'}`);
         // <= to handle a weird edge case I encountered but coult not reproduce
         // Not 0 for a small concurrency buffer for other uses of this token

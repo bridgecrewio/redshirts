@@ -8,7 +8,14 @@ import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 export default class Bitbucket extends Command {
     static summary = 'Count active contributors for Bitbucket repos';
 
-    static description = `About rate limiting: Bitbucket uses an hourly rate limit that rolls over every minute. Thus, this tool will attempt to submit requests in as much of a burst as possible while respecting the rolling limit. If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a lower value here, because there is no way to check the rate liit status in a stateless way. For Bitbucket, you can also control throttling by setting the MAX_REQUESTS_PER_SECOND environment variable. This will cause the tool to submit no more than that many requests per second from the start of execution. This will slow down execution but avoid unexpected rate limit issues.`;
+    static description = `About authentication: this tool uses an app password with the following scopes:
+
+    - Repositories: read
+    - Account: read (not required if you always use --repos and / or --workspaces)
+
+    See: https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
+    
+    About rate limiting: Bitbucket uses an hourly rate limit that rolls over every minute. Thus, this tool will attempt to submit requests in as much of a burst as possible while respecting the rolling limit. If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a lower value here, because there is no way to check the rate liit status in a stateless way. For Bitbucket, you can also control throttling by setting the MAX_REQUESTS_PER_SECOND environment variable. This will cause the tool to submit no more than that many requests per second from the start of execution. This will slow down execution but avoid unexpected rate limit issues.`;
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --username my_username --token ATBBXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat`,
@@ -25,7 +32,7 @@ export default class Bitbucket extends Command {
         token: Flags.string({
             char: 't',
             description:
-                'A Bitbucket app token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
+                'A Bitbucket access token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted. See the description below for how to create this token.',
             required: true,
             helpGroup: HelpGroup.AUTH,
         }),

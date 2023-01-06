@@ -6,10 +6,7 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - document specific permissions needed
-// - document getting a cert chain
 // - author vs committer - use author always (not committer)
-// - clean up logging
 // - test on windows
 
 const EXCLUDED_EMAIL_REGEXES: RegExp[] = [/noreply/, /no-reply/];
@@ -72,7 +69,6 @@ export abstract class BaseRunner {
             }
         );
 
-        // TODO better error handling
         try {
             await tasks.run();
         } catch (error) {
