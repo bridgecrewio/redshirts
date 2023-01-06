@@ -35,6 +35,7 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
             // TODO determine tabular output format (mainly the header with total)
 
             const table = new Table({
+                title: 'Contributors per Repository',
                 columns: [
                     {
                         name: 'Repo',
@@ -52,9 +53,7 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
                 table.addRow({ Repo: repo, Contributors: contributors.size });
             }
 
-            console.log('\n');
             table.printTable();
-
             console.log(`Total unique contributors: ${counter.contributorsByEmail.size}`);
 
             break;

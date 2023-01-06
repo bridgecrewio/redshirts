@@ -22,6 +22,7 @@
         "@oclif/plugin-help": "^5",
         "axios": "^1.2.1",
         "bottleneck": "^2.19.5",
+        "chalk": "^5.2.0",
         "console-table-printer": "^2.11.1",
         "listr": "^0.14.3",
         "winston": "^3.8.2"
