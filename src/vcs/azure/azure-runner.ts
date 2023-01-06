@@ -55,9 +55,6 @@ export class AzureRunner extends VcsRunner {
         // then our first API call will be actually getting commits. Otherwise, our first
         // API call will be here (getting org/project repos or getting repo visibility)
 
-        // TODO optimization for the future - we can actually filter out public repos at the project level,
-        // because that is what determines visibility
-
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
         const reposFile: string | undefined = this.flags['repo-file'];

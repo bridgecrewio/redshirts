@@ -5,7 +5,6 @@ import { init } from '../common/utils';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
-// TODO notes about rate limiting
 export default class Bitbucket extends Command {
     static summary = 'Count active contributors for Bitbucket repos'
 

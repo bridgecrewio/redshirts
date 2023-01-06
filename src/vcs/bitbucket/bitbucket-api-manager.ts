@@ -7,8 +7,6 @@ import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
 
-// TODO /commits returns all branches by default. To do otherwise, we need to know the name of the main branch
-
 export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     _getAxiosConfiguration(): AxiosRequestConfig {

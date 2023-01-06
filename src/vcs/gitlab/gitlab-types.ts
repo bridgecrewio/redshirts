@@ -8,7 +8,6 @@ export type GitlabAuthor = {
 }
 
 export interface GitlabCommit extends VCSCommit {
-    // TODO gitlab commits do not have a username. Need to handle?
     committer_name: string,
     committer_email: string,
     committed_date: string

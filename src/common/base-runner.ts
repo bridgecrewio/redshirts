@@ -45,8 +45,6 @@ export abstract class BaseRunner {
 
         const sinceDate = getXDaysAgoDate(this.flags.days);
 
-        // TODO better error handling
-
         try {
             const repos = await this.getRepoList();
             await this.processRepos(repos, sinceDate);
@@ -76,7 +74,7 @@ export abstract class BaseRunner {
                 if (error instanceof AxiosError && isSslError(error)) {
                     throw error;
                 }
-                
+
                 let message = `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`;
                 if (error instanceof AxiosError) {
                     message += ` - the API returned an error: ${error.message}`;
