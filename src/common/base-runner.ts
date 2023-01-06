@@ -20,10 +20,10 @@ export abstract class BaseRunner {
     apiManager: ApiManager;
     repoSeparator: string;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(
         sourceInfo: SourceInfo,
         excludedEmailRegexes: Array<string>,
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         flags: any,
         apiManager: ApiManager,
         repoSeparator = '/'
