@@ -6,15 +6,14 @@ import { init } from '../common/utils';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
 
-// TODO access notes:
-// user must be at least "basic" in the ADO org (which is higher than you get by default if you add a user to a team)
-
 export default class AzureDevOps extends Command {
 
     static summary = 'Count active contributors for Azure DevOps repos'
 
     static description = `Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not possible to use a personal access token to fetch all orgs and repos for a user.
     
+    About authentication: you must use a personal access token, scoped to the appropriate organization(s), with the Code: Read scope. The token's user must have at least a Basic level of membership to the organizations being scanned. Note that this is higher than the default access level that may be provided when you add a user to a team. See: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows and https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/add-organization-users?view=azure-devops&tabs=browser
+
     About rate limiting: For Azure DevOps, this tool will attempt to submit requests in a burst until a rate limit is hit, and then respect the rate limit reset information provided in the response. Azure DevOps does not consistently provide rate limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.`
 
     static examples = [
