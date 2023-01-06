@@ -213,11 +213,15 @@ export const logError = (error: Error, message?: string, args?: any): void => {
 };
 
 export const deleteFlagKey = (obj: {[key: string]: FlagBase<any, any>}, ...keys: string[]): {[key: string]: FlagBase<any, any>} => {
-    for (const key of keys) {
-        delete obj[key];
+    const ret: typeof obj = {};
+    
+    for (const key of Object.keys(obj)) {
+        if (!keys.includes(key) && key in obj) {
+            ret[key] = obj[key];
+        }
     }
 
-    return obj;
+    return ret;
 };
 
 export const splitAndCombine = (stringToSplit: string, delimiter: string, limit: number): string[] => {

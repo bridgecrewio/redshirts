@@ -11,7 +11,7 @@ let githubApiManager: GithubApiManager;
 const sinceDate = new Date(1672380000000);
 
 before(() => {
-    githubApiManager = new GithubApiManager(Github.getSourceInfo(''));
+    githubApiManager = new GithubApiManager(Github.getSourceInfo('', true));
 });
 
 describe('github api rate limiting', () => {

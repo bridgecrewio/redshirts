@@ -8,7 +8,8 @@ describe('github runner', () => {
         const repos: GithubRepoResponse[] = [
             {
                 name: 'repo1',
-                owner: { login: 'owner1' }
+                owner: { login: 'owner1' },
+                private: true
             },
             {
                 name: 'repo2',
