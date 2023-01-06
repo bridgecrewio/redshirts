@@ -10,6 +10,8 @@ export default class BitbucketServer extends Bitbucket {
     static summary = 'Count active contributors for Bitbucket server (self-hosted) repos'
 
     static description = `This tool works with Bitbucket server v1 APIs.
+
+    About authentication: you must create an HTTP access token with Project read and repository read permissions. See: https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html
     
     About rate limiting: Bitbucket server rate limiting is unique in that you specify a "token bucket size" and "refill rate". To translate this to requests per hour, you must calculate how many requests a client can submit in an hour without being limited. This is basically equal to the refill rate, which is the number of requests per second we can submit indefinitely without being limited. The requests per hour is then the refill rate * 3600.
     See https://confluence.atlassian.com/bitbucketserver/improving-instance-stability-with-rate-limiting-976171954.html for more information.
