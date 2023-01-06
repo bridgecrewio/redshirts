@@ -1,22 +1,21 @@
 {
-  "extends": [
-    "oclif",
-    "oclif-typescript",
-    "prettier"
-  ],
-  "rules": {
-    "no-else-return": "off",
-    "radix": "off",
-    "max-params": [
-      1, 
-      {
-        "max": 8
-      }
-    ],
-    "semi": [
-      2,
-      "always"
-    ],
-    "unicorn/numeric-separators-style": ["error", {"onlyIfContainsSeparator": true }]
-  }
+    "extends": ["oclif", "oclif-typescript", "prettier"],
+    "rules": {
+        "no-else-return": "off",
+        "radix": "off",
+        "no-await-in-loop": "off",
+        "max-params": [
+            1,
+            {
+                "max": 8
+            }
+        ],
+        "semi": [2, "always"],
+        "unicorn/numeric-separators-style": [
+            "error",
+            {
+                "onlyIfContainsSeparator": true
+            }
+        ]
+    }
 }

@@ -6,18 +6,12 @@ import { LocalCommit } from './local-types';
 
 const GIT_COMMAND = 'git';
 const COMMIT_MARKER = '--commit--';
-const GIT_LOG_ARGS = [
-    'log',
-    '--date=raw',
-    `--format="${COMMIT_MARKER}%nauthor:%an%nemail:%ae%ndate:%at%n"`,
-    '--since'
-];
+const GIT_LOG_ARGS = ['log', '--date=raw', `--format="${COMMIT_MARKER}%nauthor:%an%nemail:%ae%ndate:%at%n"`, '--since'];
 const DEFAULT_COMMAND_OPTS = {
     shell: true,
 };
 
 export class LocalApiManager extends ApiManager {
-
     async getCommits(repo: Repo, sinceDate: Date): Promise<LocalCommit[]> {
         // git log in unix seconds
         const timestamp = Math.floor(sinceDate.getTime() / 1000);
@@ -27,12 +21,12 @@ export class LocalApiManager extends ApiManager {
 
         const opts = {
             ...DEFAULT_COMMAND_OPTS,
-            cwd: repoPath
+            cwd: repoPath,
         };
 
         const gitLog = await exec(GIT_COMMAND, args, opts);
 
-        if (process.env.LOG_API_RESPONSES?.toLowerCase() === 'true') {
+        if (this.logApiResponses) {
             LOGGER.debug(gitLog);
         }
 
@@ -60,10 +54,10 @@ export class LocalApiManager extends ApiManager {
             commits.push({
                 name: splitAndCombine(authorLine, ':', 2)[1],
                 email: splitAndCombine(emailLine, ':', 2)[1],
-                timestamp: Number.parseInt(splitAndCombine(timestampLine, ':', 2)[1] + '000')  // need to convert from seconds to ms
+                timestamp: Number.parseInt(splitAndCombine(timestampLine, ':', 2)[1] + '000'), // need to convert from seconds to ms
             });
 
-            lineNumber += 5;  // the commit marker, the 3 lines above, and the blank line
+            lineNumber += 5; // the commit marker, the 3 lines above, and the blank line
         }
 
         return commits;

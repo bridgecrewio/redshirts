@@ -10,7 +10,6 @@ const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
 const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 
 export class AzureApiManager extends RateLimitVcsApiManager {
-
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, undefined, certPath);
     }
@@ -26,37 +25,31 @@ export class AzureApiManager extends RateLimitVcsApiManager {
     }
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<AzureCommit[]> {
-        const repoPath = repo.owner + '/' + repo.name;
         const [org, project] = repo.owner.split('/', 2);
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}/commits`,
             method: 'GET',
             params: {
                 $top: MAX_PAGE_SIZE,
                 'searchCriteria.fromDate': sinceDate.toISOString(),
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data.value || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
     async getOrgRepos(org: string): Promise<AzureRepoResponse[]> {
-
         const projects = await this.getOrgProjects(org);
 
         const repos: AzureRepoResponse[] = [];
 
         for (const project of projects) {
-            // eslint-disable-next-line no-await-in-loop
-            repos.push(...await this.getProjectRepos(project));
+            repos.push(...(await this.getProjectRepos(project)));
         }
 
-        // org / owner does not come explicitly as a field
         return repos;
     }
 
@@ -66,7 +59,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             method: 'GET',
             params: {
                 $top: MAX_PAGE_SIZE,
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
@@ -81,16 +74,19 @@ export class AzureApiManager extends RateLimitVcsApiManager {
     async getProjectRepos(project: AzureProjectsResponse): Promise<AzureRepoResponse[]> {
         const { owner, name } = project;
         const repoOwner = `${owner}/${name}`;
-        LOGGER.debug(`Getting repositories for project: ${repoOwner}`);
         const config: AxiosRequestConfig = {
             url: `${owner}/${name}/_apis/git/repositories`,
             method: 'GET',
             params: {
-                'api-version': API_VERSION
+                'api-version': API_VERSION,
             },
         };
 
-        const response = await this.axiosInstance.request(config);
+        LOGGER.debug(`Submitting request to ${config.url}`);
+
+        const response = await this.submitRequest(config); // not paginated
+
+        // org / owner does not come explicitly as a field
         return response.data.value.map((p: AzureRepoResponse) => {
             p.owner = repoOwner;
             return p;
@@ -111,8 +107,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
 
             LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
+            response = await this.submitRequest(config);
             result.data.value = [...result.data.value, ...response.data.value];
             total += result.data.count;
         }
@@ -126,7 +121,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         const [org, project] = repo.owner.split('/', 2);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);

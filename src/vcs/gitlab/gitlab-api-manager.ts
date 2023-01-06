@@ -11,7 +11,6 @@ const RATE_LIMIT_RESET_HEADER = 'ratelimit-reset';
 const RATE_LIMIT_ENDPOINT = 'user';
 
 export class GitlabApiManager extends RateLimitVcsApiManager {
-
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
     }
@@ -19,14 +18,11 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
             Authorization: `Bearer ${this.sourceInfo.token}`,
-            'Accept-Encoding': 'gzip,deflate,compress'
+            'Accept-Encoding': 'gzip,deflate,compress',
         });
     }
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<GitlabCommit[]> {
-
-        const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}/repository/commits`,
             method: 'GET',
@@ -38,7 +34,6 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -49,12 +44,11 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
 
         for (const group of groups) {
             // the groups call lists subgroups separately, so we don't need to get subgroups
-            // eslint-disable-next-line no-await-in-loop
             const repos = await this.getOrgRepos(group.full_path, false);
             groupRepos.push(...repos);
         }
 
-        LOGGER.debug(`Found ${groupRepos.length} repos in group memberships`);
+        LOGGER.debug(`Found ${groupRepos.length} projects in user's group memberships`);
 
         const userId = await this.getUserId();
 
@@ -62,25 +56,24 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             url: `/users/${userId}/projects`,
             method: 'GET',
             params: {
-                per_page: MAX_PAGE_SIZE
+                per_page: MAX_PAGE_SIZE,
             },
         };
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const userRepos: GitlabRepoResponse[] = result.data;
 
-        LOGGER.debug(`Found ${userRepos.length} user repos`);
+        LOGGER.debug(`Found ${userRepos.length} user projects`);
 
         return [...userRepos, ...groupRepos];
     }
 
     async getGroups(): Promise<GitlabGroupResponse[]> {
-
         const config: AxiosRequestConfig = {
             url: 'groups',
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                simple: true
+                simple: true,
             },
         };
 
@@ -96,15 +89,14 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                include_subgroups: includeSubgroups
+                include_subgroups: includeSubgroups,
             },
         };
 
         try {
             const result: AxiosResponse = await this.submitPaginatedRequest(config);
             return result.data;
-        }
-        catch (error) {
+        } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 404) {
                 LOGGER.debug(`Got 404 from ${config.url} call - attempting a user call`);
                 config.url = `users/${encodeURIComponent(group)}/projects`;
@@ -129,7 +121,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);

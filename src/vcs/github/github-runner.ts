@@ -5,7 +5,6 @@ import { GithubApiManager } from './github-api-manager';
 import { GithubCommit, GithubRepoResponse } from './github-types';
 
 export class GithubRunner extends VcsRunner {
-
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GithubApiManager) {
         super(sourceInfo, [], flags, apiManager);
@@ -17,14 +16,13 @@ export class GithubRunner extends VcsRunner {
             const { commit, author } = commitObject;
             const username = author?.login; // we need to use this object, because the nested commit object has the display name at the time of the commit
 
-            // TODO do we need null checks here?
-            const email: string = commit?.author?.email;
-            const commitDate: string = commit?.author?.date;
+            const email: string = commit.author.email;
+            const commitDate: string = commit.author.date;
 
             const newCommit = {
                 username,
                 commitDate,
-                email
+                email,
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);

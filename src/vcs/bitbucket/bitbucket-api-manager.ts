@@ -2,15 +2,17 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ThrottledVcsApiManager } from '../../common/throttled-vcs-api-manager';
 import { Repo } from '../../common/types';
 import { LOGGER, mapIterable } from '../../common/utils';
-import { BitbucketCommit, BitbucketRepoResponse, BitbucketUserRepoResponse, BitbucketWorkspaceResponse } from './bitbucket-types';
+import {
+    BitbucketCommit,
+    BitbucketRepoResponse,
+    BitbucketUserRepoResponse,
+    BitbucketWorkspaceResponse,
+} from './bitbucket-types';
 import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
 
-// TODO /commits returns all branches by default. To do otherwise, we need to know the name of the main branch
-
 export class BitbucketApiManager extends ThrottledVcsApiManager {
-
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
             Authorization: `Basic ${Buffer.from(this.sourceInfo.token).toString('base64')}`,
@@ -19,20 +21,20 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
-        
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
             params: {
-                pagelen: MAX_PAGE_SIZE
+                pagelen: MAX_PAGE_SIZE,
             },
         };
 
         if (repo.defaultBranch) {
             config.params.include = repo.defaultBranch;
         } else {
-            LOGGER.debug(`The repo ${repoPath} does not have a known default branch, so commits from all branches will be included. Was there an error earlier on?`);
+            LOGGER.debug(
+                `The repo ${repoPath} does not have a known default branch, so commits from all branches will be included. Was there an error earlier on?`
+            );
         }
 
         // Bitbucket does not support a 'since' filter, so we have to do it manually
@@ -40,7 +42,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -49,8 +50,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const repos = [];
         for (const workspace of workspaces) {
-            // eslint-disable-next-line no-await-in-loop
-            repos.push(...await this.getOrgRepos(workspace));
+            repos.push(...(await this.getOrgRepos(workspace)));
         }
 
         LOGGER.debug(`Found ${repos.length} repos across ${workspaces.length} workspaces`);
@@ -62,9 +62,13 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
         // get the unique workspaces for the user's own repos and the workspaces of which they are a member
         const userRepos = await this.getUserRepoPermissions();
 
-        const userWorkspaces = new Set(userRepos.map(r => r.repository && r.repository.full_name && r.repository.full_name.split('/')[0]).filter(r => r));
+        const userWorkspaces = new Set(
+            userRepos
+                .map((r) => r.repository && r.repository.full_name && r.repository.full_name.split('/')[0])
+                .filter((r) => r)
+        );
 
-        LOGGER.debug(`Got the following workspaces from the user's repos: ${mapIterable(userWorkspaces, w => w)}`);
+        LOGGER.debug(`Got the following workspaces from the user's repos: ${mapIterable(userWorkspaces, (w) => w)}`);
 
         const config: AxiosRequestConfig = {
             url: 'workspaces',
@@ -104,7 +108,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);
