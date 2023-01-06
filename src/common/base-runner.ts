@@ -61,7 +61,6 @@ export abstract class BaseRunner {
                         let currentRepo = 1;
                         for (const repo of ctx.repos) {
                             task.title = `Processing repositories: ${currentRepo}/${reposCount}`;
-                            // eslint-disable-next-line no-await-in-loop
                             await this.processRepo(repo, sinceDate);
                             currentRepo++;
                         }
