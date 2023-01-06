@@ -1,12 +1,11 @@
 /* eslint-disable no-case-declarations */
-import { BaseRunner } from "./base-runner";
-import { OutputFormat, OutputTableRow, Report, SortField, SummaryReport } from "./types";
-import { jsonReportReplacer, mapIterable } from "./utils";
-import { Table } from "console-table-printer";
+import { BaseRunner } from './base-runner';
+import { OutputFormat, OutputTableRow, Report, SortField, SummaryReport } from './types';
+import { jsonReportReplacer, mapIterable } from './utils';
+import { Table } from 'console-table-printer';
 
 export const printSummary = (counter: BaseRunner, outputFormat: string, sortField: SortField): void => {
     switch (outputFormat) {
-
         case OutputFormat.JSON:
             console.log(JSON.stringify(generateReportObject(counter), jsonReportReplacer, 2));
 
@@ -19,7 +18,7 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
             const repos = mapIterable(counter.contributorsByRepo.entries(), (value): OutputTableRow => {
                 return {
                     Repo: value[0],
-                    Contributors: value[1].size
+                    Contributors: value[1].size,
                 };
             });
 
@@ -39,47 +38,49 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
                 columns: [
                     {
                         name: 'Repo',
-                        alignment: 'left'
+                        alignment: 'left',
                     },
                     {
                         name: 'Contributors',
-                        alignment: 'left'
-                    }
+                        alignment: 'left',
+                    },
                 ],
-                sort: getSortFn(sortField)
+                sort: getSortFn(sortField),
             });
 
             for (const [repo, contributors] of counter.contributorsByRepo) {
-                table.addRow({ 'Repo': repo, 'Contributors': contributors.size });
+                table.addRow({ Repo: repo, Contributors: contributors.size });
             }
 
+            console.log('\n');
             table.printTable();
 
             break;
     }
 };
 
-const getSortFn = (sortField: SortField): (repo1: OutputTableRow, repo2: OutputTableRow) => number => {
+const getSortFn = (sortField: SortField): ((repo1: OutputTableRow, repo2: OutputTableRow) => number) => {
     return (repo1: OutputTableRow, repo2: OutputTableRow): number => {
-        return sortField === SortField.REPO ? repo1.Repo.localeCompare(repo2.Repo) : repo2.Contributors - repo1.Contributors;
+        return sortField === SortField.REPO
+            ? repo1.Repo.localeCompare(repo2.Repo)
+            : repo2.Contributors - repo1.Contributors;
     };
 };
 
 const generateReportObject = (counter: BaseRunner): SummaryReport => {
-
     const repos = new Map<string, Report>();
 
     for (const [repo, contributors] of counter.contributorsByRepo) {
         repos.set(repo, {
             totalContributors: contributors.size,
-            contributors: [...contributors.values()]
+            contributors: [...contributors.values()],
         });
     }
 
     const report: SummaryReport = {
         totalContributors: counter.contributorsByEmail.size,
         contributors: [...counter.contributorsByEmail.values()],
-        repos
+        repos,
     };
 
     return report;
