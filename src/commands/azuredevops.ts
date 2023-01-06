@@ -72,7 +72,8 @@ export default class AzureDevOps extends Command {
             orgFlagName: 'orgs',
             minPathLength: 3,
             maxPathLength: 3,
-            includePublic
+            includePublic,
+            requiresEnrichment: false
         };
     }
 }

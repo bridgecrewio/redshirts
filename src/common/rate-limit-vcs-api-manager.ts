@@ -96,7 +96,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         LOGGER.debug(`Rate limit remaining: ${rateLimitStatus ? rateLimitStatus.remaining : 'unknown'}`);
         // <= to handle a weird edge case I encountered but coult not reproduce
         // Not 0 for a small concurrency buffer for other uses of this token
-        if (rateLimitStatus && rateLimitStatus.remaining <= 5) {
+        if (rateLimitStatus && rateLimitStatus.remaining <= 0) {
             LOGGER.warn('Hit rate limit for VCS');
             await sleepUntilDateTime(new Date(rateLimitStatus.reset!.getTime() + 10000)); // 10 second buffer
         }

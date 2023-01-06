@@ -98,11 +98,18 @@ describe('utils', () => {
 
         const flags = {
             a: Flags.integer(),
-            b: Flags.boolean(),
-            c: Flags.string()
+            b: Flags.integer(),
+            c: Flags.integer()
         };
 
-        expect(deleteFlagKey(flags, 'b', 'c', 'd')).to.deep.equal({a: Flags.integer()});
+        const newFlags = deleteFlagKey(flags, 'b', 'c', 'd');
+        expect(newFlags).to.deep.equal({a: Flags.integer()});
+        // flags is unmodified
+        expect(flags).to.deep.equal({
+            a: Flags.integer(),
+            b: Flags.integer(),
+            c: Flags.integer()
+        });
     });
 
     it('generates a server URL', () => {

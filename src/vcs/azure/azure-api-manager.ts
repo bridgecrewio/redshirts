@@ -122,7 +122,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         return result;
     }
 
-    async isRepoPublic(repo: Repo): Promise<boolean> {
+    async enrichRepo(repo: Repo): Promise<void> {
         const [org, project] = repo.owner.split('/', 2);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}`,
@@ -132,6 +132,6 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         LOGGER.debug(`Submitting request to ${config.url}`);
         const response = await this.submitRequest(config);
         const data: AzureRepoResponse = response.data;
-        return data.project.visibility === 'public';
+        repo.private = data.project.visibility !== 'public';
     }
 }

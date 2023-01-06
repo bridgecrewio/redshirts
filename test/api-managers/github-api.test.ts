@@ -9,18 +9,22 @@ import * as utils from "../../src/common/utils";
 
 let githubApiManager: GithubApiManager;
 const sinceDate = new Date(1672380000000);
+let stub: MockAdapter;
 
-before(() => {
-    githubApiManager = new GithubApiManager(Github.getSourceInfo(''));
+beforeEach(() => {
+    githubApiManager = new GithubApiManager(Github.getSourceInfo('', true));
+    stub = new MockAdapter(githubApiManager.axiosInstance);
+    stub.onGet(githubApiManager.rateLimitEndpoint).reply(200, {}, {
+        'x-ratelimit-remaining': '5',
+        'x-ratelimit-reset': '1672799029'
+    });
 });
 
+// before(() => {
+//     githubApiManager = new GithubApiManager(Github.getSourceInfo('', true));
+// });
+
 describe('github api rate limiting', () => {
-
-    let stub: MockAdapter;
-
-    before(() => {
-        stub = new MockAdapter(githubApiManager.axiosInstance);
-    });
 
     afterEach(() => {
         restore();
@@ -28,10 +32,10 @@ describe('github api rate limiting', () => {
 
 
     it('checks the rate limit status', async () => {
-        stub.onGet(githubApiManager.rateLimitEndpoint).replyOnce(200, {}, {
-            'x-ratelimit-remaining': '5',
-            'x-ratelimit-reset': '1672799029'
-        });
+        // stub.onGet(githubApiManager.rateLimitEndpoint).replyOnce(200, {}, {
+        //     'x-ratelimit-remaining': '5',
+        //     'x-ratelimit-reset': '1672799029'
+        // });
 
         const rateLimit = await githubApiManager.checkRateLimitStatus();
         expect(rateLimit).to.deep.equal({
@@ -201,11 +205,6 @@ describe('github helpers', () => {
 });
 
 describe('github api queries', () => {
-    let stub: MockAdapter;
-
-    before(() => {
-        stub = new MockAdapter(githubApiManager.axiosInstance);
-    });
 
     it('fetches paginated commits', async () => {
         stub.onGet(`repos/owner/repo/commits`, { params: { per_page: 100, since: sinceDate.toISOString() } }).replyOnce(200, [

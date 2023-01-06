@@ -50,7 +50,8 @@ export default class Gitlab extends Command {
             orgFlagName: 'groups',
             minPathLength: 2,
             maxPathLength: 99,
-            includePublic
+            includePublic,
+            requiresEnrichment: false
         };
     }
 }

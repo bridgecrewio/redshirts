@@ -22,7 +22,10 @@ export interface BitbucketUserRepoResponse {
 
 export interface BitbucketRepoResponse extends RepoResponse {
     full_name: string
-    is_private: boolean
+    is_private: boolean,
+    mainbranch: {
+        name: string
+    }
 }
 
 export type BitbucketWorkspaceResponse = {

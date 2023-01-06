@@ -32,7 +32,7 @@ export abstract class VcsApiManager extends ApiManager {
     abstract _getAxiosConfiguration(): any
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>
     abstract getUserRepos(): Promise<RepoResponse[]>
-    abstract isRepoPublic(repo: Repo): Promise<boolean>;
+    abstract enrichRepo(repo: Repo): Promise<void>;
     abstract submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse>
 
     hasMorePages(response: AxiosResponse): boolean {
