@@ -10,7 +10,7 @@ export default class GithubServer extends Github {
 
     static description = `This tool works with GitHub enterprise server v3 APIs. Note that earlier versions are out of support from GitHub, and thus are not supported here.
 
-    Authentication: you must use a personal access token (PAT) with the "repo" scope (the top-level checkbox must be checked).
+    About authentication: you must use a personal access token (PAT) with the "repo" scope (the top-level checkbox must be checked). See: https://docs.github.com/en/enterprise-server@3.7/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
     
     About rate limiting: GitHub server returns rate limit details in response headers, and thus this tool will submit requests as quickly as possible while respecting the rate limit provided. If rate limiting is disabled on the server, then this tool will not attempt to throttle requests.`
 
