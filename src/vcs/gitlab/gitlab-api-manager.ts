@@ -49,7 +49,6 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
 
         for (const group of groups) {
             // the groups call lists subgroups separately, so we don't need to get subgroups
-            // eslint-disable-next-line no-await-in-loop
             const repos = await this.getOrgRepos(group.full_path, false);
             groupRepos.push(...repos);
         }

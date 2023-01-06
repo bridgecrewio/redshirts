@@ -52,7 +52,6 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         const repos: AzureRepoResponse[] = [];
 
         for (const project of projects) {
-            // eslint-disable-next-line no-await-in-loop
             repos.push(...await this.getProjectRepos(project));
         }
 
@@ -111,7 +110,6 @@ export class AzureApiManager extends RateLimitVcsApiManager {
 
             LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
-            // eslint-disable-next-line no-await-in-loop
             response = await this.axiosInstance.request(config);
             result.data.value = [...result.data.value, ...response.data.value];
             total += result.data.count;

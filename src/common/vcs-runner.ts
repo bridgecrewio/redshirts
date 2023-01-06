@@ -47,7 +47,6 @@ export abstract class VcsRunner extends BaseRunner {
                 LOGGER.debug(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
                 for (const repo of addedRepos) {
                     try {
-                        // eslint-disable-next-line no-await-in-loop
                         await this.apiManager.enrichRepo(repo);
                     } catch (error) {
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
@@ -92,7 +91,6 @@ export abstract class VcsRunner extends BaseRunner {
         for (const org of orgs) {
             LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
             try {
-                // eslint-disable-next-line no-await-in-loop
                 const orgRepos = (await this.apiManager.getOrgRepos(org));
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {

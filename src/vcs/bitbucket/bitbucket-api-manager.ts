@@ -20,7 +20,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
         LOGGER.debug(`Getting commits for repo: ${repoPath}`);
-        
+
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
@@ -49,7 +49,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const repos = [];
         for (const workspace of workspaces) {
-            // eslint-disable-next-line no-await-in-loop
             repos.push(...await this.getOrgRepos(workspace));
         }
 

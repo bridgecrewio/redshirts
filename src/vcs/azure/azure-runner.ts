@@ -50,7 +50,7 @@ export class AzureRunner extends VcsRunner {
 
         // TODO optimization for the future - we can actually filter out public repos at the project level,
         // because that is what determines visibility
-        
+
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
         const reposFile: string | undefined = this.flags['repo-file'];
@@ -72,10 +72,9 @@ export class AzureRunner extends VcsRunner {
 
         const projectRepos: Repo[] = [];
         for (const project of explicitProjects) {
-            // eslint-disable-next-line no-await-in-loop
             projectRepos.push(...this.convertRepos(await this.apiManager.getProjectRepos(project)));
         }
-        
+
         if (explicitProjects.length > 0) {
             LOGGER.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...projectRepos);
@@ -87,7 +86,6 @@ export class AzureRunner extends VcsRunner {
                 LOGGER.debug(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
                 for (const repo of addedRepos) {
                     try {
-                        // eslint-disable-next-line no-await-in-loop
                         await this.apiManager.enrichRepo(repo);
                     } catch (error) {
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);

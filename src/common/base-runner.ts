@@ -7,7 +7,6 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // TODO
 // - document specific permissions needed
 // - document getting a cert chain
-// - some sort of errored repo list that is easy to review
 // - author vs committer - use author always (not committer)
 // - clean up logging
 // - test on windows
@@ -32,7 +31,7 @@ export abstract class BaseRunner {
         this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
-        this.apiManager = apiManager; 
+        this.apiManager = apiManager;
     }
 
     abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void
@@ -66,7 +65,6 @@ export abstract class BaseRunner {
     async processRepos(repos: Repo[], sinceDate: Date): Promise<void> {
         for (const repo of repos) {
             try {
-                // eslint-disable-next-line no-await-in-loop
                 const commits: VCSCommit[] = await this.apiManager.getCommits(repo, sinceDate);
                 if (commits.length > 0) {
                     this.aggregateCommitContributors(repo, commits);

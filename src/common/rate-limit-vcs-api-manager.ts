@@ -51,8 +51,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         //     let r: AxiosResponse | undefined;
             
         //     try {
-        //         // eslint-disable-next-line no-await-in-loop
-        //         r = await this.submitRequest(config, r);
+        //                 //         r = await this.submitRequest(config, r);
         //         console.debug(r.status);
         //         console.debug(Object.keys(r.headers));
         //     } catch (error) {
