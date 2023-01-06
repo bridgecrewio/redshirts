@@ -183,10 +183,10 @@ const logFormat = winston.format.printf(({ level, message, timestamp, ...rest })
     
     const error = rest.error && rest.error instanceof Error ? { error: { message: rest.error.message, stack: rest.error.stack}} : {};
     const argumentsString = JSON.stringify({ ...rest, ...error });
-    return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
+    return `${timestamp} [${level.padEnd(5)}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
 
-const getLogLevel = (): string => {
+const getLogLevelFromEnv = (): string => {
     const envLevel = process.env.LOG_LEVEL;
     if (!envLevel) {
         return DEFAULT_LOG_LEVEL;
@@ -199,7 +199,9 @@ const getLogLevel = (): string => {
 };
 
 export const LOGGER = winston.createLogger({
-    level: getLogLevel(),
+    // Attempt to set it from the env if it's there, so we can log as early as possible.
+    // Otherwise gets properly set in the init method
+    level: getLogLevelFromEnv(),
     transports: [
         new winston.transports.Console({
             stderrLevels: LOG_LEVELS,
@@ -328,7 +330,7 @@ export const logParams = (flags: any): void => {
     LOGGER.debug(`Command args:${EOL}${maskedArgs.join(EOL)}`);
 
     const maskedFlags = Object.keys(flags).map(flag => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`);
-    LOGGER.debug(`Parsed flags:${EOL}${maskedFlags}`);
+    LOGGER.debug(`Parsed flags:${EOL}${maskedFlags.join(EOL)}`);
 
     LOGGER.debug('Relevant environment variables:');
     const relevantEnvVars = [MAX_REQUESTS_PER_SECOND_VAR, LOG_API_RESPONSES_ENV];
