@@ -1,13 +1,19 @@
 import { AxiosError } from 'axios';
 import { Repo, VcsSourceInfo } from '../../common/types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER } from '../../common/utils';
+import {
+    filterRepoList,
+    getExplicitRepoList,
+    getRepoListFromParams,
+    isSslError,
+    logError,
+    LOGGER,
+} from '../../common/utils';
 import { VcsRunner } from '../../common/vcs-runner';
 import { AzureApiManager } from './azure-api-manager';
 import { AzureCommit, AzureProjectsResponse, AzureRepoResponse } from './azure-types';
 
 export class AzureRunner extends VcsRunner {
-
-    apiManager: AzureApiManager  // need the explicit type for some calls
+    apiManager: AzureApiManager; // need the explicit type for some calls
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: AzureApiManager) {
@@ -23,7 +29,7 @@ export class AzureRunner extends VcsRunner {
             const newCommit = {
                 username: author.name,
                 email: author.email,
-                commitDate: author.date
+                commitDate: author.date,
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);
@@ -67,23 +73,29 @@ export class AzureRunner extends VcsRunner {
 
         if (orgsString) {
             repos = await this.getOrgRepos(orgsString);
-            LOGGER.debug(`Got repos from org(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from org(s): ${repos.map((r) => `${r.owner}/${r.name}`)}`);
         }
 
-        const explicitProjects = getRepoListFromParams(this.sourceInfo.minPathLength - 1, this.sourceInfo.maxPathLength - 1, projectsList).map(p => {
+        const explicitProjects = getRepoListFromParams(
+            this.sourceInfo.minPathLength - 1,
+            this.sourceInfo.maxPathLength - 1,
+            projectsList
+        ).map((p) => {
             return p as AzureProjectsResponse;
         });
 
         if (explicitProjects.length > 0) {
             const projectRepos = await this.getProjectRepos(explicitProjects);
-            LOGGER.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from project(s): ${projectRepos.map((r) => `${r.owner}/${r.name}`)}`);
             repos.push(...projectRepos);
         }
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
         if (addedRepos.length > 0) {
             if (!this.sourceInfo.includePublic) {
-                LOGGER.info(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
+                LOGGER.info(
+                    `--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`
+                );
                 for (const repo of addedRepos) {
                     try {
                         await this.apiManager.enrichRepo(repo);
@@ -93,28 +105,47 @@ export class AzureRunner extends VcsRunner {
                             throw error;
                         }
 
-                        logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
+                        logError(
+                            error as Error,
+                            `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`
+                        );
                     }
                 }
             }
 
-            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map((r) => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
 
-        const skipProjects = getRepoListFromParams(this.sourceInfo.minPathLength - 1, this.sourceInfo.maxPathLength - 1, skipProjectsList).map(p => {
+        const skipProjects = getRepoListFromParams(
+            this.sourceInfo.minPathLength - 1,
+            this.sourceInfo.maxPathLength - 1,
+            skipProjectsList
+        ).map((p) => {
             return p as AzureProjectsResponse;
         });
-        repos = filterRepoList(repos, skipProjects, 'project', (repo, project) => repo.owner === `${project.owner}/${project.name}`);
+        repos = filterRepoList(
+            repos,
+            skipProjects,
+            'project',
+            (repo, project) => repo.owner === `${project.owner}/${project.name}`
+        );
 
-        const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
+        const skipRepos = getRepoListFromParams(
+            this.sourceInfo.minPathLength,
+            this.sourceInfo.maxPathLength,
+            skipReposList,
+            skipReposFile
+        );
         repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
 
         // now that we have all the repos and their visibility, we can remove the public ones if needed
         if (!this.sourceInfo.includePublic) {
-            repos = repos.filter(repo => {
+            repos = repos.filter((repo) => {
                 if (repo.private === undefined) {
-                    LOGGER.info(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    LOGGER.info(
+                        `Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`
+                    );
                     return false;
                 } else if (repo.private) {
                     return true;
@@ -125,7 +156,7 @@ export class AzureRunner extends VcsRunner {
             });
         }
 
-        LOGGER.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
+        LOGGER.debug(`Final repo list: ${repos.map((r) => `${r.owner}/${r.name}`)}`);
 
         return repos;
     }

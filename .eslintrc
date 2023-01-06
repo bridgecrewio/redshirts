@@ -1,9 +1,5 @@
 {
-    "extends": [
-        "oclif",
-        "oclif-typescript",
-        "prettier"
-    ],
+    "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
         "no-else-return": "off",
         "radix": "off",
@@ -14,10 +10,7 @@
                 "max": 8
             }
         ],
-        "semi": [
-            2,
-            "always"
-        ],
+        "semi": [2, "always"],
         "unicorn/numeric-separators-style": [
             "error",
             {

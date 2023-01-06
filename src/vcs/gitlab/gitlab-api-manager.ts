@@ -11,7 +11,6 @@ const RATE_LIMIT_RESET_HEADER = 'ratelimit-reset';
 const RATE_LIMIT_ENDPOINT = 'user';
 
 export class GitlabApiManager extends RateLimitVcsApiManager {
-
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
     }
@@ -19,7 +18,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     _getAxiosConfiguration(): AxiosRequestConfig {
         return this._buildAxiosConfiguration(this.sourceInfo.url, {
             Authorization: `Bearer ${this.sourceInfo.token}`,
-            'Accept-Encoding': 'gzip,deflate,compress'
+            'Accept-Encoding': 'gzip,deflate,compress',
         });
     }
 
@@ -57,7 +56,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             url: `/users/${userId}/projects`,
             method: 'GET',
             params: {
-                per_page: MAX_PAGE_SIZE
+                per_page: MAX_PAGE_SIZE,
             },
         };
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
@@ -69,13 +68,12 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     }
 
     async getGroups(): Promise<GitlabGroupResponse[]> {
-
         const config: AxiosRequestConfig = {
             url: 'groups',
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                simple: true
+                simple: true,
             },
         };
 
@@ -91,15 +89,14 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
             method: 'GET',
             params: {
                 per_page: MAX_PAGE_SIZE,
-                include_subgroups: includeSubgroups
+                include_subgroups: includeSubgroups,
             },
         };
 
         try {
             const result: AxiosResponse = await this.submitPaginatedRequest(config);
             return result.data;
-        }
-        catch (error) {
+        } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 404) {
                 LOGGER.debug(`Got 404 from ${config.url} call - attempting a user call`);
                 config.url = `users/${encodeURIComponent(group)}/projects`;
@@ -124,7 +121,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);

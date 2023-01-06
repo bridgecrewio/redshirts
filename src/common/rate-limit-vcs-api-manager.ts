@@ -1,17 +1,22 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { RateLimitStatus, RepoResponse, VcsSourceInfo } from './types';
 import { LOGGER, sleepUntilDateTime } from './utils';
-import https = require('https')
+import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
 
 export abstract class RateLimitVcsApiManager extends VcsApiManager {
+    rateLimitRemainingHeader: string;
+    rateLimitResetHeader: string;
+    rateLimitEndpoint?: string;
+    lastResponse?: AxiosResponse;
 
-    rateLimitRemainingHeader: string
-    rateLimitResetHeader: string
-    rateLimitEndpoint?: string
-    lastResponse?: AxiosResponse
-
-    constructor(sourceInfo: VcsSourceInfo, rateLimitRemainingHeader: string, rateLimitResetHeader: string, rateLimitEndpoint?: string, certPath?: string) {
+    constructor(
+        sourceInfo: VcsSourceInfo,
+        rateLimitRemainingHeader: string,
+        rateLimitResetHeader: string,
+        rateLimitEndpoint?: string,
+        certPath?: string
+    ) {
         super(sourceInfo, certPath);
         this.rateLimitRemainingHeader = rateLimitRemainingHeader;
         this.rateLimitResetHeader = rateLimitResetHeader;
@@ -19,22 +24,23 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     }
 
     _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert ? {
-            baseURL,
-            headers,
-            httpsAgent: new https.Agent({ ca: this.cert })
-        } : {
-            baseURL,
-            headers,
-        };
+        return this.cert
+            ? {
+                  baseURL,
+                  headers,
+                  httpsAgent: new https.Agent({ ca: this.cert }),
+              }
+            : {
+                  baseURL,
+                  headers,
+              };
     }
 
-    abstract _getAxiosConfiguration(): any
-    abstract getOrgRepos(group: string): Promise<RepoResponse[]>
-    abstract getUserRepos(): Promise<RepoResponse[]>
-    
-    async checkRateLimitStatus(): Promise<RateLimitStatus | undefined> {
+    abstract _getAxiosConfiguration(): any;
+    abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
+    abstract getUserRepos(): Promise<RepoResponse[]>;
 
+    async checkRateLimitStatus(): Promise<RateLimitStatus | undefined> {
         if (!this.rateLimitEndpoint) {
             return undefined;
         }
@@ -50,7 +56,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         //     LOGGER.debug(`Submitting request ${requestNum}`);
 
         //     let r: AxiosResponse | undefined;
-            
+
         //     try {
         //                 //         r = await this.submitRequest(config, r);
         //         console.debug(r.status);
@@ -73,10 +79,12 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     getRateLimitStatus(response?: AxiosResponse<any, any>): RateLimitStatus | undefined {
         // returns the rate limit status from this response, if present, otherwise from this.lastResponse, otherwise undefined
         const r = response || this.lastResponse || undefined;
-        return r && this.rateLimitRemainingHeader in r.headers ? {
-            remaining: Number.parseInt(r.headers[this.rateLimitRemainingHeader]!),
-            reset: new Date(Number.parseInt(r.headers[this.rateLimitResetHeader]!) * 1000)
-        } : undefined;
+        return r && this.rateLimitRemainingHeader in r.headers
+            ? {
+                  remaining: Number.parseInt(r.headers[this.rateLimitRemainingHeader]!),
+                  reset: new Date(Number.parseInt(r.headers[this.rateLimitResetHeader]!) * 1000),
+              }
+            : undefined;
     }
 
     async submitRequest(config: AxiosRequestConfig, previousResponse?: AxiosResponse): Promise<AxiosResponse> {
@@ -102,7 +110,11 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         // only explicitly check the rate limit status if we do not have a previous response yet
         // this prevents unnecessary calls to the check rate limit endpoint in the case where
         // rate limiting is not enabled or the system does not send data in the response headers consistently
-        const rateLimitStatus = response ? this.getRateLimitStatus(response) : this.lastResponse ? this.getRateLimitStatus(this.lastResponse) : await this.checkRateLimitStatus();
+        const rateLimitStatus = response
+            ? this.getRateLimitStatus(response)
+            : this.lastResponse
+            ? this.getRateLimitStatus(this.lastResponse)
+            : await this.checkRateLimitStatus();
 
         LOGGER.debug(`Rate limit remaining: ${rateLimitStatus ? rateLimitStatus.remaining : 'unknown'}`);
         // <= to handle a weird edge case I encountered but coult not reproduce

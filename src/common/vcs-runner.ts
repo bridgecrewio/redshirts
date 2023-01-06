@@ -1,7 +1,15 @@
 import { AxiosError } from 'axios';
 import { BaseRunner } from './base-runner';
 import { Repo, VcsSourceInfo } from './types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER, stringToArr } from './utils';
+import {
+    filterRepoList,
+    getExplicitRepoList,
+    getRepoListFromParams,
+    isSslError,
+    logError,
+    LOGGER,
+    stringToArr,
+} from './utils';
 import { VcsApiManager } from './vcs-api-manager';
 
 export abstract class VcsRunner extends BaseRunner {
@@ -16,7 +24,6 @@ export abstract class VcsRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
-
         // we must throw any SSL error that we encounter here - it is possible in a very
         // specific set of conditions that we will not make any API calls here:
         // if the only repo spec argument is --repos, and --include-public is set,
@@ -38,7 +45,7 @@ export abstract class VcsRunner extends BaseRunner {
         if (orgsString) {
             triedToGetRepos = true;
             repos = await this.getOrgRepos(orgsString);
-            LOGGER.debug(`Got repos from ${this.sourceInfo.orgTerm}(s): ${repos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Got repos from ${this.sourceInfo.orgTerm}(s): ${repos.map((r) => `${r.owner}/${r.name}`)}`);
         }
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
@@ -54,13 +61,16 @@ export abstract class VcsRunner extends BaseRunner {
                         if (error instanceof AxiosError && isSslError(error)) {
                             throw error;
                         }
-                        
-                        logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
+
+                        logError(
+                            error as Error,
+                            `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`
+                        );
                     }
                 }
             }
 
-            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map(r => `${r.owner}/${r.name}`)}`);
+            LOGGER.debug(`Added repos from --repo list: ${addedRepos.map((r) => `${r.owner}/${r.name}`)}`);
             repos.push(...addedRepos);
         }
 
@@ -69,15 +79,22 @@ export abstract class VcsRunner extends BaseRunner {
             repos = await this.getUserRepos();
         }
 
-        const skipRepos = getRepoListFromParams(this.sourceInfo.minPathLength, this.sourceInfo.maxPathLength, skipReposList, skipReposFile);
+        const skipRepos = getRepoListFromParams(
+            this.sourceInfo.minPathLength,
+            this.sourceInfo.maxPathLength,
+            skipReposList,
+            skipReposFile
+        );
 
         repos = filterRepoList(repos, skipRepos, this.sourceInfo.repoTerm);
 
         // now that we have all the repos and their visibility, we can remove the public ones if needed
         if (!this.sourceInfo.includePublic) {
-            repos = repos.filter(repo => {
+            repos = repos.filter((repo) => {
                 if (repo.private === undefined) {
-                    LOGGER.warn(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    LOGGER.warn(
+                        `Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`
+                    );
                     return false;
                 } else if (repo.private) {
                     return true;
@@ -98,7 +115,7 @@ export abstract class VcsRunner extends BaseRunner {
         for (const org of orgs) {
             LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
             try {
-                const orgRepos = (await this.apiManager.getOrgRepos(org));
+                const orgRepos = await this.apiManager.getOrgRepos(org);
                 LOGGER.debug(`Found ${orgRepos.length} ${this.sourceInfo.repoTerm}s`);
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {
@@ -107,15 +124,21 @@ export abstract class VcsRunner extends BaseRunner {
                         throw error;
                     }
 
-                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
+                    LOGGER.error(
+                        `Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`
+                    );
                 } else {
-                    LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
+                    LOGGER.error(
+                        `Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`
+                    );
                     LOGGER.error(error);
                 }
             }
         }
 
-        LOGGER.info(`Found ${repos.length} total ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
+        LOGGER.info(
+            `Found ${repos.length} total ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`
+        );
         return repos;
     }
 

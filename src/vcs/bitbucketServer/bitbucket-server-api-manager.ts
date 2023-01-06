@@ -8,7 +8,6 @@ import { getBitbucketServerDateCompareFunction } from './bitbucket-server-utils'
 const MAX_PAGE_SIZE = 100;
 
 export class BitbucketServerApiManager extends BitbucketApiManager {
-
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketServerCommit[]> {
         const config: AxiosRequestConfig = {
             url: `projects/${repo.owner}/repos/${repo.name}/commits`,
@@ -53,7 +52,7 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `projects/${repo.owner}/repos/${repo.name}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);
