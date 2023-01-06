@@ -27,7 +27,7 @@ describe('github runner', () => {
             {
                 name: 'repo1',
                 owner: 'owner1',
-                private: undefined
+                private: true
             },
             {
                 name: 'repo2',
