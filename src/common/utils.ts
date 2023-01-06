@@ -4,6 +4,7 @@ import { Protocol, Repo, VcsSourceInfo } from './types';
 import * as winston from 'winston';
 import { FlagBase } from '@oclif/core/lib/interfaces';
 import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
+import { EOL } from 'node:os';
 
 export const DEFAULT_DAYS = 90;
 export const DEFAULT_LOG_LEVEL = 'warn';
@@ -292,5 +293,27 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const init = (flags: any): void => {
     // performs common, command-independent initialization
-    setLogLevel(flags);
+    setLogLevel(flags['log-level']);
+    logParams(flags);
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const logParams = (flags: any): void => {
+    const tokenParams = new Set(['-t', '--token']);
+    const tokenFlags = new Set(['token']);
+    
+    const maskedArgs = [];
+    for (let i = 0; i < process.argv.length; i++) {
+        const arg = process.argv[i];
+        maskedArgs.push(arg);
+        if (tokenParams.has(arg)) {
+            i++;
+            maskedArgs.push(maskedArgs.push(process.argv[i].slice(0, 4) + '****'));
+        }
+    }
+
+    LOGGER.debug(`Command args:${EOL}${maskedArgs.join(EOL)}`);
+
+    const maskedFlags = Object.keys(flags).map(flag => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`);
+    LOGGER.debug(`Parsed flags:${EOL}${maskedFlags}`);
 };
