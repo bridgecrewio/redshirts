@@ -121,7 +121,7 @@ export abstract class BaseRunner {
 
     addEmptyRepo(repo: Repo): void {
         // Adds a repo that has no commits to the aggregation
-        const repoPath = repo.owner + '/' + repo.name;
+        const repoPath = repo.owner + this.repoSeparator + repo.name;
         this.contributorsByRepo.set(repoPath, new Map());
     }
 
