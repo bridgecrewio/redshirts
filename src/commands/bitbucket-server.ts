@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 import { vcsServerFlags } from '../common/flags';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
-import { deleteFlagKey, getServerUrl } from '../common/utils';
+import { deleteFlagKey, getServerUrl, init } from '../common/utils';
 import { BitbucketServerApiManager } from '../vcs/bitbucketServer/bitbucket-server-api-manager';
 import { BitbucketServerRunner } from '../vcs/bitbucketServer/bitbucket-server-runner';
 import Bitbucket from './bitbucket';
@@ -33,6 +33,7 @@ export default class BitbucketServer extends Bitbucket {
     async run(): Promise<void> {
         
         const { flags } = await this.parse(BitbucketServer);
+        init(flags);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/rest/api/1.0`;

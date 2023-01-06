@@ -1,6 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 import { getThrottlingFlag, vcsFlags } from '../common/flags';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
+import { init } from '../common/utils';
 import { BitbucketApiManager } from '../vcs/bitbucket/bitbucket-api-manager';
 import { BitbucketRunner } from '../vcs/bitbucket/bitbucket-runner';
 
@@ -39,6 +40,7 @@ export default class Bitbucket extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Bitbucket);
+        init(flags);
 
         const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`, flags['include-public']);
 

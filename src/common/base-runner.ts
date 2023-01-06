@@ -5,7 +5,6 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - all branches? (no?) - remove all branches from the BB call, remote git log --all
 // - document specific permissions needed
 // - document getting a cert chain
 // - some sort of errored repo list that is easy to review

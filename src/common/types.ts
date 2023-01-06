@@ -81,8 +81,7 @@ export enum HelpGroup {
     REPO_SPEC = 'Repo specification',
     AUTH = 'Authentication',
     OUTPUT = 'Output',
-    CONNECTION = 'Connection',
-    OTHER = 'Other'
+    CONNECTION = 'Connection'
 }
 
 export enum Protocol {

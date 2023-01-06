@@ -1,6 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 import { vcsFlags } from '../common/flags';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
+import { init } from '../common/utils';
 import { GithubApiManager } from '../vcs/github/github-api-manager';
 import { GithubRunner } from '../vcs/github/github-runner';
 
@@ -29,6 +30,7 @@ export default class Github extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Github);
+        init(flags);
 
         const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public']);
 

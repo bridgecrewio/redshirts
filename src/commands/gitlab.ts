@@ -1,6 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 import { vcsFlags } from '../common/flags';
 import { HelpGroup, SourceType, VcsSourceInfo, } from '../common/types';
+import { init } from '../common/utils';
 import { GitlabApiManager } from '../vcs/gitlab/gitlab-api-manager';
 import { GitlabRunner } from '../vcs/gitlab/gitlab-runner';
 
@@ -31,6 +32,7 @@ export default class Gitlab extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
+        init(flags);
 
         const sourceInfo = Gitlab.getSourceInfo(flags.token, flags['include-public']);
 

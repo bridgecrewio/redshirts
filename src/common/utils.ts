@@ -6,6 +6,9 @@ import { FlagBase } from '@oclif/core/lib/interfaces';
 import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
 
 export const DEFAULT_DAYS = 90;
+export const DEFAULT_LOG_LEVEL = 'warn';
+export const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
+export const DISABLE_LOG_ENV_VAR = 'DISABLE_LOGS';
 
 export const getXDaysAgoDate = (nDaysAgo: number, fromDate = new Date()): Date => {
     const xDaysAgo = new Date(fromDate);
@@ -169,9 +172,6 @@ const logFormat = winston.format.printf(({ level, message, timestamp, ...rest })
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
 
-const DEFAULT_LOG_LEVEL = 'warn';
-const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
-
 const getLogLevel = (): string => {
     const envLevel = process.env.LOG_LEVEL;
     if (!envLevel) {
@@ -189,7 +189,7 @@ export const LOGGER = winston.createLogger({
     transports: [
         new winston.transports.Console({
             stderrLevels: LOG_LEVELS,
-            silent: process.env.DISABLE_LOGS === 'true'
+            silent: process.env[DISABLE_LOG_ENV_VAR]?.toLowerCase() === 'true'
         })
     ],
     format: winston.format.combine(
@@ -199,6 +199,11 @@ export const LOGGER = winston.createLogger({
         logFormat
     )
 });
+
+export const setLogLevel = (level: typeof LOG_LEVELS[number]): void => {
+    // used for setting the level after logger creation (which happens on startup)
+    LOGGER.level = level;
+};
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const logError = (error: Error, message?: string, args?: any): void => {
@@ -282,4 +287,10 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
             reject(err);
         });
     });
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const init = (flags: any): void => {
+    // performs common, command-independent initialization
+    setLogLevel(flags);
 };
