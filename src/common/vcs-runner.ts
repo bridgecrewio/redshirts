@@ -43,12 +43,12 @@ export abstract class VcsRunner extends BaseRunner {
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
 
         if (addedRepos.length > 0) {
-            if (!this.sourceInfo.includePublic) {
-                LOGGER.debug(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
+            if (!this.sourceInfo.includePublic || this.sourceInfo.requiresEnrichment) {
+                LOGGER.debug(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
                 for (const repo of addedRepos) {
                     try {
                         // eslint-disable-next-line no-await-in-loop
-                        repo.private = !await this.apiManager.isRepoPublic(repo);
+                        await this.apiManager.enrichRepo(repo);
                     } catch (error) {
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
                     }

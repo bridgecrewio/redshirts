@@ -11,6 +11,7 @@ export interface VcsSourceInfo extends SourceInfo {
     minPathLength: number
     maxPathLength: number
     includePublic: boolean
+    requiresEnrichment: boolean
 }
 
 export type RateLimitStatus = {
@@ -30,6 +31,7 @@ export type Repo = {
     name: string
     owner: string
     private?: boolean
+    defaultBranch?: string
 }
 
 export interface Commit {

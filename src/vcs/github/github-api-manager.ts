@@ -89,7 +89,7 @@ export class GithubApiManager extends RateLimitVcsApiManager {
         }
     }
 
-    async isRepoPublic(repo: Repo): Promise<boolean> {
+    async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `repos/${repo.owner}/${repo.name}`,
             method: 'GET'
@@ -98,6 +98,6 @@ export class GithubApiManager extends RateLimitVcsApiManager {
         LOGGER.debug(`Submitting request to ${config.url}`);
         const response = await this.submitRequest(config);
         const data: GithubRepoResponse = response.data;
-        return !data.private;
+        repo.private = data.private;
     }
 }

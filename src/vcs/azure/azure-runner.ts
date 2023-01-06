@@ -88,7 +88,7 @@ export class AzureRunner extends VcsRunner {
                 for (const repo of addedRepos) {
                     try {
                         // eslint-disable-next-line no-await-in-loop
-                        repo.private = !await this.apiManager.isRepoPublic(repo);
+                        await this.apiManager.enrichRepo(repo);
                     } catch (error) {
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
                     }
