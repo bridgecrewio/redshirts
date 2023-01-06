@@ -25,7 +25,7 @@ export default class AzureDevOps extends Command {
         token: Flags.string({
             char: 't',
             description:
-                'An Azure DevOps user personal access token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted.',
+                'An Azure DevOps user personal access token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted. See the description below for more information about the token.',
             required: true,
             helpGroup: HelpGroup.AUTH,
         }),
