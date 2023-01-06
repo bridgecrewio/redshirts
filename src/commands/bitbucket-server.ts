@@ -55,7 +55,7 @@ export default class BitbucketServer extends Bitbucket {
             minPathLength: 2,
             maxPathLength: 2,
             includePublic,
-            requiresEnrichment: false // TODO
+            requiresEnrichment: false
         };
     }
 }
