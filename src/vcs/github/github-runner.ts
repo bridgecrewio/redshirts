@@ -5,7 +5,6 @@ import { GithubApiManager } from './github-api-manager';
 import { GithubCommit, GithubRepoResponse } from './github-types';
 
 export class GithubRunner extends VcsRunner {
-
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GithubApiManager) {
         super(sourceInfo, [], flags, apiManager);
@@ -23,7 +22,7 @@ export class GithubRunner extends VcsRunner {
             const newCommit = {
                 username,
                 commitDate,
-                email
+                email,
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);

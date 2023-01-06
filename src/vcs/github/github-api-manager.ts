@@ -10,7 +10,6 @@ const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
 const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 const RATE_LIMIT_ENDPOINT = 'rate_limit';
 export class GithubApiManager extends RateLimitVcsApiManager {
-
     constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
         super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
     }
@@ -40,14 +39,17 @@ export class GithubApiManager extends RateLimitVcsApiManager {
             const commits = result?.data || [];
             return commits;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.status === 409 && error.response.data.message === 'Git Repository is empty.') {
+            if (
+                error instanceof AxiosError &&
+                error.response?.status === 409 &&
+                error.response.data.message === 'Git Repository is empty.'
+            ) {
                 LOGGER.debug(`Repo ${repoPath} is empty`);
                 return [];
             }
 
             throw error;
         }
-        
     }
 
     async getUserRepos(): Promise<GithubRepoResponse[]> {
@@ -74,8 +76,7 @@ export class GithubApiManager extends RateLimitVcsApiManager {
         try {
             const result: AxiosResponse = await this.submitPaginatedRequest(config);
             return result.data;
-        }
-        catch (error) {
+        } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 404) {
                 LOGGER.debug(`Got 404 from /orgs/${org}/repos call - attempting a user call`);
                 config.url = `/users/${org}/repos`;
@@ -90,7 +91,7 @@ export class GithubApiManager extends RateLimitVcsApiManager {
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
             url: `repos/${repo.owner}/${repo.name}`,
-            method: 'GET'
+            method: 'GET',
         };
 
         LOGGER.debug(`Submitting request to ${config.url}`);
