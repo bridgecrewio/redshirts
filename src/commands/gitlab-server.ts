@@ -1,6 +1,6 @@
 import { vcsServerFlags } from '../common/flags';
 import { SourceType } from '../common/types';
-import { getServerUrl } from '../common/utils';
+import { getServerUrl, init } from '../common/utils';
 import { GitlabServerApiManager } from '../vcs/gitlabServer/gitlab-server-api-manager';
 import { GitlabServerRunner } from '../vcs/gitlabServer/gitlab-server-runner';
 import Gitlab from './gitlab';
@@ -23,6 +23,7 @@ export default class GitlabServer extends Gitlab {
     async run(): Promise<void> {
         
         const { flags } = await this.parse(GitlabServer);
+        init(flags);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v4`;

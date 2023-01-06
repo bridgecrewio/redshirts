@@ -7,8 +7,6 @@ import { getBitbucketDateCompareFunction } from './bitbucket-utils';
 
 const MAX_PAGE_SIZE = 100;
 
-// TODO /commits returns all branches by default. To do otherwise, we need to know the name of the main branch
-
 export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     _getAxiosConfiguration(): AxiosRequestConfig {
@@ -19,8 +17,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
-        
+
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
@@ -40,7 +37,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -49,7 +45,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const repos = [];
         for (const workspace of workspaces) {
-            // eslint-disable-next-line no-await-in-loop
             repos.push(...await this.getOrgRepos(workspace));
         }
 

@@ -1,11 +1,17 @@
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { readFileSync } from 'node:fs';
 import { Protocol, Repo, VcsSourceInfo } from './types';
 import * as winston from 'winston';
 import { FlagBase } from '@oclif/core/lib/interfaces';
 import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
+import { EOL } from 'node:os';
+import { MAX_REQUESTS_PER_SECOND_VAR } from './throttled-vcs-api-manager';
+import { LOG_API_RESPONSES_ENV } from './api-manager';
 
 export const DEFAULT_DAYS = 90;
+export const DEFAULT_LOG_LEVEL = 'warn';
+export const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
+export const DISABLE_LOG_ENV_VAR = 'DISABLE_LOGS';
 
 export const getXDaysAgoDate = (nDaysAgo: number, fromDate = new Date()): Date => {
     const xDaysAgo = new Date(fromDate);
@@ -164,13 +170,21 @@ export const isSslError = (error: AxiosError): boolean => {
 
 
 const logFormat = winston.format.printf(({ level, message, timestamp, ...rest }) => {
+    if (rest.response) {
+        const response: AxiosResponse = rest.response;
+        const respObject = {
+            status: response.status,
+            data: response.data,
+            headers: response.headers,
+            url: response.config.url
+        };
+        rest.response = respObject;
+    }
+    
     const error = rest.error && rest.error instanceof Error ? { error: { message: rest.error.message, stack: rest.error.stack}} : {};
     const argumentsString = JSON.stringify({ ...rest, ...error });
     return `${timestamp} [${level}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });
-
-const DEFAULT_LOG_LEVEL = 'warn';
-const LOG_LEVELS = ['error', 'warn', 'info', 'debug'];
 
 const getLogLevel = (): string => {
     const envLevel = process.env.LOG_LEVEL;
@@ -189,7 +203,7 @@ export const LOGGER = winston.createLogger({
     transports: [
         new winston.transports.Console({
             stderrLevels: LOG_LEVELS,
-            silent: process.env.DISABLE_LOGS === 'true'
+            silent: process.env[DISABLE_LOG_ENV_VAR]?.toLowerCase() === 'true'
         })
     ],
     format: winston.format.combine(
@@ -199,6 +213,11 @@ export const LOGGER = winston.createLogger({
         logFormat
     )
 });
+
+export const setLogLevel = (level: typeof LOG_LEVELS[number]): void => {
+    // used for setting the level after logger creation (which happens on startup)
+    LOGGER.level = level;
+};
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const logError = (error: Error, message?: string, args?: any): void => {
@@ -236,7 +255,7 @@ export const splitAndCombine = (stringToSplit: string, delimiter: string, limit:
 };
 
 export const sleepUntilDateTime = async (until: Date): Promise<void> => {
-    LOGGER.debug(`Sleeping until ${until.toLocaleString()}`);
+    LOGGER.warn(`Sleeping until ${until.toLocaleString()}`);
     const now = new Date();
     const ms = until.getTime() - now.getTime();
     // eslint-disable-next-line no-promise-executor-return
@@ -282,4 +301,41 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
             reject(err);
         });
     });
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const init = (flags: any): void => {
+    // performs common, command-independent initialization
+    setLogLevel(flags['log-level']);
+    logParams(flags);
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const logParams = (flags: any): void => {
+    const tokenParams = new Set(['-t', '--token']);
+    const tokenFlags = new Set(['token']);
+    
+    const maskedArgs = [];
+    for (let i = 0; i < process.argv.length; i++) {
+        const arg = process.argv[i];
+        maskedArgs.push(arg);
+        if (tokenParams.has(arg)) {
+            i++;
+            maskedArgs.push(maskedArgs.push(process.argv[i].slice(0, 4) + '****'));
+        }
+    }
+
+    LOGGER.debug(`Command args:${EOL}${maskedArgs.join(EOL)}`);
+
+    const maskedFlags = Object.keys(flags).map(flag => `${flag}: ${tokenFlags.has(flag) ? flags[flag].slice(0, 4) + '****' : flags[flag]}`);
+    LOGGER.debug(`Parsed flags:${EOL}${maskedFlags}`);
+
+    LOGGER.debug('Relevant environment variables:');
+    const relevantEnvVars = [MAX_REQUESTS_PER_SECOND_VAR, LOG_API_RESPONSES_ENV];
+    for (const envVar of relevantEnvVars) {
+        const val = process.env[envVar];
+        if (val) {
+            LOGGER.debug(`${envVar}=${val}`);
+        }
+    }
 };

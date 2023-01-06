@@ -1,18 +1,8 @@
 import { AxiosError } from 'axios';
 import { BaseRunner } from './base-runner';
 import { Repo, VcsSourceInfo } from './types';
-import { filterRepoList, getExplicitRepoList, getRepoListFromParams, logError, LOGGER, stringToArr } from './utils';
+import { filterRepoList, getExplicitRepoList, getRepoListFromParams, isSslError, logError, LOGGER, stringToArr } from './utils';
 import { VcsApiManager } from './vcs-api-manager';
-
-// TODO
-// - get commits from all branches for all VCSes and git log
-// - default to private only repos - should we explicitly check each repo for its visibility?
-// - document specific permissions needed
-// - public / private repos - include in output?
-// - document getting a cert chain
-// - some sort of errored repo list that is easy to review
-// - author vs committer
-// - rate limiting
 
 export abstract class VcsRunner extends BaseRunner {
     sourceInfo: VcsSourceInfo;
@@ -26,6 +16,13 @@ export abstract class VcsRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
+
+        // we must throw any SSL error that we encounter here - it is possible in a very
+        // specific set of conditions that we will not make any API calls here:
+        // if the only repo spec argument is --repos, and --include-public is set,
+        // and this VCS does not require enrichment (everything but bitbucket),
+        // then our first API call will be actually getting commits. Otherwise, our first
+        // API call will be here (getting org repos or getting repo visibility)
 
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
@@ -44,12 +41,16 @@ export abstract class VcsRunner extends BaseRunner {
 
         if (addedRepos.length > 0) {
             if (!this.sourceInfo.includePublic || this.sourceInfo.requiresEnrichment) {
-                LOGGER.debug(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
+                LOGGER.info(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
                 for (const repo of addedRepos) {
                     try {
-                        // eslint-disable-next-line no-await-in-loop
                         await this.apiManager.enrichRepo(repo);
                     } catch (error) {
+                        // eslint-disable-next-line max-depth
+                        if (error instanceof AxiosError && isSslError(error)) {
+                            throw error;
+                        }
+                        
                         logError(error as Error, `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`);
                     }
                 }
@@ -60,7 +61,7 @@ export abstract class VcsRunner extends BaseRunner {
         }
 
         if (repos.length === 0) {
-            LOGGER.debug('No explicitly specified repos - getting all user repos');
+            LOGGER.info('No explicitly specified repos - getting all user repos');
             repos = await this.getUserRepos();
         }
 
@@ -72,12 +73,12 @@ export abstract class VcsRunner extends BaseRunner {
         if (!this.sourceInfo.includePublic) {
             repos = repos.filter(repo => {
                 if (repo.private === undefined) {
-                    LOGGER.debug(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    LOGGER.warn(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
                     return false;
                 } else if (repo.private) {
                     return true;
                 } else {
-                    LOGGER.debug(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
+                    LOGGER.info(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
                     return false;
                 }
             });
@@ -89,14 +90,19 @@ export abstract class VcsRunner extends BaseRunner {
     async getOrgRepos(orgsString: string): Promise<Repo[]> {
         const repos: Repo[] = [];
         const orgs = stringToArr(orgsString);
+        LOGGER.info(`Getting ${this.sourceInfo.repoTerm}s for ${orgs.length} ${this.sourceInfo.orgTerm}s`);
         for (const org of orgs) {
             LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
             try {
-                // eslint-disable-next-line no-await-in-loop
                 const orgRepos = (await this.apiManager.getOrgRepos(org));
+                LOGGER.debug(`Found ${orgRepos.length} ${this.sourceInfo.repoTerm}s`);
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {
                 if (error instanceof AxiosError) {
+                    if (isSslError(error)) {
+                        throw error;
+                    }
+
                     LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}: ${error.message}`);
                 } else {
                     LOGGER.error(`Error getting ${this.sourceInfo.repoTerm}s for the ${this.sourceInfo.orgTerm} ${org}:`);
@@ -105,13 +111,13 @@ export abstract class VcsRunner extends BaseRunner {
             }
         }
 
-        LOGGER.debug(`Found ${repos.length} ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
+        LOGGER.info(`Found ${repos.length} total ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
         return repos;
     }
 
     async getUserRepos(): Promise<Repo[]> {
         const userRepos = await this.apiManager.getUserRepos();
-        LOGGER.debug(`Found ${userRepos.length} repos for the user`);
+        LOGGER.info(`Found ${userRepos.length} ${this.sourceInfo.repoTerm}s for the user`);
         const repos = this.convertRepos(userRepos);
         return repos;
     }

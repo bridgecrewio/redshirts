@@ -1,7 +1,8 @@
 import { Flags } from "@oclif/core";
 import { OptionFlag } from "@oclif/core/lib/interfaces";
+import { LOG_API_RESPONSES_ENV } from "./api-manager";
 import { HelpGroup, OutputFormat, Protocol, SortField } from "./types";
-import { DEFAULT_DAYS } from "./utils";
+import { DEFAULT_DAYS, DEFAULT_LOG_LEVEL, DISABLE_LOG_ENV_VAR, LOG_LEVELS } from "./utils";
 
 export const commonFlags = {
     output: Flags.enum({
@@ -36,6 +37,13 @@ export const commonFlags = {
     'include-public': Flags.boolean({
         description: 'The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying private repos, or mostly private repos, using --repos, --orgs, etc.',
         helpGroup: HelpGroup.REPO_SPEC
+    }),
+    'log-level': Flags.enum({
+        description: `Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use 'debug' for granular logging, which will be required for any support cases. You can log individual responses using the environment variable ${LOG_API_RESPONSES_ENV}=true. You can also disable all logging by setting ${DISABLE_LOG_ENV_VAR}=true as an environment variable. This is not recommended, as you may miss important processing messages. All logs will be written to the stderr stream.`,
+        options: LOG_LEVELS,
+        env: 'LOG_LEVEL',
+        default: DEFAULT_LOG_LEVEL,
+        helpGroup: HelpGroup.OUTPUT
     })
 };
 

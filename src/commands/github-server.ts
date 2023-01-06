@@ -1,5 +1,5 @@
 import { SourceType } from '../common/types';
-import { getServerUrl } from '../common/utils';
+import { getServerUrl, init } from '../common/utils';
 import { GithubServerRunner } from '../vcs/githubServer/github-server-runner';
 import { GithubServerApiManager } from '../vcs/githubServer/github-server-api-manager';
 import Github from './github';
@@ -25,6 +25,7 @@ export default class GithubServer extends Github {
     async run(): Promise<void> {
         
         const { flags } = await this.parse(GithubServer);
+        init(flags);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v3`;

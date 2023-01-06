@@ -5,7 +5,8 @@ import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
 import { LOGGER } from './utils';
 
-
+const DEFAULT_MAX_REQUESTS_PER_SECOND = 10;
+export const MAX_REQUESTS_PER_SECOND_VAR = 'MAX_REQUESTS_PER_SECOND';
 export abstract class ThrottledVcsApiManager extends VcsApiManager {
     requestsPerHour: number
     bottleneck: Bottleneck
@@ -13,12 +14,17 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
     constructor(sourceInfo: VcsSourceInfo, requestsPerHour: number, certPath?: string) {
         super(sourceInfo, certPath);
         this.requestsPerHour = requestsPerHour;
+        
+        const envRPS = Number.parseInt(process.env[MAX_REQUESTS_PER_SECOND_VAR]!);
+        const rps = Number.isNaN(envRPS) ? DEFAULT_MAX_REQUESTS_PER_SECOND : envRPS;
+        LOGGER.debug(`Max requests per second: ${rps}`);
+        const minTime = Math.ceil(1000 / rps);
         this.bottleneck = new Bottleneck({
             reservoir: requestsPerHour,
             reservoirRefreshInterval: 3600 * 1000,
             reservoirRefreshAmount: requestsPerHour,
             maxConcurrent: 1,
-            minTime: 100
+            minTime
         });
     }
 
@@ -40,8 +46,12 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
         const response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
         
-        if (LOGGER.level === 'debug') {
+        if (LOGGER.level === 'debug') { // check log level before we do an await unnecessarily
             LOGGER.debug(`Reservoir remaining: ${await this.bottleneck.currentReservoir()}`);
+        }
+
+        if (this.logApiResponses) {
+            LOGGER.debug(response);
         }
         
         return response;

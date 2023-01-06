@@ -24,9 +24,6 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     }
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<GitlabCommit[]> {
-
-        const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `projects/${encodeURIComponent(`${repo.owner}/${repo.name}`)}/repository/commits`,
             method: 'GET',
@@ -38,7 +35,6 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -49,12 +45,11 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
 
         for (const group of groups) {
             // the groups call lists subgroups separately, so we don't need to get subgroups
-            // eslint-disable-next-line no-await-in-loop
             const repos = await this.getOrgRepos(group.full_path, false);
             groupRepos.push(...repos);
         }
 
-        LOGGER.debug(`Found ${groupRepos.length} repos in group memberships`);
+        LOGGER.debug(`Found ${groupRepos.length} projects in user's group memberships`);
 
         const userId = await this.getUserId();
 
@@ -68,7 +63,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const userRepos: GitlabRepoResponse[] = result.data;
 
-        LOGGER.debug(`Found ${userRepos.length} user repos`);
+        LOGGER.debug(`Found ${userRepos.length} user projects`);
 
         return [...userRepos, ...groupRepos];
     }

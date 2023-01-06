@@ -2,6 +2,7 @@ import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { vcsFlags } from '../common/flags';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
+import { init } from '../common/utils';
 import { AzureApiManager } from '../vcs/azure/azure-api-manager';
 import { AzureRunner } from '../vcs/azure/azure-runner';
 
@@ -49,6 +50,7 @@ export default class AzureDevOps extends Command {
 
     async run(): Promise<void> {
         const { flags } = (await this.parse(AzureDevOps));
+        init(flags);
 
         const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token, flags['include-public']);
 

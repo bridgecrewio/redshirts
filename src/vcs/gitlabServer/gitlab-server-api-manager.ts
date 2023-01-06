@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { GitlabApiManager } from '../gitlab/gitlab-api-manager';
 
 export class GitlabServerApiManager extends GitlabApiManager {

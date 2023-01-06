@@ -44,6 +44,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
             method: 'GET',
         };
 
+        // TODO remove - test code to hit rate limits
         // let requestNum = 0;
         // while (requestNum++ < 2000) {
         //     LOGGER.debug(`Submitting request ${requestNum}`);
@@ -51,8 +52,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         //     let r: AxiosResponse | undefined;
             
         //     try {
-        //         // eslint-disable-next-line no-await-in-loop
-        //         r = await this.submitRequest(config, r);
+        //                 //         r = await this.submitRequest(config, r);
         //         console.debug(r.status);
         //         console.debug(Object.keys(r.headers));
         //     } catch (error) {
@@ -63,6 +63,9 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         // }
 
         const response = await this.axiosInstance.request(config);
+        if (this.logApiResponses) {
+            LOGGER.debug('', { response });
+        }
 
         return this.getRateLimitStatus(response);
     }
@@ -80,6 +83,10 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         await this.handleRateLimit(previousResponse);
         try {
             this.lastResponse = await this.axiosInstance.request(config);
+            if (this.logApiResponses) {
+                LOGGER.debug('', { response: this.lastResponse });
+            }
+
             return this.lastResponse;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 429) {

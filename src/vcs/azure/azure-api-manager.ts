@@ -26,9 +26,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
     }
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<AzureCommit[]> {
-        const repoPath = repo.owner + '/' + repo.name;
         const [org, project] = repo.owner.split('/', 2);
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `${org}/${project}/_apis/git/repositories/${repo.name}/commits`,
             method: 'GET',
@@ -41,7 +39,6 @@ export class AzureApiManager extends RateLimitVcsApiManager {
 
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data.value || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
@@ -52,11 +49,9 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         const repos: AzureRepoResponse[] = [];
 
         for (const project of projects) {
-            // eslint-disable-next-line no-await-in-loop
             repos.push(...await this.getProjectRepos(project));
         }
 
-        // org / owner does not come explicitly as a field
         return repos;
     }
 
@@ -81,7 +76,6 @@ export class AzureApiManager extends RateLimitVcsApiManager {
     async getProjectRepos(project: AzureProjectsResponse): Promise<AzureRepoResponse[]> {
         const { owner, name } = project;
         const repoOwner = `${owner}/${name}`;
-        LOGGER.debug(`Getting repositories for project: ${repoOwner}`);
         const config: AxiosRequestConfig = {
             url: `${owner}/${name}/_apis/git/repositories`,
             method: 'GET',
@@ -90,7 +84,11 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             },
         };
 
-        const response = await this.axiosInstance.request(config);
+        LOGGER.debug(`Submitting request to ${config.url}`);
+
+        const response = await this.submitRequest(config); // not paginated
+
+        // org / owner does not come explicitly as a field
         return response.data.value.map((p: AzureRepoResponse) => {
             p.owner = repoOwner;
             return p;
@@ -111,8 +109,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
 
             LOGGER.debug(`Fetching next page of request from ${config.url}`);
 
-            // eslint-disable-next-line no-await-in-loop
-            response = await this.axiosInstance.request(config);
+            response = await this.submitRequest(config);
             result.data.value = [...result.data.value, ...response.data.value];
             total += result.data.count;
         }

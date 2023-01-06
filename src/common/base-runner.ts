@@ -5,10 +5,8 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - all branches? (no?) - remove all branches from the BB call, remote git log --all
 // - document specific permissions needed
 // - document getting a cert chain
-// - some sort of errored repo list that is easy to review
 // - author vs committer - use author always (not committer)
 // - clean up logging
 // - test on windows
@@ -33,7 +31,7 @@ export abstract class BaseRunner {
         this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
-        this.apiManager = apiManager; 
+        this.apiManager = apiManager;
     }
 
     abstract aggregateCommitContributors(repo: Repo, commits: VCSCommit[]): void
@@ -46,14 +44,14 @@ export abstract class BaseRunner {
         }
 
         const sinceDate = getXDaysAgoDate(this.flags.days);
-
-        // TODO better error handling
+        LOGGER.info(`${this.flags.days} days ago: ${sinceDate.toISOString()}`);
 
         try {
             const repos = await this.getRepoList();
             await this.processRepos(repos, sinceDate);
         } catch (error) {
             if (error instanceof AxiosError && isSslError(error)) {
+                // if we ever encounter an SSL error, we cannot continue. This method expects getRepoList to raise any SSL error it encounters, as soon as it encounters one
                 const sourceInfo = this.sourceInfo as VcsSourceInfo;
                 logError(error, `Received an SSL error while connecting to the server at url ${sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`);
             }
@@ -65,17 +63,29 @@ export abstract class BaseRunner {
     }
 
     async processRepos(repos: Repo[], sinceDate: Date): Promise<void> {
+        LOGGER.info(`Getting commits for ${repos.length} ${this.sourceInfo.repoTerm}s`);
+
         for (const repo of repos) {
             try {
-                // eslint-disable-next-line no-await-in-loop
+                LOGGER.debug(`Getting commits for ${this.sourceInfo.repoTerm}s ${repo.owner}/${repo.name}`);
                 const commits: VCSCommit[] = await this.apiManager.getCommits(repo, sinceDate);
+                LOGGER.debug(`Found ${commits.length} commits`);
                 if (commits.length > 0) {
                     this.aggregateCommitContributors(repo, commits);
                 } else if (!this.flags['exclude-empty']) {
                     this.addEmptyRepo(repo);
                 }
             } catch (error) {
-                logError(error as Error, `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`);
+                if (error instanceof AxiosError && isSslError(error)) {
+                    throw error;
+                }
+
+                let message = `Failed to get commits for ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}`;
+                if (error instanceof AxiosError) {
+                    message += ` - the API returned an error: ${error.message}`;
+                }
+
+                logError(error as Error, message);
             }
         }
     }
@@ -111,11 +121,11 @@ export abstract class BaseRunner {
         const { username, email, commitDate } = commit;
 
         // handle the 2 maps separately so that we can track commit dates per repo and globally
-        this.upsertContributor(repoContributors, username, email, commitDate);
+        this.upsertContributor(repoContributors, username, email, commitDate, true);
         this.upsertContributor(this.contributorsByEmail, username, email, commitDate);
     }
 
-    upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
+    upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string, logNew = false): void {
         const contributor = contributorMap.get(email);
 
         if (contributor) {
@@ -124,7 +134,10 @@ export abstract class BaseRunner {
                 contributor.lastCommitDate = commitDate;
             }
         } else {
-            LOGGER.debug(`Found new contributor: ${email}, ${username}`);
+            if (logNew) {
+                LOGGER.debug(`Found new contributor: ${email}, ${username}`);
+            }
+
             contributorMap.set(email, {
                 email,
                 usernames: new Set([username]),

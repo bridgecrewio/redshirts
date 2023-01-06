@@ -2,7 +2,7 @@ import { Command, Flags } from '@oclif/core';
 import { CLIError } from '@oclif/errors';
 import { commonFlags } from '../common/flags';
 import { HelpGroup, SourceType } from '../common/types';
-import { deleteFlagKey } from '../common/utils';
+import { deleteFlagKey, init } from '../common/utils';
 import { LocalApiManager } from '../vcs/local/local-api-manager';
 import { LocalRunner } from '../vcs/local/local-runner';
 
@@ -47,6 +47,7 @@ export default class Local extends Command {
 
     async run(): Promise<void> {
         const { flags } = (await this.parse(Local));
+        init(flags);
 
         if (!(flags.directories || flags['directory-file'])) {
             throw new CLIError('At least one of --directories or --directory-file is required for running locally.');
