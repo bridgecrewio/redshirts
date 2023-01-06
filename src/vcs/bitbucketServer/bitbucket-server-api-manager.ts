@@ -55,7 +55,7 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
 
     async enrichRepo(repo: Repo): Promise<void> {
         const config: AxiosRequestConfig = {
-            url: `repos/${repo.owner}/${repo.name}`,
+            url: `projects/${repo.owner}/repos/${repo.name}`,
             method: 'GET'
         };
 
