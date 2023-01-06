@@ -72,7 +72,6 @@ export abstract class BaseRunner {
             }
         );
 
-        // TODO better error handling
         try {
             await tasks.run();
         } catch (error) {
