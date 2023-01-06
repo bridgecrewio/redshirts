@@ -255,7 +255,7 @@ export const splitAndCombine = (stringToSplit: string, delimiter: string, limit:
 };
 
 export const sleepUntilDateTime = async (until: Date): Promise<void> => {
-    LOGGER.debug(`Sleeping until ${until.toLocaleString()}`);
+    LOGGER.warn(`Sleeping until ${until.toLocaleString()}`);
     const now = new Date();
     const ms = until.getTime() - now.getTime();
     // eslint-disable-next-line no-promise-executor-return

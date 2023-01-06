@@ -44,6 +44,7 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
             method: 'GET',
         };
 
+        // TODO remove - test code to hit rate limits
         // let requestNum = 0;
         // while (requestNum++ < 2000) {
         //     LOGGER.debug(`Submitting request ${requestNum}`);

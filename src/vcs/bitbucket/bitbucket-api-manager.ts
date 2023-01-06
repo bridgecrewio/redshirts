@@ -17,7 +17,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
 
         const config: AxiosRequestConfig = {
             url: `repositories/${repo.owner}/${repo.name}/commits`,
@@ -38,7 +37,6 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 

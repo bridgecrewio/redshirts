@@ -25,7 +25,6 @@ export class GithubApiManager extends RateLimitVcsApiManager {
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<GithubCommit[]> {
         const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `repos/${repo.owner}/${repo.name}/commits`,
             method: 'GET',
@@ -39,7 +38,6 @@ export class GithubApiManager extends RateLimitVcsApiManager {
         try {
             const result: AxiosResponse = await this.submitPaginatedRequest(config);
             const commits = result?.data || [];
-            LOGGER.debug(`Found ${commits.length} commits`);
             return commits;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 409 && error.response.data.message === 'Git Repository is empty.') {

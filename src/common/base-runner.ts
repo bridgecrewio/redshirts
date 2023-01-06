@@ -44,6 +44,7 @@ export abstract class BaseRunner {
         }
 
         const sinceDate = getXDaysAgoDate(this.flags.days);
+        LOGGER.info(`${this.flags.days} days ago: ${sinceDate.toISOString()}`);
 
         try {
             const repos = await this.getRepoList();
@@ -62,9 +63,13 @@ export abstract class BaseRunner {
     }
 
     async processRepos(repos: Repo[], sinceDate: Date): Promise<void> {
+        LOGGER.info(`Getting commits for ${repos.length} ${this.sourceInfo.repoTerm}s`);
+
         for (const repo of repos) {
             try {
+                LOGGER.debug(`Getting commits for ${this.sourceInfo.repoTerm}s ${repo.owner}/${repo.name}`);
                 const commits: VCSCommit[] = await this.apiManager.getCommits(repo, sinceDate);
+                LOGGER.debug(`Found ${commits.length} commits`);
                 if (commits.length > 0) {
                     this.aggregateCommitContributors(repo, commits);
                 } else if (!this.flags['exclude-empty']) {
@@ -116,11 +121,11 @@ export abstract class BaseRunner {
         const { username, email, commitDate } = commit;
 
         // handle the 2 maps separately so that we can track commit dates per repo and globally
-        this.upsertContributor(repoContributors, username, email, commitDate);
+        this.upsertContributor(repoContributors, username, email, commitDate, true);
         this.upsertContributor(this.contributorsByEmail, username, email, commitDate);
     }
 
-    upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string): void {
+    upsertContributor(contributorMap: ContributorMap, username: string, email: string, commitDate: string, logNew = false): void {
         const contributor = contributorMap.get(email);
 
         if (contributor) {
@@ -129,7 +134,10 @@ export abstract class BaseRunner {
                 contributor.lastCommitDate = commitDate;
             }
         } else {
-            LOGGER.debug(`Found new contributor: ${email}, ${username}`);
+            if (logNew) {
+                LOGGER.debug(`Found new contributor: ${email}, ${username}`);
+            }
+
             contributorMap.set(email, {
                 email,
                 usernames: new Set([username]),

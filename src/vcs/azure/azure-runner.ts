@@ -74,27 +74,8 @@ export class AzureRunner extends VcsRunner {
             return p as AzureProjectsResponse;
         });
 
-        const projectRepos: Repo[] = [];
-        for (const project of explicitProjects) {
-            try {
-                const reposForProject = await this.apiManager.getProjectRepos(project);
-                projectRepos.push(...this.convertRepos(reposForProject));
-            } catch (error) {
-                if (error instanceof AxiosError) {
-                    if (isSslError(error)) {
-                        throw error;
-                    }
-
-                    LOGGER.error(`Error getting reposs for the project ${project}: ${error.message}`);
-                } else {
-                    LOGGER.error(`Error getting reposs for the project ${project}:`);
-                    LOGGER.error(error);
-                }
-            }
-            
-        }
-
         if (explicitProjects.length > 0) {
+            const projectRepos = await this.getProjectRepos(explicitProjects);
             LOGGER.debug(`Got repos from project(s): ${projectRepos.map(r => `${r.owner}/${r.name}`)}`);
             repos.push(...projectRepos);
         }
@@ -102,7 +83,7 @@ export class AzureRunner extends VcsRunner {
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
         if (addedRepos.length > 0) {
             if (!this.sourceInfo.includePublic) {
-                LOGGER.debug(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
+                LOGGER.info(`--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`);
                 for (const repo of addedRepos) {
                     try {
                         await this.apiManager.enrichRepo(repo);
@@ -133,12 +114,12 @@ export class AzureRunner extends VcsRunner {
         if (!this.sourceInfo.includePublic) {
             repos = repos.filter(repo => {
                 if (repo.private === undefined) {
-                    LOGGER.debug(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    LOGGER.info(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
                     return false;
                 } else if (repo.private) {
                     return true;
                 } else {
-                    LOGGER.debug(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
+                    LOGGER.info(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
                     return false;
                 }
             });
@@ -147,5 +128,32 @@ export class AzureRunner extends VcsRunner {
         LOGGER.debug(`Final repo list: ${repos.map(r => `${r.owner}/${r.name}`)}`);
 
         return repos;
+    }
+
+    async getProjectRepos(projects: AzureProjectsResponse[]): Promise<Repo[]> {
+        const projectRepos: Repo[] = [];
+        LOGGER.info(`Getting repos for ${projects.length} projects`);
+
+        for (const project of projects) {
+            try {
+                const reposForProject = await this.apiManager.getProjectRepos(project);
+                LOGGER.debug(`Found ${reposForProject.length} repos`);
+                projectRepos.push(...this.convertRepos(reposForProject));
+            } catch (error) {
+                if (error instanceof AxiosError) {
+                    if (isSslError(error)) {
+                        throw error;
+                    }
+
+                    LOGGER.error(`Error getting repos for the project ${project}: ${error.message}`);
+                } else {
+                    LOGGER.error(`Error getting repos for the project ${project}:`);
+                    LOGGER.error(error);
+                }
+            }
+        }
+
+        LOGGER.info(`Found ${projectRepos.length} total repos for the specified projects`);
+        return projectRepos;
     }
 }

@@ -41,7 +41,7 @@ export abstract class VcsRunner extends BaseRunner {
 
         if (addedRepos.length > 0) {
             if (!this.sourceInfo.includePublic || this.sourceInfo.requiresEnrichment) {
-                LOGGER.debug(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
+                LOGGER.info(`Enriching specified ${this.sourceInfo.repoTerm}s with visibility and default branch info`);
                 for (const repo of addedRepos) {
                     try {
                         await this.apiManager.enrichRepo(repo);
@@ -61,7 +61,7 @@ export abstract class VcsRunner extends BaseRunner {
         }
 
         if (repos.length === 0) {
-            LOGGER.debug('No explicitly specified repos - getting all user repos');
+            LOGGER.info('No explicitly specified repos - getting all user repos');
             repos = await this.getUserRepos();
         }
 
@@ -73,12 +73,12 @@ export abstract class VcsRunner extends BaseRunner {
         if (!this.sourceInfo.includePublic) {
             repos = repos.filter(repo => {
                 if (repo.private === undefined) {
-                    LOGGER.debug(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
+                    LOGGER.warn(`Found ${this.sourceInfo.repoTerm} with unknown visibility: ${repo.owner}/${repo.name} - did it error out above? It will be skipped.`);
                     return false;
                 } else if (repo.private) {
                     return true;
                 } else {
-                    LOGGER.debug(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
+                    LOGGER.info(`Skipping public ${this.sourceInfo.repoTerm}: ${repo.owner}/${repo.name}`);
                     return false;
                 }
             });
@@ -90,10 +90,12 @@ export abstract class VcsRunner extends BaseRunner {
     async getOrgRepos(orgsString: string): Promise<Repo[]> {
         const repos: Repo[] = [];
         const orgs = stringToArr(orgsString);
+        LOGGER.info(`Getting ${this.sourceInfo.repoTerm}s for ${orgs.length} ${this.sourceInfo.orgTerm}s`);
         for (const org of orgs) {
             LOGGER.debug(`Getting ${this.sourceInfo.repoTerm}s for ${this.sourceInfo.orgTerm} ${org}`);
             try {
                 const orgRepos = (await this.apiManager.getOrgRepos(org));
+                LOGGER.debug(`Found ${orgRepos.length} ${this.sourceInfo.repoTerm}s`);
                 repos.push(...this.convertRepos(orgRepos));
             } catch (error) {
                 if (error instanceof AxiosError) {
@@ -109,13 +111,13 @@ export abstract class VcsRunner extends BaseRunner {
             }
         }
 
-        LOGGER.debug(`Found ${repos.length} ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
+        LOGGER.info(`Found ${repos.length} total ${this.sourceInfo.repoTerm}s for the specified ${this.sourceInfo.orgTerm}s`);
         return repos;
     }
 
     async getUserRepos(): Promise<Repo[]> {
         const userRepos = await this.apiManager.getUserRepos();
-        LOGGER.debug(`Found ${userRepos.length} repos for the user`);
+        LOGGER.info(`Found ${userRepos.length} ${this.sourceInfo.repoTerm}s for the user`);
         const repos = this.convertRepos(userRepos);
         return repos;
     }

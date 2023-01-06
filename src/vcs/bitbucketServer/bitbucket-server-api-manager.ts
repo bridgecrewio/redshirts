@@ -10,8 +10,6 @@ const MAX_PAGE_SIZE = 100;
 export class BitbucketServerApiManager extends BitbucketApiManager {
 
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketServerCommit[]> {
-        const repoPath = repo.owner + '/' + repo.name;
-        LOGGER.debug(`Getting commits for repo: ${repoPath}`);
         const config: AxiosRequestConfig = {
             url: `projects/${repo.owner}/repos/${repo.name}/commits`,
             method: 'GET',
@@ -25,7 +23,6 @@ export class BitbucketServerApiManager extends BitbucketApiManager {
 
         const result: AxiosResponse = await this.submitFilteredPaginatedRequest(config, filterfn);
         const commits = result?.data.values || [];
-        LOGGER.debug(`Found ${commits.length} commits`);
         return commits;
     }
 
