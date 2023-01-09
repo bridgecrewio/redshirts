@@ -37,9 +37,13 @@ export abstract class VcsRunner extends BaseRunner {
         const skipReposList: string | undefined = this.flags['skip-repos'];
         const skipReposFile: string | undefined = this.flags['skip-repo-file'];
 
+        // if we try to get specific org repos and fail to get any, then don't proceed to get all user repos
+        let triedToGetRepos = false;
+
         let repos: Repo[] = [];
 
         if (orgsString) {
+            triedToGetRepos = true;
             repos = await this.getOrgRepos(orgsString);
             LOGGER.debug(`Got repos from ${this.sourceInfo.orgTerm}(s): ${repos.map((r) => `${r.owner}/${r.name}`)}`);
         }
@@ -70,7 +74,7 @@ export abstract class VcsRunner extends BaseRunner {
             repos.push(...addedRepos);
         }
 
-        if (repos.length === 0) {
+        if (repos.length === 0 && !triedToGetRepos) {
             LOGGER.info('No explicitly specified repos - getting all user repos');
             repos = await this.getUserRepos();
         }
