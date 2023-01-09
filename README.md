@@ -1,13 +1,46 @@
 # Redshirts
 
-Counts contributors for git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. Use this tool to estimate the impact on credit consumption prior to connecting repos to the platform. Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform. Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
+Redshirts counts contributors in git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. You can use this tool to estimate the impact on credit consumption prior to connecting repos to the platform.
+
+"Contributors" are users who commit code to your repos. The platform counts contributors, identified by email address, who have committed code to non-public repositories in the last 90 days. Users who contribute to multiple repos only get counted once.
+
+## Example
+
+Suppose you have two repositories integrated in the platform, with the following commit history:
+
+| Repo  | User              | Commit date |
+| ----- | ----------------- | ----------- |
+| Repo1 | user1@example.com | 1 day ago   |
+| Repo1 | user2@example.com | 2 days ago  |
+| Repo1 | user1@example.com | 3 days ago  |
+| Repo1 | user3@example.com | 99 days ago |
+| Repo2 | user1@example.com | 1 day ago   |
+| Repo2 | user4@example.com | 2 days ago  |
+
+Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 also has 2 contributors (user1 and user4). There are 3 total unique contributors to these repos in the last 90 days (user1, user2, user4).
+
+Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform.
+
+Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
 
 <!-- toc -->
 
+-   [Quickstart](#quickstart)
+-   [Requirements](#requirements)
 -   [Redshirts](#redshirts)
 -   [Usage](#usage)
 -   [Commands](#commands)
 <!-- tocstop -->
+
+# Quickstart example
+
+1. Generate access token for your VCS
+1. Install: `npm install -g @paloaltonetworks/redshirts`
+1. Run: `redshirts github --token gph_xxx --orgs mygithuborg,myothergithuborg`
+
+# Requirements
+
+Requires [nodejs](https://nodejs.org/en/) v16 or higher. If you use nodejs for other purposes, we recommend using Node Version Manager ([\*nix](https://github.com/nvm-sh/nvm), [windows](https://github.com/coreybutler/nvm-windows)).
 
 # Usage
 
