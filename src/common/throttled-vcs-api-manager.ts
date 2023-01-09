@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { RepoResponse, VcsSourceInfo } from './types';
 import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
@@ -46,17 +46,25 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
     abstract getUserRepos(): Promise<RepoResponse[]>;
 
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
-        const response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
+        try {
+            const response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
 
-        if (LOGGER.level === 'debug') {
-            // check log level before we do an await unnecessarily
-            LOGGER.debug(`Reservoir remaining: ${await this.bottleneck.currentReservoir()}`);
+            if (LOGGER.level === 'debug') {
+                // check log level before we do an await unnecessarily
+                LOGGER.debug(`Reservoir remaining: ${await this.bottleneck.currentReservoir()}`);
+            }
+
+            if (this.logApiResponses) {
+                LOGGER.debug(response);
+            }
+
+            return response;
+        } catch (error) {
+            if (error instanceof AxiosError && this.logApiResponses) {
+                LOGGER.debug('', { response: error.response });
+            }
+
+            throw error;
         }
-
-        if (this.logApiResponses) {
-            LOGGER.debug(response);
-        }
-
-        return response;
     }
 }

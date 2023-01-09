@@ -215,10 +215,16 @@ const logFormat = winston.format.printf(({ level, message, timestamp, ...rest })
         rest.response = respObject;
     }
 
-    const error =
-        rest.error && rest.error instanceof Error
-            ? { error: { message: rest.error.message, stack: rest.error.stack } }
-            : {};
+    let error: any = {};
+
+    if (rest.error && rest.error instanceof Error) {
+        error = { error: { message: rest.error.message, stack: rest.error.stack } };
+
+        if (rest.error instanceof AxiosError) {
+            error.error.data = rest.error.response?.data;
+        }
+    }
+
     const argumentsString = JSON.stringify({ ...rest, ...error });
     return `${timestamp} [${level.padEnd(5)}]: ${message} ${argumentsString === '{}' ? '' : argumentsString}`;
 });

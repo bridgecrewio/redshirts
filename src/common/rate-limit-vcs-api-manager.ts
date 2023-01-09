@@ -97,9 +97,15 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
 
             return this.lastResponse;
         } catch (error) {
-            if (error instanceof AxiosError && error.response?.status === 429) {
-                // now we expect the rate limit details to be in the header
-                return this.submitRequest(config, error.response);
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 429) {
+                    // now we expect the rate limit details to be in the header, which will get checked in handleRateLimit on the following call
+                    return this.submitRequest(config, error.response);
+                }
+
+                if (this.logApiResponses) {
+                    LOGGER.debug('', { response: error.response });
+                }
             }
 
             throw error;
