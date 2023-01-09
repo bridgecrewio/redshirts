@@ -31,6 +31,16 @@ export abstract class VcsRunner extends BaseRunner {
         // then our first API call will be actually getting commits. Otherwise, our first
         // API call will be here (getting org repos or getting repo visibility)
 
+        if (this.flags.repos && this.flags['repo-file']) {
+            LOGGER.warn('You specified both "--repos" and "--repo-file". "--repo-file" will be ignored.');
+        }
+
+        if (this.flags['skip-repos'] && this.flags['skip-repo-file']) {
+            LOGGER.warn(
+                'You specified both "--skip-repos" and "--skip-repo-file". "--skip-repo-file" will be ignored.'
+            );
+        }
+
         const orgsString: string | undefined = this.flags[this.sourceInfo.orgFlagName];
         const reposList: string | undefined = this.flags.repos;
         const reposFile: string | undefined = this.flags['repo-file'];
