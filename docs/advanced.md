@@ -35,6 +35,6 @@ Bitbucket server ultimately works the same as bitbucket.org, but you configure t
 
 The same tuning options for bitbucket.org apply to bitbucket server.
 
-### Viewing API request and git log details
+## Viewing API request and git log details
 
 If you wish to enable extra-verbose logging, including all of the API response bodies and `git log` output (if running the `local` command), set the environment variable `REDSHIRTS_LOG_API_RESPONSES` to `true`. Note that depending on the VCS, this may result in sensitive information (your token) in the output.

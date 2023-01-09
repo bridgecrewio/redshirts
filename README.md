@@ -75,7 +75,7 @@ In local mode, the tool will scan directories you specify for cloned git repos, 
 
 `redshirts local --dirs $HOME/repos,/tmp/another-repo --log-level debug`
 
-See [Usage](#usage) and [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directoriess) for more examples.
+See [Usage](#usage), [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directoriess) for more examples.
 
 # Support and troubleshooting
 
@@ -85,7 +85,7 @@ Please report issues or enhancement requests to your account team, PANW support,
 
 Include debug logs and command output with your submission. Debug logs will contain required troubleshooting information. Note that your token will not be included in the log output.
 
-You can enable debug logs by using the `--log-level debug` argument or by setting the environment variable `LOG_LEVEL=DEBUG`. Debug logs will be printed to the `stderr` stream, and normal output will be printed to the `stdout` stream.
+You can enable debug logs by using the `--log-level debug` argument or by setting the environment variable `LOG_LEVEL=debug`. Debug logs will be printed to the `stderr` stream, and normal output will be printed to the `stdout` stream.
 
 # Usage
 
