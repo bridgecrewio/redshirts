@@ -2,14 +2,20 @@
 
 Redshirts counts contributors in git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. You can use this tool to estimate the impact on credit consumption prior to connecting repos to the platform.
 
-"Contributors" are users who commit code to your repos. The platform counts contributors, identified by email address, who have committed code to non-public repositories in the last 90 days. Users who contribute to multiple repos only get counted once.
+"Contributors" are users who commit code to your repos. The platform counts contributors, identified by email address, who have committed code to the default branch (including commits merged from other branches) to non-public repositories in the last 90 days. Users who contribute to multiple repos only get counted once.
+
+Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform.
+
+Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
+
+See [docs](./docs) for more information.
 
 ## Example
 
 Suppose you have two repositories integrated in the platform, with the following commit history:
 
 | Repo  | User              | Commit date |
-| ----- | ----------------- | ----------- |
+|-------|-------------------|-------------|
 | Repo1 | user1@example.com | 1 day ago   |
 | Repo1 | user2@example.com | 2 days ago  |
 | Repo1 | user1@example.com | 3 days ago  |
@@ -19,34 +25,59 @@ Suppose you have two repositories integrated in the platform, with the following
 
 Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 also has 2 contributors (user1 and user4). There are 3 total unique contributors to these repos in the last 90 days (user1, user2, user4).
 
-Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform.
-
-Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
+# Contents
 
 <!-- toc -->
-<<<<<<< HEAD
-
--   [Quickstart](#quickstart)
--   [Requirements](#requirements)
--   [Redshirts](#redshirts)
--   [Usage](#usage)
--   [Commands](#commands)
-=======
-* [Redshirts](#redshirts)
+* [Quickstart](#quickstart)
+* [Requirements](#requirements)
+* [Modes](#modes)
 * [Usage](#usage)
 * [Commands](#commands)
->>>>>>> main
 <!-- tocstop -->
 
-# Quickstart example
+# Quickstart
 
 1. Generate access token for your VCS
 1. Install: `npm install -g @paloaltonetworks/redshirts`
 1. Run: `redshirts github --token gph_xxx --orgs mygithuborg,myothergithuborg`
 
+See [installation](./docs/installation.md) for more information.
+
 # Requirements
 
-Requires [nodejs](https://nodejs.org/en/) v16 or higher. If you use nodejs for other purposes, we recommend using Node Version Manager ([\*nix](https://github.com/nvm-sh/nvm), [windows](https://github.com/coreybutler/nvm-windows)).
+Requires [nodejs](https://nodejs.org/en/) v16 or higher. If you use nodejs for other purposes, we recommend using Node Version Manager ([*nix](https://github.com/nvm-sh/nvm), [windows](https://github.com/coreybutler/nvm-windows)).
+
+# Modes
+
+Broadly, this tool supports two "modes" - one in which it connects directly to your version control system (VCS), and one which uses repositories that you have cloned locally.
+
+In VCS mode, the tool will use your personal access token to connect to the VCS and obtain real-time commit data. This is the most accurate and comprehensive mode, and we recommend using it as a first choice. See [VCS mode](./docs/vcs-mode.md).
+
+In local mode, the tool will scan directories you specify for cloned git repos, and use the `git log` command to count contributors. See [local mode](./docs/local-mode.md).
+
+# Examples
+
+`redshirts github --orgs mygithuborg --token GITHUB_PAT`
+
+`redshirts bitbucket-server --host bitbucket.mycompany.com --projects ABC,XYZ --username myuser --token BB_TOKEN`
+
+`redshirts gitlab --repo-file repos.txt --token GITLAB_PAT -o json`
+
+`redshirts azuredevops --orgs myazureorg -o csv --sort contributors --exclude-empty --token ADO_PAT`
+
+`redshirts local --dirs $HOME/repos,/tmp/another-repo --log-level debug`
+
+See [Usage](#usage) and [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directoriess) for more examples.
+
+# Support and troubleshooting
+
+If you have issues, please first review the command output, which may contain specific error messages and suggestions.
+
+Please report issues or enhancement requests to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues.
+
+Include debug logs and command output with your submission. Debug logs will contain required troubleshooting information. Note that your token will not be included in the log output.
+
+You can enable debug logs by using the `--log-level debug` argument or by setting the environment variable `LOG_LEVEL=DEBUG`. Debug logs will be printed to the `stderr` stream, and normal output will be printed to the `stdout` stream.
 
 # Usage
 
@@ -56,7 +87,7 @@ $ npm install -g @paloaltonetworks/redshirts
 $ redshirts COMMAND
 running command...
 $ redshirts (--version)
-@paloaltonetworks/redshirts/0.2.0 darwin-arm64 node-v16.17.0
+@paloaltonetworks/redshirts/0.2.0 darwin-x64 node-v16.6.2
 $ redshirts --help [COMMAND]
 USAGE
   $ redshirts COMMAND
