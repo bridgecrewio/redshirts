@@ -77,6 +77,109 @@ In local mode, the tool will scan directories you specify for cloned git repos, 
 
 See [Usage](#usage), [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directories) for more examples.
 
+# Output
+
+There are three types of output:
+
+* Console table (default)
+* CSV
+* JSON
+
+For the console and CSV tabular output formats, you can use `--sort repo` (default) to sort the table by repo name alphabetically, or `--sort contributors` to sort by the contributor count, descending.
+
+For all output formats, you can remove repos with no commits using the `--exclude-empty` option.
+
+**Console table**
+
+The console table shows the number of unique contributors per repository, and the total number of unique contributors. Note that the total will likely be less than the sum of the contributors per repo, because each contributor only gets counted once for all repos.
+
+```
+        Contributors per Repository
+┌──────────────────────────┬──────────────┐
+│ Repo                     │ Contributors │
+├──────────────────────────┼──────────────┤
+│ try-bridgecrew/cfngoat   │ 0            │
+│ try-bridgecrew/codegoat  │ 1            │
+│ try-bridgecrew/terragoat │ 2            │
+└──────────────────────────┴──────────────┘
+Total unique contributors: 2
+```
+
+**CSV**
+
+This format is similar to the table above, but in CSV format. The total is included as part of the CSV table.
+
+```
+Repo,Unique contributors
+try-bridgecrew/cfngoat,0
+try-bridgecrew/codegoat,1
+try-bridgecrew/terragoat,2
+Total,2
+```
+
+**JSON**
+
+The JSON format is suitable for programmatic processing and also includes more details than the tabular output. In particular, the output will include the list of all contributors and their last commit date, both per-repo and globally.
+
+```
+{
+  "totalContributors": 2,
+  "contributors": [
+    {
+      "email": "user1@example.com",
+      "usernames": [
+        "example-user1"
+      ],
+      "lastCommitDate": "2022-12-06T15:22:01Z"
+    },
+    {
+      "email": "user2@example",
+      "usernames": [
+        "example-user2"
+      ],
+      "lastCommitDate": "2022-12-04T17:45:22Z"
+    }
+  ],
+  "repos": {
+    "try-bridgecrew/terragoat": {
+      "totalContributors": 2,
+      "contributors": [
+        {
+          "email": "user1@example.com",
+          "usernames": [
+            "mroberts-panw"
+          ],
+          "lastCommitDate": "2022-11-04T14:43:10Z"
+        },
+        {
+          "email": "user2@example.com",
+          "usernames": [
+            "example-user2"
+          ],
+          "lastCommitDate": "2022-12-04T17:45:22Z"
+        }
+      ]
+    },
+    "try-bridgecrew/cfngoat": {
+      "totalContributors": 0,
+      "contributors": []
+    },
+    "try-bridgecrew/codegoat": {
+      "totalContributors": 1,
+      "contributors": [
+        {
+          "email": "user1@example.com",
+          "usernames": [
+            "example-user1",
+          ],
+          "lastCommitDate": "2022-12-06T15:22:01Z"
+        }
+      ]
+    }
+  }
+}
+```
+
 # Support and troubleshooting
 
 If you have issues, please first review the command output, which may contain specific error messages and suggestions.
