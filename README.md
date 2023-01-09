@@ -75,7 +75,7 @@ In local mode, the tool will scan directories you specify for cloned git repos, 
 
 `redshirts local --dirs $HOME/repos,/tmp/another-repo --log-level debug`
 
-See [Usage](#usage), [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directoriess) for more examples.
+See [Usage](#usage), [specifying repos](./docs/vcs-mode.md#specifying-repositories), and [specifying directories](./docs/local-mode.md#specifying-directories) for more examples.
 
 # Support and troubleshooting
 
