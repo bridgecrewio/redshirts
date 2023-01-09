@@ -24,12 +24,18 @@ Note that while this tool applies the same logic as the platform when identifyin
 Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts/issues
 
 <!-- toc -->
+<<<<<<< HEAD
 
 -   [Quickstart](#quickstart)
 -   [Requirements](#requirements)
 -   [Redshirts](#redshirts)
 -   [Usage](#usage)
 -   [Commands](#commands)
+=======
+* [Redshirts](#redshirts)
+* [Usage](#usage)
+* [Commands](#commands)
+>>>>>>> main
 <!-- tocstop -->
 
 # Quickstart example
@@ -45,34 +51,31 @@ Requires [nodejs](https://nodejs.org/en/) v16 or higher. If you use nodejs for o
 # Usage
 
 <!-- usage -->
-
 ```sh-session
-$ npm install -g redshirts
+$ npm install -g @paloaltonetworks/redshirts
 $ redshirts COMMAND
 running command...
 $ redshirts (--version)
-redshirts/0.0.0 darwin-arm64 node-v16.17.0
+@paloaltonetworks/redshirts/0.2.0 darwin-arm64 node-v16.17.0
 $ redshirts --help [COMMAND]
 USAGE
   $ redshirts COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 # Commands
 
 <!-- commands -->
-
--   [`redshirts azuredevops`](#redshirts-azuredevops)
--   [`redshirts bitbucket`](#redshirts-bitbucket)
--   [`redshirts bitbucket-server`](#redshirts-bitbucket-server)
--   [`redshirts github`](#redshirts-github)
--   [`redshirts github-server`](#redshirts-github-server)
--   [`redshirts gitlab`](#redshirts-gitlab)
--   [`redshirts gitlab-server`](#redshirts-gitlab-server)
--   [`redshirts help [COMMAND]`](#redshirts-help-command)
--   [`redshirts local`](#redshirts-local)
+* [`redshirts azuredevops`](#redshirts-azuredevops)
+* [`redshirts bitbucket`](#redshirts-bitbucket)
+* [`redshirts bitbucket-server`](#redshirts-bitbucket-server)
+* [`redshirts github`](#redshirts-github)
+* [`redshirts github-server`](#redshirts-github-server)
+* [`redshirts gitlab`](#redshirts-gitlab)
+* [`redshirts gitlab-server`](#redshirts-gitlab-server)
+* [`redshirts help [COMMAND]`](#redshirts-help-command)
+* [`redshirts local`](#redshirts-local)
 
 ## `redshirts azuredevops`
 
@@ -154,7 +157,8 @@ OUTPUT FLAGS
 
 AUTHENTICATION FLAGS
   -t, --token=<value>  (required) An Azure DevOps user personal access token tied to the provided username. This token
-                       must be tied to a user that has sufficient visibility of the repo(s) being counted.
+                       must be tied to a user that has sufficient visibility of the repo(s) being counted. See the
+                       description below for more information about the token.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -169,6 +173,13 @@ DESCRIPTION
   Note: you must provide --repos, --projects, and / or --orgs. Due to limitations in Azure DevOps APIs, it is not
   possible to use a personal access token to fetch all orgs and repos for a user.
 
+  About authentication: you must use a personal access token, scoped to the appropriate organization(s), with the Code:
+  Read scope. The token's user must have at least a Basic level of membership to the organizations being scanned. Note
+  that this is higher than the default access level that may be provided when you add a user to a team. See:
+  https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=
+  azure-devops&tabs=Windows and https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/add-organization-u
+  sers?view=azure-devops&tabs=browser
+
   About rate limiting: For Azure DevOps, this tool will attempt to submit requests in a burst until a rate limit is hit,
   and then respect the rate limit reset information provided in the response. Azure DevOps does not consistently provide
   rate limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.
@@ -181,7 +192,7 @@ EXAMPLES
   $ redshirts azuredevops --token obnwxxx --orgs bridgecrewio,try-bridgecrew --projects org/project
 ```
 
-_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/azuredevops.ts)_
+_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/azuredevops.ts)_
 
 ## `redshirts bitbucket`
 
@@ -252,8 +263,9 @@ OUTPUT FLAGS
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>     (required) A Bitbucket app token tied to the provided username. This token must be tied to a
-                          user that has sufficient visibility of the repo(s) being counted.
+  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. This token must be tied to
+                          a user that has sufficient visibility of the repo(s) being counted. See the description below
+                          for how to create this token.
   -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
 
 CONNECTION FLAGS
@@ -273,6 +285,13 @@ CONNECTION FLAGS
 DESCRIPTION
   Count active contributors for Bitbucket repos
 
+  About authentication: this tool uses an app password with the following scopes:
+
+  - Repositories: read
+  - Account: read (not required if you always use --repos and / or --workspaces)
+
+  See: https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/
+
   About rate limiting: Bitbucket uses an hourly rate limit that rolls over every minute. Thus, this tool will attempt to
   submit requests in as much of a burst as possible while respecting the rolling limit. If you run this tool multiple
   times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a
@@ -287,7 +306,7 @@ EXAMPLES
   $ redshirts bitbucket --username my_username --token ATBBXXX --workspaces bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/bitbucket.ts)_
+_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/bitbucket.ts)_
 
 ## `redshirts bitbucket-server`
 
@@ -389,14 +408,18 @@ OUTPUT FLAGS
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>     (required) A Bitbucket app token tied to the provided username. This token must be tied to a
-                          user that has sufficient visibility of the repo(s) being counted.
+  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. This token must be tied to
+                          a user that has sufficient visibility of the repo(s) being counted. See the description below
+                          for how to create this token.
   -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
 
 DESCRIPTION
   Count active contributors for Bitbucket server (self-hosted) repos
 
   This tool works with Bitbucket server v1 APIs.
+
+  About authentication: you must create an HTTP access token with Project read and repository read permissions. See:
+  https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html
 
   About rate limiting: Bitbucket server rate limiting is unique in that you specify a "token bucket size" and "refill
   rate". To translate this to requests per hour, you must calculate how many requests a client can submit in an hour
@@ -417,7 +440,7 @@ EXAMPLES
   $ redshirts bitbucket-server --token ATXXX --workspaces bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/bitbucket-server.ts)_
+_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/bitbucket-server.ts)_
 
 ## `redshirts github`
 
@@ -489,7 +512,7 @@ OUTPUT FLAGS
 
 AUTHENTICATION FLAGS
   -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted.
+                       visibility of the repo(s) being counted. See the description below for more information.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -501,13 +524,27 @@ CONNECTION FLAGS
 DESCRIPTION
   Count active contributors for GitHub repos
 
+  About authentication: you must use one of the following options:
+
+  - a GitHub "classic" personal access token (PAT) with the "repo" scope (the top-level checkbox must be checked). This
+  type of token can be used for multiple orgs at once.
+  - a fine-grained token with the following permissions for the appropriate repos: Metadata (read-only), Contents
+  (read-only). This type of token is scoped to a single org. To use it for multiple orgs, you must use multiple tokens
+  and run this tool for each one.
+
+  See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+  Additionally, if you are a member of an organization that requires SSO, you must also authorize that token for the
+  organization. This requires you to use a classic PAT. See https://docs.github.com/en/enterprise-cloud@latest/authentic
+  ation/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on
+
 EXAMPLES
   $ redshirts github --token ghp_xxxx --repos bridgecrewio/checkov,try-bridgecrew/terragoat
 
   $ redshirts github --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/github.ts)_
+_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/github.ts)_
 
 ## `redshirts github-server`
 
@@ -592,13 +629,17 @@ OUTPUT FLAGS
 
 AUTHENTICATION FLAGS
   -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted.
+                       visibility of the repo(s) being counted. See the description below for more information.
 
 DESCRIPTION
   Count active contributors for GitHub server (self-hosted) repos
 
   This tool works with GitHub enterprise server v3 APIs. Note that earlier versions are out of support from GitHub, and
   thus are not supported here.
+
+  About authentication: you must use a personal access token (PAT) with the "repo" scope (the top-level checkbox must be
+  checked). See: https://docs.github.com/en/enterprise-server@3.7/authentication/keeping-your-account-and-data-secure/cr
+  eating-a-personal-access-token
 
   About rate limiting: GitHub server returns rate limit details in response headers, and thus this tool will submit
   requests as quickly as possible while respecting the rate limit provided. If rate limiting is disabled on the server,
@@ -610,7 +651,7 @@ EXAMPLES
   $ redshirts github-server --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/github-server.ts)_
+_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/github-server.ts)_
 
 ## `redshirts gitlab`
 
@@ -683,7 +724,8 @@ OUTPUT FLAGS
 
 AUTHENTICATION FLAGS
   -t, --token=<value>  (required) Gitlab personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted.
+                       visibility of the repo(s) being counted. See the description below for more information about the
+                       token.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -695,6 +737,9 @@ CONNECTION FLAGS
 DESCRIPTION
   Count active contributors for GitLab repos
 
+  About authentication: you must create a personal access token with the read_api scope. See
+  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+
   About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and
   then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate
   limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.
@@ -705,7 +750,7 @@ EXAMPLES
   $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
 ```
 
-_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/gitlab.ts)_
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab.ts)_
 
 ## `redshirts gitlab-server`
 
@@ -791,7 +836,8 @@ OUTPUT FLAGS
 
 AUTHENTICATION FLAGS
   -t, --token=<value>  (required) Gitlab personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted.
+                       visibility of the repo(s) being counted. See the description below for more information about the
+                       token.
 
 DESCRIPTION
   Count active contributors for GitLab server (self-hosted) repos
@@ -799,13 +845,20 @@ DESCRIPTION
   This tool works with GitLab enterprise server v4 APIs, supported by server versions 13.x and higher. Note that earlier
   versions are out of support from GitLab, and thus are not supported here.
 
+  About authentication: you must create a personal access token with the read_api scope. See
+  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+
+  About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and
+  then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate
+  limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.
+
 EXAMPLES
   $ redshirts gitlab-server --token ghp_xxxx --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname gitlab.mycompany.internal
 
   $ redshirts gitlab-server --token ghp_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup --hostname gitlab.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/gitlab-server.ts)_
+_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab-server.ts)_
 
 ## `redshirts help [COMMAND]`
 
@@ -893,6 +946,5 @@ EXAMPLES
   $ redshirts local --repos ~/repos,/tmp/repo,/tmp/repo/submodule
 ```
 
-_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.0.0/dist/commands/local.ts)_
-
+_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/local.ts)_
 <!-- commandsstop -->
