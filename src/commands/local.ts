@@ -23,6 +23,7 @@ export default class Local extends Command {
                 '(One of --directories or --directory-file is required.) A comma-separated list of relative or absolute paths to directories on the file system that contain git repositories. The tool will traverse this directory recursively, stopping at any directories with a .git directory (the root of a repo) - it will not traverse more deeply than that. This means that if you have a repo with a submodule, you should specify the submodule directory explicitly here. If you have directories with commas in the name, use the --directory-file option.',
             required: false,
             aliases: ['dirs'],
+            char: 'd',
             helpGroup: HelpGroup.REPO_SPEC,
         }),
         'directory-file': Flags.string({
