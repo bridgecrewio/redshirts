@@ -3,10 +3,10 @@ import { RepoResponse, VcsSourceInfo } from './types';
 import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
-import { LOGGER } from './utils';
+import { getEnvVarWithDefault, LOGGER } from './utils';
 
-const DEFAULT_MAX_REQUESTS_PER_SECOND = 10;
-export const MAX_REQUESTS_PER_SECOND_VAR = 'MAX_REQUESTS_PER_SECOND';
+const DEFAULT_MAX_REQUESTS_PER_SECOND = '20';
+export const MAX_REQUESTS_PER_SECOND_VAR = 'REDSHIRTS_MAX_REQUESTS_PER_SECOND';
 export abstract class ThrottledVcsApiManager extends VcsApiManager {
     requestsPerHour: number;
     bottleneck: Bottleneck;
@@ -15,8 +15,7 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
         super(sourceInfo, certPath);
         this.requestsPerHour = requestsPerHour;
 
-        const envRPS = Number.parseInt(process.env[MAX_REQUESTS_PER_SECOND_VAR]!);
-        const rps = Number.isNaN(envRPS) ? DEFAULT_MAX_REQUESTS_PER_SECOND : envRPS;
+        const rps = Number.parseInt(getEnvVarWithDefault(MAX_REQUESTS_PER_SECOND_VAR, DEFAULT_MAX_REQUESTS_PER_SECOND));
         LOGGER.debug(`Max requests per second: ${rps}`);
         const minTime = Math.ceil(1000 / rps);
         this.bottleneck = new Bottleneck({

@@ -1,14 +1,17 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { RateLimitStatus, RepoResponse, VcsSourceInfo } from './types';
-import { LOGGER, sleepUntilDateTime } from './utils';
+import { getEnvVarWithDefault, LOGGER, sleepUntilDateTime } from './utils';
 import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
 
+const REQUESTS_REMAINING_BUFFER_ENV_VAR = 'REDSHIRTS_REQUESTS_REMAINING_BUFFER';
+const DEFAULT_REQUESTS_REMAINING_BUFFER = '5';
 export abstract class RateLimitVcsApiManager extends VcsApiManager {
     rateLimitRemainingHeader: string;
     rateLimitResetHeader: string;
     rateLimitEndpoint?: string;
     lastResponse?: AxiosResponse;
+    requestRemainingBuffer: number;
 
     constructor(
         sourceInfo: VcsSourceInfo,
@@ -21,6 +24,11 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         this.rateLimitRemainingHeader = rateLimitRemainingHeader;
         this.rateLimitResetHeader = rateLimitResetHeader;
         this.rateLimitEndpoint = rateLimitEndpoint;
+
+        this.requestRemainingBuffer = Number.parseInt(
+            getEnvVarWithDefault(REQUESTS_REMAINING_BUFFER_ENV_VAR, DEFAULT_REQUESTS_REMAINING_BUFFER)
+        );
+        LOGGER.debug(`Request remaining buffer: ${this.requestRemainingBuffer}`);
     }
 
     _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
@@ -117,9 +125,8 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
             : await this.checkRateLimitStatus();
 
         LOGGER.debug(`Rate limit remaining: ${rateLimitStatus ? rateLimitStatus.remaining : 'unknown'}`);
-        // <= to handle a weird edge case I encountered but coult not reproduce
-        // Not 0 for a small concurrency buffer for other uses of this token
-        if (rateLimitStatus && rateLimitStatus.remaining <= 0) {
+        // <= to handle a weird edge case I read about but coult not reproduce
+        if (rateLimitStatus && rateLimitStatus.remaining <= this.requestRemainingBuffer) {
             LOGGER.warn('Hit rate limit for VCS');
             await sleepUntilDateTime(new Date(rateLimitStatus.reset!.getTime() + 10000)); // 10 second buffer
         }
