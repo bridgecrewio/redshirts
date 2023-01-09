@@ -31,7 +31,7 @@ Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 als
 * [Redshirts](#redshirts)
 * [Contents](#contents)
 * [Quickstart](#quickstart)
-* [Requirements](#requirements)
+* [Installation and requirements](#installation-and-requirements)
 * [Modes](#modes)
 * [Examples](#examples)
 * [Support and troubleshooting](#support-and-troubleshooting)
