@@ -27,6 +27,7 @@ export default class AzureDevOps extends Command {
             description:
                 'An Azure DevOps user personal access token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted. See the description below for more information about the token.',
             required: true,
+            env: 'REDSHIRTS_TOKEN',
             helpGroup: HelpGroup.AUTH,
         }),
         orgs: Flags.string({

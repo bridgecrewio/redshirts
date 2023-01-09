@@ -34,6 +34,7 @@ export default class Bitbucket extends Command {
             description:
                 'A Bitbucket access token tied to the provided username. This token must be tied to a user that has sufficient visibility of the repo(s) being counted. See the description below for how to create this token.',
             required: true,
+            env: 'REDSHIRTS_TOKEN',
             helpGroup: HelpGroup.AUTH,
         }),
         workspaces: Flags.string({

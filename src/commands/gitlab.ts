@@ -23,6 +23,7 @@ export default class Gitlab extends Command {
             description:
                 'Gitlab personal access token. This token must be tied to a user that has sufficient visibility of the repo(s) being counted. See the description below for more information about the token.',
             required: true,
+            env: 'REDSHIRTS_TOKEN',
             helpGroup: HelpGroup.AUTH,
         }),
         groups: Flags.string({
