@@ -27,7 +27,7 @@ export default class Gitlab extends Command {
         }),
         groups: Flags.string({
             description:
-                'Group names and / or usernames for which to fetch repos. These values must be the namespace slug, as it appears in GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. For users, this will only include repos owned by that user. Use the --repos option to add additional specific repos on top of those in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these group(s).',
+                'Group names and / or usernames for which to fetch repos. These values must be the namespace slug, as it appears in GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. If you want to exclude some subgroups, either specify the subgroups you want to include, or use the --skip-repos option. For users, this will only include repos owned by that user. Use the --repos option to add additional specific repos on top of those in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these group(s).',
             required: false,
             helpGroup: HelpGroup.REPO_SPEC,
         }),
