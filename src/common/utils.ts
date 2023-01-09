@@ -393,3 +393,8 @@ export const logParams = (flags: any): void => {
         }
     }
 };
+
+export const getEnvVarWithDefault = (varName: string, defaultValue: string): string => {
+    const value = process.env[varName];
+    return value || defaultValue;
+};

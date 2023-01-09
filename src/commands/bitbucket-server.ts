@@ -1,5 +1,6 @@
 import { Flags } from '@oclif/core';
 import { vcsServerFlags } from '../common/flags';
+import { MAX_REQUESTS_PER_SECOND_VAR } from '../common/throttled-vcs-api-manager';
 import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
 import { deleteFlagKey, getServerUrl, init } from '../common/utils';
 import { BitbucketServerApiManager } from '../vcs/bitbucketServer/bitbucket-server-api-manager';
@@ -16,7 +17,7 @@ export default class BitbucketServer extends Bitbucket {
     About rate limiting: Bitbucket server rate limiting is unique in that you specify a "token bucket size" and "refill rate". To translate this to requests per hour, you must calculate how many requests a client can submit in an hour without being limited. This is basically equal to the refill rate, which is the number of requests per second we can submit indefinitely without being limited. The requests per hour is then the refill rate * 3600.
     See https://confluence.atlassian.com/bitbucketserver/improving-instance-stability-with-rate-limiting-976171954.html for more information.
     
-    If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a lower value here, because there is no way to check the rate liit status in a stateless way. For Bitbucket Server, you can also control throttling by setting the MAX_REQUESTS_PER_SECOND environment variable. This will cause the tool to submit no more than that many requests per second from the start of execution. This will slow down execution but avoid unexpected rate limit issues.`;
+    If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a lower value here, because there is no way to check the rate limit status in a stateless way. For Bitbucket Server, you can also control throttling by setting the ${MAX_REQUESTS_PER_SECOND_VAR} environment variable. This will cause the tool to submit no more than that many requests per second from the start of execution. This will slow down execution but avoid unexpected rate limit issues.`;
 
     static examples = [
         `$ <%= config.bin %> <%= command.id %> --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname github.mycompany.internal`,

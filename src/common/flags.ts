@@ -23,7 +23,6 @@ export const commonFlags = {
         description:
             'The number of days for which to fetch commit history. Defaults to 90, which is the value used in the Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.',
         required: false,
-        char: 'd',
         default: DEFAULT_DAYS,
         helpGroup: HelpGroup.REPO_SPEC,
     }),

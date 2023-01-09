@@ -39,6 +39,18 @@ export class LocalRunner extends BaseRunner {
     }
 
     async getRepoList(): Promise<Repo[]> {
+        if (this.flags.directories && this.flags['directory-file']) {
+            LOGGER.warn(
+                'You specified both "--directories" and "--directory-file". "--directory-file" will be ignored.'
+            );
+        }
+
+        if (this.flags['skip-directories'] && this.flags['skip-directory-file']) {
+            LOGGER.warn(
+                'You specified both "--skip-directories" and "--skip-directory-file". "--skip-directory-file" will be ignored.'
+            );
+        }
+
         const reposList: string | undefined = this.flags.directories;
         const reposFile: string | undefined = this.flags['directory-file'];
         const skipReposList: string | undefined = this.flags['skip-directories'];
