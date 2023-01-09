@@ -28,9 +28,13 @@ Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 als
 # Contents
 
 <!-- toc -->
+* [Redshirts](#redshirts)
+* [Contents](#contents)
 * [Quickstart](#quickstart)
 * [Requirements](#requirements)
 * [Modes](#modes)
+* [Examples](#examples)
+* [Support and troubleshooting](#support-and-troubleshooting)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
@@ -43,9 +47,13 @@ Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 als
 
 See [installation](./docs/installation.md) for more information.
 
-# Requirements
+# Installation and requirements
+
+Install using `npm`: `npm install -g @paloaltonetworks/redshirts`
 
 Requires [nodejs](https://nodejs.org/en/) v16 or higher. If you use nodejs for other purposes, we recommend using Node Version Manager ([*nix](https://github.com/nvm-sh/nvm), [windows](https://github.com/coreybutler/nvm-windows)).
+
+See [installation](./docs/installation.md) for more information.
 
 # Modes
 
@@ -115,12 +123,43 @@ Count active contributors for Azure DevOps repos
 ```
 USAGE
   $ redshirts azuredevops -t <value> [--orgs <value>] [--projects <value>] [--skip-projects <value>] [-o
-    summary|json|csv] [--ca-cert <value>] [-d <value>] [--sort repo|contributors] [--exclude-empty] [--include-public]
-    [--log-level error|warn|info|debug] [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file
-    <value>]
+    summary|json|csv] [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty]
+    [--include-public] [--log-level error|warn|info|debug] [--repos <value>] [--repo-file <value>] [--skip-repos
+    <value>] [--skip-repo-file <value>]
+
+OUTPUT FLAGS
+  -o, --output=(summary|json|csv)
+      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
+      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
+
+  --exclude-empty
+      Do not include repos with no commits in the output
+
+  --log-level=(error|warn|info|debug)
+      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
+      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
+      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
+      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
+      written to the stderr stream.
+
+  --sort=(repo|contributors)
+      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
+      name, or by descending contributor count (ignored for JSON)
+
+AUTHENTICATION FLAGS
+  -t, --token=<value>  (required) An Azure DevOps user personal access token tied to the provided username. This token
+                       must be tied to a user that has sufficient visibility of the repo(s) being counted. See the
+                       description below for more information about the token.
+
+CONNECTION FLAGS
+  --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
+                     https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a certificate
+                     chain for your environment. Note that for some systems, the hostname for the API endpoint may be
+                     different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
+                     to obtain a certificate for the correct hostname.
 
 REPO SPECIFICATION FLAGS
-  -d, --days=<value>
+  --days=<value>
       [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
       Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
 
@@ -167,37 +206,6 @@ REPO SPECIFICATION FLAGS
       the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
       --skip-repo-file.
 
-OUTPUT FLAGS
-  -o, --output=(summary|json|csv)
-      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
-      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
-
-  --exclude-empty
-      Do not include repos with no commits in the output
-
-  --log-level=(error|warn|info|debug)
-      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
-      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
-
-  --sort=(repo|contributors)
-      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
-      name, or by descending contributor count (ignored for JSON)
-
-AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) An Azure DevOps user personal access token tied to the provided username. This token
-                       must be tied to a user that has sufficient visibility of the repo(s) being counted. See the
-                       description below for more information about the token.
-
-CONNECTION FLAGS
-  --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
-                     https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a certificate
-                     chain for your environment. Note that for some systems, the hostname for the API endpoint may be
-                     different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
-                     to obtain a certificate for the correct hostname.
-
 DESCRIPTION
   Count active contributors for Azure DevOps repos
 
@@ -232,47 +240,9 @@ Count active contributors for Bitbucket repos
 ```
 USAGE
   $ redshirts bitbucket -u <value> -t <value> [--workspaces <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [-d <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
     [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [--requests-per-hour
     <value>]
-
-REPO SPECIFICATION FLAGS
-  -d, --days=<value>
-      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
-      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
-
-  --include-public
-      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
-      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
-      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
-      private repos, or mostly private repos, using --repos, --orgs, etc.
-
-  --repo-file=<value>
-      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
-      details.
-
-  --repos=<value>
-      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
-      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
-      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
-      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
-      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
-      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
-      group(s).
-
-  --skip-repo-file=<value>
-      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
-
-  --skip-repos=<value>
-      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
-      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
-      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
-      --skip-repo-file.
-
-  --workspaces=<value>
-      A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add
-      additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude
-      individual repos that are a part of these workspace(s).
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -313,6 +283,44 @@ CONNECTION FLAGS
       other sources simultaneously. If you are running in a self-hosted server environment without API rate limits, you
       can also set this to a very high number to effectively disable throttling, but this may impact server performance.
 
+REPO SPECIFICATION FLAGS
+  --days=<value>
+      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
+      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
+
+  --include-public
+      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
+      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
+      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
+      private repos, or mostly private repos, using --repos, --orgs, etc.
+
+  --repo-file=<value>
+      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
+      details.
+
+  --repos=<value>
+      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
+      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
+      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
+      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
+      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
+      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
+      group(s).
+
+  --skip-repo-file=<value>
+      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
+
+  --skip-repos=<value>
+      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
+      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
+      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
+      --skip-repo-file.
+
+  --workspaces=<value>
+      A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add
+      additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude
+      individual repos that are a part of these workspace(s).
+
 DESCRIPTION
   Count active contributors for Bitbucket repos
 
@@ -346,53 +354,9 @@ Count active contributors for Bitbucket server (self-hosted) repos
 ```
 USAGE
   $ redshirts bitbucket-server -u <value> -t <value> -h <value> [--workspaces <value>] [-o summary|json|csv]
-    [--ca-cert <value>] [-d <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug] [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
     [--requests-per-hour <value>] [-p <value>] [--protocol http|https] [--projects <value>]
-
-REPO SPECIFICATION FLAGS
-  -d, --days=<value>
-      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
-      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
-
-  --include-public
-      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
-      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
-      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
-      private repos, or mostly private repos, using --repos, --orgs, etc.
-
-  --projects=<value>
-      A comma separated list of projects and / or usernames for which to fetch repos. Use the --repos option to add
-      additional specific repos on top of those in the specified project(s). Use the --skip-repos option to exclude
-      individual repos that are a part of these project(s). For users, use the value you would use in the git clone URL:
-      `~username`.
-
-  --repo-file=<value>
-      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
-      details.
-
-  --repos=<value>
-      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
-      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
-      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
-      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
-      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
-      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
-      group(s).
-
-  --skip-repo-file=<value>
-      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
-
-  --skip-repos=<value>
-      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
-      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
-      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
-      --skip-repo-file.
-
-  --workspaces=<value>
-      A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add
-      additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude
-      individual repos that are a part of these workspace(s).
 
 CONNECTION FLAGS
   -h, --hostname=<value>
@@ -444,6 +408,50 @@ AUTHENTICATION FLAGS
                           for how to create this token.
   -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
 
+REPO SPECIFICATION FLAGS
+  --days=<value>
+      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
+      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
+
+  --include-public
+      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
+      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
+      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
+      private repos, or mostly private repos, using --repos, --orgs, etc.
+
+  --projects=<value>
+      A comma separated list of projects and / or usernames for which to fetch repos. Use the --repos option to add
+      additional specific repos on top of those in the specified project(s). Use the --skip-repos option to exclude
+      individual repos that are a part of these project(s). For users, use the value you would use in the git clone URL:
+      `~username`.
+
+  --repo-file=<value>
+      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
+      details.
+
+  --repos=<value>
+      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
+      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
+      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
+      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
+      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
+      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
+      group(s).
+
+  --skip-repo-file=<value>
+      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
+
+  --skip-repos=<value>
+      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
+      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
+      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
+      --skip-repo-file.
+
+  --workspaces=<value>
+      A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add
+      additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude
+      individual repos that are a part of these workspace(s).
+
 DESCRIPTION
   Count active contributors for Bitbucket server (self-hosted) repos
 
@@ -460,10 +468,10 @@ DESCRIPTION
   for more information.
 
   If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit,
-  you may need to provide a lower value here, because there is no way to check the rate liit status in a stateless way.
-  For Bitbucket Server, you can also control throttling by setting the MAX_REQUESTS_PER_SECOND environment variable.
-  This will cause the tool to submit no more than that many requests per second from the start of execution. This will
-  slow down execution but avoid unexpected rate limit issues.
+  you may need to provide a lower value here, because there is no way to check the rate limit status in a stateless way.
+  For Bitbucket Server, you can also control throttling by setting the REDSHIRTS_MAX_REQUESTS_PER_SECOND environment
+  variable. This will cause the tool to submit no more than that many requests per second from the start of execution.
+  This will slow down execution but avoid unexpected rate limit issues.
 
 EXAMPLES
   $ redshirts bitbucket-server --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname github.mycompany.internal
@@ -479,12 +487,42 @@ Count active contributors for GitHub repos
 
 ```
 USAGE
-  $ redshirts github -t <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>] [-d <value>]
+  $ redshirts github -t <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>] [--days <value>]
     [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug] [--repos
     <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
 
+OUTPUT FLAGS
+  -o, --output=(summary|json|csv)
+      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
+      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
+
+  --exclude-empty
+      Do not include repos with no commits in the output
+
+  --log-level=(error|warn|info|debug)
+      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
+      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
+      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
+      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
+      written to the stderr stream.
+
+  --sort=(repo|contributors)
+      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
+      name, or by descending contributor count (ignored for JSON)
+
+AUTHENTICATION FLAGS
+  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
+                       visibility of the repo(s) being counted. See the description below for more information.
+
+CONNECTION FLAGS
+  --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
+                     https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a certificate
+                     chain for your environment. Note that for some systems, the hostname for the API endpoint may be
+                     different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
+                     to obtain a certificate for the correct hostname.
+
 REPO SPECIFICATION FLAGS
-  -d, --days=<value>
+  --days=<value>
       [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
       Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
 
@@ -521,36 +559,6 @@ REPO SPECIFICATION FLAGS
       to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
       the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
       --skip-repo-file.
-
-OUTPUT FLAGS
-  -o, --output=(summary|json|csv)
-      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
-      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
-
-  --exclude-empty
-      Do not include repos with no commits in the output
-
-  --log-level=(error|warn|info|debug)
-      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
-      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
-
-  --sort=(repo|contributors)
-      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
-      name, or by descending contributor count (ignored for JSON)
-
-AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information.
-
-CONNECTION FLAGS
-  --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
-                     https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a certificate
-                     chain for your environment. Note that for some systems, the hostname for the API endpoint may be
-                     different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
-                     to obtain a certificate for the correct hostname.
 
 DESCRIPTION
   Count active contributors for GitHub repos
@@ -583,13 +591,48 @@ Count active contributors for GitHub server (self-hosted) repos
 
 ```
 USAGE
-  $ redshirts github-server -t <value> -h <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>] [-d
-    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
+  $ redshirts github-server -t <value> -h <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
     [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [-p <value>] [--protocol
     http|https]
 
+CONNECTION FLAGS
+  -h, --hostname=<value>   (required) The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and
+                           protocol here (see --port and --protocol).
+  -p, --port=<value>       The port of your server, if not a standard port (443 for https, or 80 for http).
+  --ca-cert=<value>        Path to certificate chain to use in HTTP requests. See
+                           https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a
+                           certificate chain for your environment. Note that for some systems, the hostname for the API
+                           endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs.
+                           github.com). Be sure to obtain a certificate for the correct hostname.
+  --protocol=(http|https)  [default: https] Protocol for your server, https (default) or http. Affects the default port
+                           value if you do not specify a port. You must specify a protocol here, not in the hostname.
+
+OUTPUT FLAGS
+  -o, --output=(summary|json|csv)
+      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
+      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
+
+  --exclude-empty
+      Do not include repos with no commits in the output
+
+  --log-level=(error|warn|info|debug)
+      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
+      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
+      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
+      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
+      written to the stderr stream.
+
+  --sort=(repo|contributors)
+      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
+      name, or by descending contributor count (ignored for JSON)
+
+AUTHENTICATION FLAGS
+  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
+                       visibility of the repo(s) being counted. See the description below for more information.
+
 REPO SPECIFICATION FLAGS
-  -d, --days=<value>
+  --days=<value>
       [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
       Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
 
@@ -627,41 +670,6 @@ REPO SPECIFICATION FLAGS
       the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
       --skip-repo-file.
 
-CONNECTION FLAGS
-  -h, --hostname=<value>   (required) The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and
-                           protocol here (see --port and --protocol).
-  -p, --port=<value>       The port of your server, if not a standard port (443 for https, or 80 for http).
-  --ca-cert=<value>        Path to certificate chain to use in HTTP requests. See
-                           https://www.baeldung.com/linux/ssl-certificates for more information on obtaining a
-                           certificate chain for your environment. Note that for some systems, the hostname for the API
-                           endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs.
-                           github.com). Be sure to obtain a certificate for the correct hostname.
-  --protocol=(http|https)  [default: https] Protocol for your server, https (default) or http. Affects the default port
-                           value if you do not specify a port. You must specify a protocol here, not in the hostname.
-
-OUTPUT FLAGS
-  -o, --output=(summary|json|csv)
-      [default: summary] Output format for displaying data. Defaults to 'summary', which is a console-friendly tabular
-      output. To see full committer details, instead of just the unique count (total and per repo), use 'json'.
-
-  --exclude-empty
-      Do not include repos with no commits in the output
-
-  --log-level=(error|warn|info|debug)
-      [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
-      'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
-
-  --sort=(repo|contributors)
-      [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
-      name, or by descending contributor count (ignored for JSON)
-
-AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information.
-
 DESCRIPTION
   Count active contributors for GitHub server (self-hosted) repos
 
@@ -690,49 +698,9 @@ Count active contributors for GitLab repos
 
 ```
 USAGE
-  $ redshirts gitlab -t <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>] [-d <value>]
-    [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug] [--repos
-    <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
-
-REPO SPECIFICATION FLAGS
-  -d, --days=<value>
-      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
-      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
-
-  --groups=<value>
-      Group names and / or usernames for which to fetch repos. These values must be the namespace slug, as it appears in
-      GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. For users, this
-      will only include repos owned by that user. Use the --repos option to add additional specific repos on top of those
-      in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these
-      group(s).
-
-  --include-public
-      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
-      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
-      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
-      private repos, or mostly private repos, using --repos, --orgs, etc.
-
-  --repo-file=<value>
-      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
-      details.
-
-  --repos=<value>
-      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
-      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
-      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
-      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
-      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
-      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
-      group(s).
-
-  --skip-repo-file=<value>
-      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
-
-  --skip-repos=<value>
-      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
-      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
-      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
-      --skip-repo-file.
+  $ redshirts gitlab -t <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>] [--days
+    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
+    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -765,45 +733,17 @@ CONNECTION FLAGS
                      different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
                      to obtain a certificate for the correct hostname.
 
-DESCRIPTION
-  Count active contributors for GitLab repos
-
-  About authentication: you must create a personal access token with the read_api scope. See
-  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
-
-  About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and
-  then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate
-  limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.
-
-EXAMPLES
-  $ redshirts gitlab --token glpat_xxxx --repos bridgecrewio/checkov,group/subgroup/terragoat
-
-  $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
-```
-
-_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab.ts)_
-
-## `redshirts gitlab-server`
-
-Count active contributors for GitLab server (self-hosted) repos
-
-```
-USAGE
-  $ redshirts gitlab-server -t <value> -h <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>] [-d
-    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
-    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [-p <value>] [--protocol
-    http|https]
-
 REPO SPECIFICATION FLAGS
-  -d, --days=<value>
+  --days=<value>
       [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
       Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
 
   --groups=<value>
       Group names and / or usernames for which to fetch repos. These values must be the namespace slug, as it appears in
-      GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. For users, this
-      will only include repos owned by that user. Use the --repos option to add additional specific repos on top of those
-      in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these
+      GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. If you want to
+      exclude some subgroups, either specify the subgroups you want to include, or use the --skip-repos option. For users,
+      this will only include repos owned by that user. Use the --repos option to add additional specific repos on top of
+      those in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these
       group(s).
 
   --include-public
@@ -833,6 +773,35 @@ REPO SPECIFICATION FLAGS
       to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
       the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
       --skip-repo-file.
+
+DESCRIPTION
+  Count active contributors for GitLab repos
+
+  About authentication: you must create a personal access token with the read_api scope. See
+  https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+
+  About rate limiting: For GitLab, this tool will attempt to submit requests in a burst until a rate limit is hit, and
+  then respect the rate limit reset information provided in the response. GitLab does not consistently provide rate
+  limit headers in the responses, and thus it is not possible to always avoid hitting a rate limit.
+
+EXAMPLES
+  $ redshirts gitlab --token glpat_xxxx --repos bridgecrewio/checkov,group/subgroup/terragoat
+
+  $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
+```
+
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab.ts)_
+
+## `redshirts gitlab-server`
+
+Count active contributors for GitLab server (self-hosted) repos
+
+```
+USAGE
+  $ redshirts gitlab-server -t <value> -h <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
+    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [-p <value>] [--protocol
+    http|https]
 
 CONNECTION FLAGS
   -h, --hostname=<value>   (required) The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and
@@ -869,6 +838,47 @@ AUTHENTICATION FLAGS
   -t, --token=<value>  (required) Gitlab personal access token. This token must be tied to a user that has sufficient
                        visibility of the repo(s) being counted. See the description below for more information about the
                        token.
+
+REPO SPECIFICATION FLAGS
+  --days=<value>
+      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
+      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
+
+  --groups=<value>
+      Group names and / or usernames for which to fetch repos. These values must be the namespace slug, as it appears in
+      GitLab URLs, not the display name, which might be different. For groups, includes all subgroups. If you want to
+      exclude some subgroups, either specify the subgroups you want to include, or use the --skip-repos option. For users,
+      this will only include repos owned by that user. Use the --repos option to add additional specific repos on top of
+      those in the specified group(s). Use the --skip-repos option to exclude individual repos that are a part of these
+      group(s).
+
+  --include-public
+      The platform only counts contributors in private repos (and "internal" repos for some enterprise systems). If you
+      wish to see contributors in public repos, for informational or other purposes, use this flag. This will also cause
+      Redshirts to skip checking if a repo is public, so it can speed up the runtime if you know you are only supplying
+      private repos, or mostly private repos, using --repos, --orgs, etc.
+
+  --repo-file=<value>
+      The name of a file containing a list of repositories to fetch, one per line. See the --repos option for more
+      details.
+
+  --repos=<value>
+      A comma-separated list of repository names to fetch, as fully qualified paths (e.g., owner/repo,
+      group/subgroup/project, etc). For systems where the repo display name can differ from the repo URL / slug (e.g.,
+      Gitlab), the repo slug must be used. Takes precedence over --repos-file. If no repo or org / group list is provided,
+      then the script will run over all repos for the token provided. Note that for some systems, this is not equivalent
+      to a list of all possible repos. See the notes for each VCS for more information. If used with --orgs, --groups,
+      etc, then this is a list of *additional* repos to fetch beyond the repos associated with the specified org(s) /
+      group(s).
+
+  --skip-repo-file=<value>
+      The name of a file containing repository names to skip, one per line. See --skip-repos for more details.
+
+  --skip-repos=<value>
+      A comma-separated list of repository names to skip - used in conjunction with the VCS --orgs, --groups, etc options
+      to skip specific repos within those groupings, or to filter out repos if no repo / org list is specified at all. If
+      the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
+      --skip-repo-file.
 
 DESCRIPTION
   Count active contributors for GitLab server (self-hosted) repos
@@ -917,21 +927,22 @@ Count active contributors in local directories using `git log`
 
 ```
 USAGE
-  $ redshirts local [--directories <value>] [--directory-file <value>] [--skip-directories <value>]
-    [--skip-directory-file <value>] [-o summary|json|csv] [-d <value>] [--sort repo|contributors] [--exclude-empty]
+  $ redshirts local [-d <value>] [--directory-file <value>] [--skip-directories <value>]
+    [--skip-directory-file <value>] [-o summary|json|csv] [--days <value>] [--sort repo|contributors] [--exclude-empty]
     [--log-level error|warn|info|debug]
 
 REPO SPECIFICATION FLAGS
-  -d, --days=<value>
-      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
-      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
-
-  --directories=<value>
+  -d, --directories=<value>
       (One of --directories or --directory-file is required.) A comma-separated list of relative or absolute paths to
       directories on the file system that contain git repositories. The tool will traverse this directory recursively,
       stopping at any directories with a .git directory (the root of a repo) - it will not traverse more deeply than that.
       This means that if you have a repo with a submodule, you should specify the submodule directory explicitly here. If
-      you have directories with commas in the name, use the --directory-file option.
+      you have directories with commas in the name, use the --directory-file option. If you specify --directories,
+      --directory-file is ignored.
+
+  --days=<value>
+      [default: 90] The number of days for which to fetch commit history. Defaults to 90, which is the value used in the
+      Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.
 
   --directory-file=<value>
       (One of --directories or --directory-file is required.) A file containing a list of directories to scan, one per
