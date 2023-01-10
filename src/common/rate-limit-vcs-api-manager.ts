@@ -1,5 +1,5 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { RateLimitStatus, RepoResponse, VcsSourceInfo } from './types';
+import { RateLimitStatus, VcsSourceInfo } from './types';
 import { getEnvVarWithDefault, LOGGER, sleepUntilDateTime } from './utils';
 import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
@@ -45,8 +45,6 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
     }
 
     abstract _getAxiosConfiguration(): any;
-    abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
-    abstract getUserRepos(): Promise<RepoResponse[]>;
 
     async checkRateLimitStatus(): Promise<RateLimitStatus | undefined> {
         if (!this.rateLimitEndpoint) {
