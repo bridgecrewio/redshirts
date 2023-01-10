@@ -126,6 +126,80 @@ describe('github api rate limiting', () => {
         expect(commits).to.have.length(4);
         expect(sleepSpy.calledOnce).to.be.true;
     });
+
+    it('handles unexpected 429 response', async () => {
+        const sleepSpy = spy(utils, 'sleepUntilDateTime');
+        stub.onGet(`repos/owner/repo/commits`, { params: { per_page: 100, since: sinceDate.toISOString() } }).replyOnce(
+            200,
+            [
+                {
+                    author: {
+                        login: 'user1',
+                    },
+                    commit: {
+                        author: 'user1',
+                        email: 'user1@email.com',
+                        date: '2023-01-04T17:56:44Z',
+                    },
+                },
+                {
+                    author: {
+                        login: 'user2',
+                    },
+                    commit: {
+                        author: 'user2',
+                        email: 'user2@email.com',
+                        date: '2023-01-04T17:55:44Z',
+                    },
+                },
+            ],
+            {
+                link: '<https://api.github.com/repositories/1234/commits?page=2>; rel="next", <https://api.github.com/repositories/1234/commits?page=2>; rel="last"',
+            }
+        );
+
+        stub.onGet(`https://api.github.com/repositories/1234/commits?page=2`, {
+            params: { per_page: 100, since: sinceDate.toISOString() },
+        }).replyOnce(429, undefined, {
+            'x-ratelimit-remaining': '0',
+            'x-ratelimit-reset': '1672799029',
+        });
+
+        stub.onGet(`https://api.github.com/repositories/1234/commits?page=2`, {
+            params: { per_page: 100, since: sinceDate.toISOString() },
+        }).replyOnce(
+            200,
+            [
+                {
+                    author: {
+                        login: 'user1',
+                    },
+                    commit: {
+                        author: 'user1',
+                        email: 'user1@email.com',
+                        date: '2023-01-03T17:56:44Z',
+                    },
+                },
+                {
+                    author: {
+                        login: 'user3',
+                    },
+                    commit: {
+                        author: 'user3',
+                        email: 'user3@email.com',
+                        date: '2023-01-02T17:55:44Z',
+                    },
+                },
+            ],
+            {
+                link: '<https://api.github.com/repositories/1234/commits?page=2>; rel="last"',
+            }
+        );
+
+        const commits = await githubApiManager.getCommits({ owner: 'owner', name: 'repo' }, sinceDate);
+        expect(commits).to.have.length(4);
+        expect(sleepSpy.calledOnce).to.be.true;
+    });
 });
 
 describe('github helpers', () => {
