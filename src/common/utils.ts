@@ -148,7 +148,7 @@ export const getExplicitRepoList = (
     const addedRepos: Repo[] = [];
 
     for (const repo of explicitRepos) {
-        if (repos.some((r) => repoMatches(r, repo))) {
+        if (repos.some((r) => repoMatches(r, repo)) || addedRepos.some((r) => repoMatches(r, repo))) {
             LOGGER.debug(
                 `Skipping adding ${sourceInfo.repoTerm} ${repo.owner}/${repo.name} as we already got it from the ${sourceInfo.orgTerm}`
             );
