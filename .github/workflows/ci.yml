@@ -24,7 +24,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node }}
             - run: yarn -D --ignore-scripts
-            - run: yarn run build --if-present
+            - run: yarn run build
             - run: yarn test
               env:
                   CI: true
