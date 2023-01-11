@@ -1,7 +1,15 @@
-import { Flags } from "@oclif/core";
-import { expect } from "chai";
-import { Protocol, Repo } from "../../src/common/types";
-import { deleteFlagKey, getRepoListFromParams, getServerUrl, repoMatches, splitAndCombine, splitRepos } from '../../src/common/utils';
+import { Flags } from '@oclif/core';
+import { expect } from 'chai';
+import { Protocol, Repo } from '../../src/common/types';
+import {
+    deleteFlagKey,
+    filterRepoList,
+    getRepoListFromParams,
+    getServerUrl,
+    repoMatches,
+    splitAndCombine,
+    splitRepos,
+} from '../../src/common/utils';
 
 describe('utils', () => {
     it('parses the CSV repo list correctly', () => {
@@ -9,16 +17,16 @@ describe('utils', () => {
         expect(repos).to.have.deep.members([
             {
                 owner: 'org',
-                name: 'repo1'
+                name: 'repo1',
             },
             {
                 owner: 'org',
-                name: 'repo2'
+                name: 'repo2',
             },
             {
                 owner: 'org2/group',
-                name: 'repo3'
-            }
+                name: 'repo3',
+            },
         ]);
     });
 
@@ -30,19 +38,19 @@ describe('utils', () => {
         const repo1: Repo = {
             owner: 'owner',
             name: 'name',
-            private: true
+            private: true,
         };
 
         const repo2: Repo = {
             owner: 'owner',
             name: 'name',
-            private: false
+            private: false,
         };
 
         const repo3: Repo = {
             owner: 'other',
             name: 'name',
-            private: true
+            private: true,
         };
 
         expect(repoMatches(repo1, repo2)).to.be.true;
@@ -51,41 +59,44 @@ describe('utils', () => {
 
     it('gets a repo list from a string or file', () => {
         expect(getRepoListFromParams(2, 2)).to.have.length(0);
-        expect(getRepoListFromParams(2, 2, 'org1/repo1,org2/repo2')).to.have.deep.members(
-            [
+        expect(getRepoListFromParams(2, 2, 'org1/repo1,org2/repo2'))
+            .to.have.deep.members([
                 {
-                    owner: "org1",
-                    name: "repo1"
+                    owner: 'org1',
+                    name: 'repo1',
                 },
                 {
-                    owner: "org2",
-                    name: "repo2"
-                }
-            ]).and.to.have.length(2);
+                    owner: 'org2',
+                    name: 'repo2',
+                },
+            ])
+            .and.to.have.length(2);
 
-        expect(getRepoListFromParams(2, 2, undefined, 'test/resources/repos1.txt')).to.have.deep.members(
-            [
+        expect(getRepoListFromParams(2, 2, undefined, 'test/resources/repos1.txt'))
+            .to.have.deep.members([
                 {
-                    owner: "org1",
-                    name: "repo1"
+                    owner: 'org1',
+                    name: 'repo1',
                 },
                 {
-                    owner: "org2222",
-                    name: "repo2222"
-                }
-            ]).and.to.have.length(2);
+                    owner: 'org2222',
+                    name: 'repo2222',
+                },
+            ])
+            .and.to.have.length(2);
 
-        expect(getRepoListFromParams(2, 2, 'org1/repo1,org2/repo2', 'test/resources/repos1.txt')).to.have.deep.members(
-            [
+        expect(getRepoListFromParams(2, 2, 'org1/repo1,org2/repo2', 'test/resources/repos1.txt'))
+            .to.have.deep.members([
                 {
-                    owner: "org1",
-                    name: "repo1"
+                    owner: 'org1',
+                    name: 'repo1',
                 },
                 {
-                    owner: "org2",
-                    name: "repo2"
-                }
-            ]).and.to.have.length(2);
+                    owner: 'org2',
+                    name: 'repo2',
+                },
+            ])
+            .and.to.have.length(2);
     });
 
     it('splits and combines', () => {
@@ -95,20 +106,19 @@ describe('utils', () => {
     });
 
     it('deletes a key', () => {
-
         const flags = {
             a: Flags.integer(),
             b: Flags.integer(),
-            c: Flags.integer()
+            c: Flags.integer(),
         };
 
         const newFlags = deleteFlagKey(flags, 'b', 'c', 'd');
-        expect(newFlags).to.deep.equal({a: Flags.integer()});
+        expect(newFlags).to.deep.equal({ a: Flags.integer() });
         // flags is unmodified
         expect(flags).to.deep.equal({
             a: Flags.integer(),
             b: Flags.integer(),
-            c: Flags.integer()
+            c: Flags.integer(),
         });
     });
 
@@ -119,6 +129,70 @@ describe('utils', () => {
         expect(getServerUrl('xyz.com', undefined, Protocol.HTTP)).to.equal('http://xyz.com');
         expect(getServerUrl('xyz.com', undefined, Protocol.HTTPS)).to.equal('https://xyz.com');
         expect(getServerUrl('xyz.com', 123, Protocol.HTTPS)).to.equal('https://xyz.com:123');
+    });
+
+    it('filters skipped repos with the default function', () => {
+        const repos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ];
+
+        const skipRepos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo4',
+            },
+        ];
+
+        expect(filterRepoList(repos, [], 'repo')).to.deep.equal(repos);
+        expect(filterRepoList(repos, skipRepos, 'repo')).to.deep.equal([
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ]);
+    });
+
+    it('filters skipped repos with a custom function', () => {
+        const repos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ];
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const f = (_: { owner: string; name: string }, __: { owner: string; name: string }): boolean => {
+            return true;
+        };
+
+        expect(filterRepoList(repos, repos, 'repo', f)).to.deep.equal([]);
     });
 });
 
