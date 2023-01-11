@@ -28,3 +28,4 @@ jobs:
             - run: yarn test
               env:
                   CI: true
+                  DISABLE_LOGS: true
