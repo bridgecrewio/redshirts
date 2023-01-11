@@ -183,7 +183,7 @@ describe('github runner repo conversion', () => {
 });
 
 describe('github repo param validation', () => {
-    let githubApiManager: GithubApiManager;
+    let apiManager: GithubApiManager;
 
     afterEach(() => {
         restore();
@@ -191,7 +191,7 @@ describe('github repo param validation', () => {
 
     it('logs a warning if --repos and --skip-repos are both used', async () => {
         const sourceInfo = sourceInfoPublic;
-        githubApiManager = new GithubApiManager(sourceInfo);
+        apiManager = new GithubApiManager(sourceInfo);
 
         const loggerSpy = spy();
         utils.LOGGER.warn = loggerSpy;
@@ -202,9 +202,9 @@ describe('github repo param validation', () => {
             'repo-file': 'file1',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        await githubRunner.getRepoList();
+        await runner.getRepoList();
 
         expect(
             loggerSpy.calledOnceWith('You specified both "--repos" and "--repo-file". "--repo-file" will be ignored.')
@@ -213,7 +213,7 @@ describe('github repo param validation', () => {
 
     it('logs a warning if --repo-file and --skip-repo-file are both used', async () => {
         const sourceInfo = sourceInfoPublic; // using public will skip the call to get repo details
-        githubApiManager = new GithubApiManager(sourceInfo);
+        apiManager = new GithubApiManager(sourceInfo);
 
         const loggerSpy = spy();
         utils.LOGGER.warn = loggerSpy;
@@ -225,9 +225,9 @@ describe('github repo param validation', () => {
             'skip-repo-file': 'file1',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        await githubRunner.getRepoList();
+        await runner.getRepoList();
 
         expect(
             loggerSpy.calledOnceWith(
@@ -237,8 +237,8 @@ describe('github repo param validation', () => {
     });
 });
 
-describe('github runner repo fetching', () => {
-    let githubApiManager: GithubApiManager;
+describe('github and generic VCS get repo list', () => {
+    let apiManager: GithubApiManager;
 
     afterEach(() => {
         restore();
@@ -246,8 +246,8 @@ describe('github runner repo fetching', () => {
 
     it('converts orgs to repos with include-public', async () => {
         const sourceInfo = sourceInfoPublic;
-        githubApiManager = new GithubApiManager(sourceInfo);
-        stub(githubApiManager, 'getOrgRepos')
+        apiManager = new GithubApiManager(sourceInfo);
+        stub(apiManager, 'getOrgRepos')
             .withArgs('org1')
             .resolves([
                 {
@@ -275,9 +275,9 @@ describe('github runner repo fetching', () => {
             orgs: 'org1,org2',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(repos).to.deep.equal([
             {
@@ -300,8 +300,8 @@ describe('github runner repo fetching', () => {
 
     it('converts orgs to repos without include-public', async () => {
         const sourceInfo = sourceInfoPrivate;
-        githubApiManager = new GithubApiManager(sourceInfo);
-        stub(githubApiManager, 'getOrgRepos')
+        apiManager = new GithubApiManager(sourceInfo);
+        stub(apiManager, 'getOrgRepos')
             .withArgs('org1')
             .resolves([
                 {
@@ -329,9 +329,9 @@ describe('github runner repo fetching', () => {
             orgs: 'org1,org2',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(repos).to.deep.equal([
             {
@@ -349,14 +349,14 @@ describe('github runner repo fetching', () => {
 
     it('gets repo metadata without --include-public', async () => {
         const sourceInfo = sourceInfoPrivate;
-        githubApiManager = new GithubApiManager(sourceInfo);
+        apiManager = new GithubApiManager(sourceInfo);
 
         const repo: Repo = {
             owner: 'org',
             name: 'repo',
         };
 
-        stub(githubApiManager, 'enrichRepo')
+        stub(apiManager, 'enrichRepo')
             .withArgs(repo)
             .callsFake(async (r: Repo): Promise<void> => {
                 r.private = true;
@@ -367,9 +367,9 @@ describe('github runner repo fetching', () => {
             repos: 'org/repo',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(repos).to.deep.equal([
             {
@@ -382,18 +382,18 @@ describe('github runner repo fetching', () => {
 
     it('does not get repo metadata with --include-public', async () => {
         const sourceInfo = sourceInfoPublic;
-        githubApiManager = new GithubApiManager(sourceInfo);
+        apiManager = new GithubApiManager(sourceInfo);
 
-        const enrichSpy = spy(githubApiManager, 'enrichRepo');
+        const enrichSpy = spy(apiManager, 'enrichRepo');
 
         const flags = {
             ...getDefaultFlags(commonFlags),
             repos: 'org/repo',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(enrichSpy.notCalled).to.be.true;
         expect(repos).to.deep.equal([
@@ -406,7 +406,7 @@ describe('github runner repo fetching', () => {
 
     it('reads repos from a file', async () => {
         const sourceInfo = sourceInfoPublic;
-        githubApiManager = new GithubApiManager(sourceInfo);
+        apiManager = new GithubApiManager(sourceInfo);
 
         stub(utils, 'getFileContents').callsFake((_: string): string => `org1/repo1${EOL}org1/repo2${EOL}`);
 
@@ -415,9 +415,9 @@ describe('github runner repo fetching', () => {
             'repo-file': 'file',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(repos).to.deep.equal([
             {
@@ -433,9 +433,9 @@ describe('github runner repo fetching', () => {
 
     it('gets user repos when no other repos are specified', async () => {
         const sourceInfo = sourceInfoPrivate;
-        githubApiManager = new GithubApiManager(sourceInfoPrivate);
+        apiManager = new GithubApiManager(sourceInfoPrivate);
 
-        stub(githubApiManager, 'getUserRepos').resolves([
+        stub(apiManager, 'getUserRepos').resolves([
             {
                 name: 'repo1',
                 owner: { login: 'org1' },
@@ -448,15 +448,15 @@ describe('github runner repo fetching', () => {
             },
         ]);
 
-        const enrichSpy = spy(githubApiManager, 'enrichRepo');
+        const enrichSpy = spy(apiManager, 'enrichRepo');
 
         const flags = {
             ...getDefaultFlags(commonFlags),
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         // also check that we removed the private one and did not need enrichRepos
         expect(enrichSpy.notCalled).to.be.true;
@@ -471,9 +471,9 @@ describe('github runner repo fetching', () => {
 
     it('removes skipped repos', async () => {
         const sourceInfo = sourceInfoPrivate;
-        githubApiManager = new GithubApiManager(sourceInfoPrivate);
+        apiManager = new GithubApiManager(sourceInfoPrivate);
 
-        stub(githubApiManager, 'getUserRepos').resolves([
+        stub(apiManager, 'getUserRepos').resolves([
             {
                 name: 'repo1',
                 owner: { login: 'org1' },
@@ -491,9 +491,9 @@ describe('github runner repo fetching', () => {
             'skip-repos': 'org1/repo2',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         expect(repos).to.deep.equal([
             {
@@ -506,9 +506,9 @@ describe('github runner repo fetching', () => {
 
     it('combines orgs and repos and skipped repos', async () => {
         const sourceInfo = sourceInfoPrivate;
-        githubApiManager = new GithubApiManager(sourceInfoPrivate);
+        apiManager = new GithubApiManager(sourceInfoPrivate);
 
-        stub(githubApiManager, 'getOrgRepos').resolves([
+        stub(apiManager, 'getOrgRepos').resolves([
             {
                 name: 'repo1',
                 owner: { login: 'org1' },
@@ -521,7 +521,7 @@ describe('github runner repo fetching', () => {
             },
         ]);
 
-        stub(githubApiManager, 'enrichRepo')
+        stub(apiManager, 'enrichRepo')
             .withArgs({ owner: 'org2', name: 'repo1' })
             .callsFake(async (r: Repo): Promise<void> => {
                 r.private = true;
@@ -534,9 +534,9 @@ describe('github runner repo fetching', () => {
             'skip-repos': 'org1/repo2',
         };
 
-        const githubRunner = new GithubRunner(sourceInfo, flags, githubApiManager);
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
-        const repos = await githubRunner.getRepoList();
+        const repos = await runner.getRepoList();
 
         // also test that we remove the public repo, and enrich the --repo repo to see that it's private
         expect(repos).to.deep.equal([
