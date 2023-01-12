@@ -84,7 +84,7 @@ export abstract class BaseRunner {
                 const sourceInfo = this.sourceInfo as VcsSourceInfo;
                 logError(
                     error,
-                    `Received an SSL error while connecting to the server at url ${sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please try using the --ca-cert option to provide a valid certificate chain.`
+                    `Received an SSL error while connecting to the server at url ${sourceInfo.url}: ${error.code}: ${error.message}. This is usually caused by a VPN in your environment. Please disable your VPN or try using the --ca-cert option to provide a valid certificate chain.`
                 );
             }
 
