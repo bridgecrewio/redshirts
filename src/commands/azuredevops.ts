@@ -60,13 +60,18 @@ export default class AzureDevOps extends Command {
         const apiManager = new AzureApiManager(sourceInfo, flags['ca-cert']);
         const runner = new AzureRunner(sourceInfo, flags, apiManager);
 
+        AzureDevOps.checkRequiredParams(flags);
+
+        await runner.execute();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    static checkRequiredParams(flags: any): void {
         if (!(flags.orgs || flags.projects || flags.repos || flags['repo-file'])) {
             throw new CLIError(
                 'At least one of --orgs, --projects, --repos, or --repo-file is required for Azure DevOps'
             );
         }
-
-        await runner.execute();
     }
 
     static getSourceInfo(
