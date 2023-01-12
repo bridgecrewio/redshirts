@@ -1,33 +1,33 @@
 /* eslint-disable camelcase */
-import { RepoResponse, VCSCommit } from "../../common/types";
+import { RepoResponse, VCSCommit } from '../../common/types';
 
-export type BitbucketAuthor = {
-    raw: string,
+export interface BitbucketAuthor {
+    raw: string;
     user: {
-        account_id: string
-        nickname: string
-    }
+        account_id: string;
+        nickname: string;
+    };
 }
 
 export interface BitbucketCommit extends VCSCommit {
-    author: BitbucketAuthor,
-    date: string
+    author: BitbucketAuthor;
+    date: string;
 }
 
 export interface BitbucketUserRepoResponse {
     repository?: {
-        full_name?: string
-    }
+        full_name?: string;
+    };
 }
 
 export interface BitbucketRepoResponse extends RepoResponse {
-    full_name: string
-    is_private: boolean,
+    full_name: string;
+    is_private: boolean;
     mainbranch: {
-        name: string
-    }
+        name: string;
+    };
 }
 
 export type BitbucketWorkspaceResponse = {
-    slug: string
-}
+    slug: string;
+};
