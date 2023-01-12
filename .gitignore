@@ -9,3 +9,4 @@ node_modules
 oclif.manifest.json
 .vscode
 .idea
+yarn-error.log

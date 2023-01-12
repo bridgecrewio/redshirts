@@ -2,9 +2,9 @@
 import { RepoResponse, VCSCommit } from '../../common/types';
 
 export interface GitlabCommit extends VCSCommit {
-    committer_name: string;
-    committer_email: string;
-    committed_date: string;
+    author_name: string;
+    author_email: string;
+    authored_date: string;
 }
 
 export interface GitlabRepoResponse extends RepoResponse {

@@ -5,7 +5,6 @@ import { GitlabApiManager } from './gitlab-api-manager';
 import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 
 export class GitlabRunner extends VcsRunner {
-
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GitlabApiManager) {
         super(sourceInfo, [], flags, apiManager);
@@ -14,13 +13,10 @@ export class GitlabRunner extends VcsRunner {
     aggregateCommitContributors(repo: Repo, commits: GitlabCommit[]): void {
         LOGGER.debug(`Processing commits for repo ${repo.owner}/${repo.name}`);
         for (const commit of commits) {
-            const email = commit.committer_email;
-            const commitDate = commit.committed_date;
-
             const newCommit = {
-                username: email,
-                email,
-                commitDate
+                username: commit.author_name,
+                email: commit.author_email,
+                commitDate: commit.authored_date,
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);
@@ -33,7 +29,7 @@ export class GitlabRunner extends VcsRunner {
             filteredRepos.push({
                 name: repo.path,
                 owner: repo.namespace.full_path,
-                private: repo.visibility === 'private'
+                private: repo.visibility === 'private',
             });
         }
 

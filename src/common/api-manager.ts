@@ -1,6 +1,6 @@
 import { Repo, SourceInfo, VCSCommit } from './types';
 
-export const LOG_API_RESPONSES_ENV = 'LOG_API_RESPONSES';
+export const LOG_API_RESPONSES_ENV = 'REDSHIRT_LOG_API_RESPONSES';
 export abstract class ApiManager {
     sourceInfo: SourceInfo;
     logApiResponses: boolean;

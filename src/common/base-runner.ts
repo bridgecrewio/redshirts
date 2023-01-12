@@ -6,7 +6,6 @@ import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsS
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
 // TODO
-// - author vs committer - use author always (not committer)
 // - test on windows
 
 const EXCLUDED_EMAIL_REGEXES: RegExp[] = [/noreply/, /no-reply/];
