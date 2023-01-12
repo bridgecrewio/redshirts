@@ -48,7 +48,7 @@ export class BitbucketApiManager extends ThrottledVcsApiManager {
     async getUserRepos(): Promise<BitbucketRepoResponse[]> {
         const workspaces = await this.getWorkspaces();
 
-        const repos = [];
+        const repos: BitbucketRepoResponse[] = [];
         for (const workspace of workspaces) {
             repos.push(...(await this.getOrgRepos(workspace)));
         }
