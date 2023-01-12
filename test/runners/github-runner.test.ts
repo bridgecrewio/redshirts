@@ -165,20 +165,26 @@ describe('github runner repo conversion', () => {
         }
 
         expect(runner.contributorsByEmail.size).to.equal(3);
-        expect(runner.contributorsByEmail.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
-        expect(runner.contributorsByEmail.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
-        expect(runner.contributorsByEmail.get('user3@email.com')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+        expect(runner.contributorsByEmail.get('user1@email.com')?.lastCommitDate).to.equal(
+            commits[1][1].commit.author.date
+        );
+        expect(runner.contributorsByEmail.get('user2@email.com')?.lastCommitDate).to.equal(
+            commits[0][1].commit.author.date
+        );
+        expect(runner.contributorsByEmail.get('user3@email.com')?.lastCommitDate).to.equal(
+            commits[1][0].commit.author.date
+        );
 
         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
         expect(repo1.size).to.equal(2);
-        expect(repo1.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-28T16:36:16.351Z');
-        expect(repo1.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-27T12:36:16.351Z');
+        expect(repo1.get('user1@email.com')?.lastCommitDate).to.equal(commits[0][0].commit.author.date);
+        expect(repo1.get('user2@email.com')?.lastCommitDate).to.equal(commits[0][1].commit.author.date);
 
         const repo2 = runner.contributorsByRepo.get('org2/repo2') as ContributorMap;
         expect(repo2.size).to.equal(3);
-        expect(repo2.get('user1@email.com')?.lastCommitDate).to.equal('2022-12-29T16:36:16.351Z');
-        expect(repo2.get('user2@email.com')?.lastCommitDate).to.equal('2022-12-24T12:36:16.351Z');
-        expect(repo2.get('user3@email.com')?.lastCommitDate).to.equal('2022-12-30T16:36:16.351Z');
+        expect(repo2.get('user1@email.com')?.lastCommitDate).to.equal(commits[1][1].commit.author.date);
+        expect(repo2.get('user2@email.com')?.lastCommitDate).to.equal(commits[1][2].commit.author.date);
+        expect(repo2.get('user3@email.com')?.lastCommitDate).to.equal(commits[1][0].commit.author.date);
     });
 });
 
@@ -546,5 +552,49 @@ describe('github and generic VCS get repo list', () => {
                 private: true,
             },
         ]);
+    });
+
+    it('does not get user repos when orgs are specified but fail', async () => {
+        const sourceInfo = sourceInfoPrivate;
+        apiManager = new GithubApiManager(sourceInfoPrivate);
+
+        stub(apiManager, 'getOrgRepos').throws(new Error('error getting org repos'));
+
+        const enrichSpy = spy(apiManager, 'getUserRepos');
+
+        const flags = {
+            ...getDefaultFlags(commonFlags),
+            orgs: 'org1',
+        };
+
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
+
+        const repos = await runner.getRepoList();
+
+        expect(enrichSpy.notCalled).to.be.true;
+        expect(repos).to.deep.equal([]);
+    });
+
+    it('does not get user repos when repos are specified but fail', async () => {
+        const sourceInfo = sourceInfoPrivate;
+        apiManager = new GithubApiManager(sourceInfoPrivate);
+
+        stub(apiManager, 'enrichRepo').throws(new Error('error'));
+
+        const enrichSpy = spy(apiManager, 'getUserRepos');
+
+        const flags = {
+            ...getDefaultFlags(commonFlags),
+            repos: 'org1/repo1',
+        };
+
+        const runner = new GithubRunner(sourceInfo, flags, apiManager);
+
+        const repos = await runner.getRepoList();
+
+        expect(enrichSpy.notCalled).to.be.true;
+
+        // also implicitly tests that we exclude repos that fail to get enriched
+        expect(repos).to.deep.equal([]);
     });
 });
