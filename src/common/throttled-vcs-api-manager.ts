@@ -1,6 +1,5 @@
-import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { RepoResponse, VcsSourceInfo } from './types';
-import https = require('https');
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { VcsSourceInfo } from './types';
 import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
 import { getEnvVarWithDefault, LOGGER } from './utils';
@@ -26,23 +25,6 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
             minTime,
         });
     }
-
-    _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert
-            ? {
-                  baseURL,
-                  headers,
-                  httpsAgent: new https.Agent({ ca: this.cert }),
-              }
-            : {
-                  baseURL,
-                  headers,
-              };
-    }
-
-    abstract _getAxiosConfiguration(): any;
-    abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
-    abstract getUserRepos(): Promise<RepoResponse[]>;
 
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
         try {

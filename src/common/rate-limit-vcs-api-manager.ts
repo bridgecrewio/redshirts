@@ -1,7 +1,6 @@
-import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
-import { RateLimitStatus, RepoResponse, VcsSourceInfo } from './types';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { RateLimitStatus, VcsSourceInfo } from './types';
 import { getEnvVarWithDefault, LOGGER, sleepUntilDateTime } from './utils';
-import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
 
 const REQUESTS_REMAINING_BUFFER_ENV_VAR = 'REDSHIRTS_REQUESTS_REMAINING_BUFFER';
@@ -30,23 +29,6 @@ export abstract class RateLimitVcsApiManager extends VcsApiManager {
         );
         LOGGER.debug(`Request remaining buffer: ${this.requestRemainingBuffer}`);
     }
-
-    _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert
-            ? {
-                  baseURL,
-                  headers,
-                  httpsAgent: new https.Agent({ ca: this.cert }),
-              }
-            : {
-                  baseURL,
-                  headers,
-              };
-    }
-
-    abstract _getAxiosConfiguration(): any;
-    abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
-    abstract getUserRepos(): Promise<RepoResponse[]>;
 
     async checkRateLimitStatus(): Promise<RateLimitStatus | undefined> {
         if (!this.rateLimitEndpoint) {
