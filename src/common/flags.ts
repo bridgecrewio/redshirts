@@ -44,7 +44,7 @@ export const commonFlags = {
     }),
     'log-level': Flags.enum({
         description: `Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use 'debug' for granular logging, which will be required for any support cases. You can log individual responses using the environment variable ${LOG_API_RESPONSES_ENV}=true. You can also disable all logging by setting ${DISABLE_LOG_ENV_VAR}=true as an environment variable. This is not recommended, as you may miss important processing messages. All logs will be written to the stderr stream.`,
-        options: LOG_LEVELS,
+        options: [...LOG_LEVELS, ...LOG_LEVELS.map((l: string) => l.toUpperCase())],
         env: 'LOG_LEVEL',
         default: DEFAULT_LOG_LEVEL,
         helpGroup: HelpGroup.OUTPUT,
