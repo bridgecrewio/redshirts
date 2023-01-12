@@ -25,7 +25,7 @@ jobs:
                   node-version: ${{ matrix.node }}
             - run: yarn -D --ignore-scripts
             - run: yarn run build
-            - run: yarn test
+            - run: yarn test-logs
               env:
                   CI: true
                   DISABLE_LOGS: true
