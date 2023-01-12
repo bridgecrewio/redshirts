@@ -48,7 +48,7 @@ export default class BitbucketServer extends Bitbucket {
             baseUrl
         );
 
-        const apiManager = new BitbucketServerApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new BitbucketServerApiManager(sourceInfo, flags['requests-per-hour'], flags['ca-cert']);
         const runner = new BitbucketServerRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();
