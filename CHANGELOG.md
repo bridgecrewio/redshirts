@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.2.0...redshirts-v0.3.0) (2023-01-12)
+
+
+### Features
+
+* add 'did you mean' suggestion plugin ([4efb494](https://github.com/bridgecrewio/redshirts/commit/4efb494a129ef749f9346cacb479435112baba88))
+* add environment variable for supplying token ([#29](https://github.com/bridgecrewio/redshirts/issues/29)) ([6ce4118](https://github.com/bridgecrewio/redshirts/commit/6ce411827a6ea49d739518c8e22771b878d6fb94))
+* add update checker plugin ([63cb018](https://github.com/bridgecrewio/redshirts/commit/63cb018ee6a94fc472db40c356f51776e6307329))
+* log more details from failed API calls ([#30](https://github.com/bridgecrewio/redshirts/issues/30)) ([6bf92a6](https://github.com/bridgecrewio/redshirts/commit/6bf92a63e6eed53fd274c155837672f22005676f))
+
+
+### Bug Fixes
+
+* ignore duplicate explicit repos ([1d6c0d6](https://github.com/bridgecrewio/redshirts/commit/1d6c0d6c9338a2bece0de79cc12b43c0a86ffda1))
+* minor type and flag fixes ([#40](https://github.com/bridgecrewio/redshirts/issues/40)) ([103e73c](https://github.com/bridgecrewio/redshirts/commit/103e73c424cce3f1496f8aa4a763f1c0eb9a61fd))
+* Use author, not committer, for BB server and gitlab ([#36](https://github.com/bridgecrewio/redshirts/issues/36)) ([1dfd6aa](https://github.com/bridgecrewio/redshirts/commit/1dfd6aa3f746b417da2efc50b48bf31372952f32))
+
 ## [0.2.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.1.0...redshirts-v0.2.0) (2023-01-06)
 
 
