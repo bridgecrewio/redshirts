@@ -40,7 +40,7 @@ export class GitlabApiManager extends RateLimitVcsApiManager {
     async getUserRepos(): Promise<GitlabRepoResponse[]> {
         const groups = await this.getGroups();
 
-        const groupRepos = [];
+        const groupRepos: GitlabRepoResponse[] = [];
 
         for (const group of groups) {
             // the groups call lists subgroups separately, so we don't need to get subgroups
