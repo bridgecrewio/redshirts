@@ -85,7 +85,7 @@ export const mapIterable = <T, U>(
     it: Iterable<T>,
     callbackfn: (value: T, index: number, it: Iterable<T>) => U
 ): U[] => {
-    const arr = [];
+    const arr: U[] = [];
 
     let i = 0;
     for (const e of it) {
@@ -358,7 +358,7 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const init = (flags: any): void => {
     // performs common, command-independent initialization
-    setLogLevel(flags['log-level']);
+    setLogLevel(flags['log-level'].toLowerCase());
     logParams(flags);
 };
 
@@ -367,13 +367,13 @@ export const logParams = (flags: any): void => {
     const tokenParams = new Set(['-t', '--token']);
     const tokenFlags = new Set(['token']);
 
-    const maskedArgs = [];
+    const maskedArgs: string[] = [];
     for (let i = 0; i < process.argv.length; i++) {
         const arg = process.argv[i];
         maskedArgs.push(arg);
         if (tokenParams.has(arg)) {
             i++;
-            maskedArgs.push(maskedArgs.push(process.argv[i].slice(0, 4) + '****'));
+            maskedArgs.push(process.argv[i].slice(0, 4) + '****');
         }
     }
 

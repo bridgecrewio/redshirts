@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
 import { Repo, RepoResponse, VcsSourceInfo } from './types';
 import { getFileBuffer, LOGGER } from './utils';
-import https = require('https');
+import * as https from 'node:https';
 import { ApiManager } from './api-manager';
 
 export abstract class VcsApiManager extends ApiManager {
