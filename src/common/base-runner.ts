@@ -138,7 +138,11 @@ export abstract class BaseRunner {
     }
 
     skipUser(email: string): boolean {
-        return this.excludedEmailRegexes.some((re) => re.exec(email) !== null);
+        const lowercase = email.toLowerCase();
+        return (
+            this.excludedEmails.some((e) => e.toLowerCase() === lowercase) ||
+            this.excludedEmailRegexes.some((re) => re.exec(email) !== null)
+        );
     }
 
     addContributor(repoOwner: string, repoName: string, commit: Commit): void {
