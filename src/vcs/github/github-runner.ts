@@ -7,7 +7,7 @@ import { GithubCommit, GithubRepoResponse } from './github-types';
 export class GithubRunner extends VcsRunner {
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GithubApiManager) {
-        super(sourceInfo, [], flags, apiManager);
+        super(sourceInfo, [], [], flags, apiManager);
     }
 
     aggregateCommitContributors(repo: Repo, commits: GithubCommit[]): void {

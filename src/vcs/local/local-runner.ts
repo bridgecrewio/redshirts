@@ -9,7 +9,7 @@ import { LocalCommit, LocalRepoResponse } from './local-types';
 export class LocalRunner extends BaseRunner {
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: SourceInfo, flags: any, apiManager: LocalApiManager) {
-        super(sourceInfo, [], flags, apiManager, path.sep);
+        super(sourceInfo, [], [], flags, apiManager, path.sep);
         this.apiManager = apiManager;
     }
 
