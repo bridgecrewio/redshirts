@@ -169,6 +169,7 @@ export abstract class BaseRunner {
         commitDate: string,
         logNew = false
     ): void {
+        email = email.toLowerCase();
         const contributor = contributorMap.get(email);
 
         if (contributor) {
