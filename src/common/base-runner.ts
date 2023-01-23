@@ -8,22 +8,19 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // TODO
 // - test on windows
 
-const EXCLUDED_EMAIL_REGEXES: RegExp[] = [];
-
-const EXCLUDED_EMAILS = [
-    '41898282+github-actions[bot]@users.noreply.github.com',
-    '49699333+dependabot[bot]@users.noreply.github.com',
-    'action@github.com',
-    '60663194+bridgecrew[bot]@users.noreply.github.com',
-    '89982750+prisma-cloud-devsecops[bot]@users.noreply.github.com',
-    'github-actions[bot]@users.noreply.github.com',
-    'commits-noreply@bitbucket.org',
+const EXCLUDED_EMAIL_REGEXES = [
+    /41898282\+github-actions\[bot]@users\.noreply\.github.com/,
+    /49699333\+dependabot\[bot]@users\.noreply\.github.com/,
+    /action@github\.com/,
+    /60663194\+bridgecrew\[bot]@users\.noreply\.github\.com/,
+    /89982750\+prisma-cloud-devsecops\[bot]@users\.noreply\.github\.com/,
+    /github-actions\[bot]@users\.noreply\.github\.com/,
+    /commits-noreply@bitbucket\.org/,
 ];
 
 export abstract class BaseRunner {
     sourceInfo: SourceInfo;
     excludedEmailRegexes: RegExp[];
-    excludedEmails: string[];
     contributorsByEmail: ContributorMap;
     contributorsByRepo: Map<string, ContributorMap>;
     flags: any;
@@ -33,7 +30,6 @@ export abstract class BaseRunner {
     constructor(
         sourceInfo: SourceInfo,
         excludedEmailRegexes: RegExp[],
-        excludedEmails: string[],
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         flags: any,
         apiManager: ApiManager,
@@ -41,7 +37,6 @@ export abstract class BaseRunner {
     ) {
         this.sourceInfo = sourceInfo;
         this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes];
-        this.excludedEmails = [...EXCLUDED_EMAILS, ...excludedEmails];
         this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
@@ -139,10 +134,7 @@ export abstract class BaseRunner {
 
     skipUser(email: string): boolean {
         const lowercase = email.toLowerCase();
-        return (
-            this.excludedEmails.some((e) => e.toLowerCase() === lowercase) ||
-            this.excludedEmailRegexes.some((re) => re.exec(email) !== null)
-        );
+        return this.excludedEmailRegexes.some((re) => re.exec(lowercase) !== null);
     }
 
     addContributor(repoOwner: string, repoName: string, commit: Commit): void {

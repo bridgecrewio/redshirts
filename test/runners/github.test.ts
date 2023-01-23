@@ -84,7 +84,7 @@ describe('github runner', () => {
                     commit: {
                         author: {
                             name: 'user1',
-                            email: 'user1@email.com',
+                            email: 'USER1@email.com',
                             date: '2022-12-27T16:36:16.351Z',
                         },
                     },

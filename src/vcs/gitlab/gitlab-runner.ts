@@ -7,7 +7,7 @@ import { GitlabCommit, GitlabRepoResponse } from './gitlab-types';
 export class GitlabRunner extends VcsRunner {
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: GitlabApiManager) {
-        super(sourceInfo, [], [], flags, apiManager);
+        super(sourceInfo, [], flags, apiManager);
     }
 
     aggregateCommitContributors(repo: Repo, commits: GitlabCommit[]): void {
