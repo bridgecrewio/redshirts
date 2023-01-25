@@ -8,7 +8,15 @@ import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './u
 // TODO
 // - test on windows
 
-const EXCLUDED_EMAIL_REGEXES: RegExp[] = [/noreply/, /no-reply/];
+const EXCLUDED_EMAIL_REGEXES = [
+    /41898282\+github-actions\[bot]@users\.noreply\.github.com/,
+    /49699333\+dependabot\[bot]@users\.noreply\.github.com/,
+    /action@github\.com/,
+    /60663194\+bridgecrew\[bot]@users\.noreply\.github\.com/,
+    /89982750\+prisma-cloud-devsecops\[bot]@users\.noreply\.github\.com/,
+    /github-actions\[bot]@users\.noreply\.github\.com/,
+    /commits-noreply@bitbucket\.org/,
+];
 
 export abstract class BaseRunner {
     sourceInfo: SourceInfo;
@@ -21,14 +29,14 @@ export abstract class BaseRunner {
 
     constructor(
         sourceInfo: SourceInfo,
-        excludedEmailRegexes: Array<string>,
+        excludedEmailRegexes: RegExp[],
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         flags: any,
         apiManager: ApiManager,
         repoSeparator = '/'
     ) {
         this.sourceInfo = sourceInfo;
-        this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes.map((s) => new RegExp(s))];
+        this.excludedEmailRegexes = [...EXCLUDED_EMAIL_REGEXES, ...excludedEmailRegexes];
         this.contributorsByEmail = new Map();
         this.contributorsByRepo = new Map();
         this.flags = flags;
@@ -125,7 +133,8 @@ export abstract class BaseRunner {
     }
 
     skipUser(email: string): boolean {
-        return this.excludedEmailRegexes.some((re) => re.exec(email) !== null);
+        const lowercase = email.toLowerCase();
+        return this.excludedEmailRegexes.some((re) => re.exec(lowercase) !== null);
     }
 
     addContributor(repoOwner: string, repoName: string, commit: Commit): void {
@@ -160,6 +169,7 @@ export abstract class BaseRunner {
         commitDate: string,
         logNew = false
     ): void {
+        email = email.toLowerCase();
         const contributor = contributorMap.get(email);
 
         if (contributor) {

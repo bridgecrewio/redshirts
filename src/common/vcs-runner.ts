@@ -16,8 +16,13 @@ export abstract class VcsRunner extends BaseRunner {
     sourceInfo: VcsSourceInfo;
     apiManager: VcsApiManager;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    constructor(sourceInfo: VcsSourceInfo, excludedEmailRegexes: Array<string>, flags: any, apiManager: VcsApiManager) {
+    constructor(
+        sourceInfo: VcsSourceInfo,
+        excludedEmailRegexes: RegExp[],
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        flags: any,
+        apiManager: VcsApiManager
+    ) {
         super(sourceInfo, excludedEmailRegexes, flags, apiManager);
         this.sourceInfo = sourceInfo;
         this.apiManager = apiManager;
