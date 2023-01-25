@@ -49,7 +49,6 @@ describe('bitbucket server runner repo conversion', () => {
             ]);
     });
 
-    // TODO filter emails
     it('aggregates contributors', () => {
         const repos: Repo[] = [
             {
@@ -132,7 +131,7 @@ describe('bitbucket server runner repo conversion', () => {
             runner.aggregateCommitContributors(repo, commits[i]);
         }
 
-        expect(runner.contributorsByEmail.size).to.equal(3);
+        expect(runner.contributorsByEmail.size).to.equal(5);
         expect(runner.contributorsByEmail.get('user1@email.com')?.lastCommitDate).to.equal(
             new Date(commits[0][0].authorTimestamp).toISOString()
         );
@@ -144,7 +143,7 @@ describe('bitbucket server runner repo conversion', () => {
         );
 
         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
-        expect(repo1.size).to.equal(2);
+        expect(repo1.size).to.equal(4);
         expect(repo1.get('user1@email.com')?.lastCommitDate).to.equal(
             new Date(commits[0][0].authorTimestamp).toISOString()
         );

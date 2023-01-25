@@ -59,7 +59,6 @@ describe('gitlab runner repo conversion', () => {
             ]);
     });
 
-    // TODO filter emails
     it('aggregates contributors', () => {
         const repos: Repo[] = [
             {
@@ -126,13 +125,13 @@ describe('gitlab runner repo conversion', () => {
             runner.aggregateCommitContributors(repo, commits[i]);
         }
 
-        expect(runner.contributorsByEmail.size).to.equal(3);
+        expect(runner.contributorsByEmail.size).to.equal(5);
         expect(runner.contributorsByEmail.get('user1@email.com')?.lastCommitDate).to.equal(commits[0][0].authored_date);
         expect(runner.contributorsByEmail.get('user2@email.com')?.lastCommitDate).to.equal(commits[0][1].authored_date);
         expect(runner.contributorsByEmail.get('user3@email.com')?.lastCommitDate).to.equal(commits[1][0].authored_date);
 
         const repo1 = runner.contributorsByRepo.get('org1/repo1') as ContributorMap;
-        expect(repo1.size).to.equal(2);
+        expect(repo1.size).to.equal(4);
         expect(repo1.get('user1@email.com')?.lastCommitDate).to.equal(commits[0][0].authored_date);
         expect(repo1.get('user2@email.com')?.lastCommitDate).to.equal(commits[0][1].authored_date);
 

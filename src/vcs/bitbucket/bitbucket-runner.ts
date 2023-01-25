@@ -6,7 +6,6 @@ import { BitbucketCommit, BitbucketRepoResponse } from './bitbucket-types';
 import { extractEmailFromRawUser } from './bitbucket-utils';
 
 export class BitbucketRunner extends VcsRunner {
-
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(sourceInfo: VcsSourceInfo, flags: any, apiManager: BitbucketApiManager) {
         super(sourceInfo, [], flags, apiManager);
@@ -21,7 +20,7 @@ export class BitbucketRunner extends VcsRunner {
             const newCommit = {
                 username: author.user.nickname,
                 email: email || author.raw,
-                commitDate: date
+                commitDate: date,
             };
 
             this.addContributor(repo.owner, repo.name, newCommit);
@@ -36,7 +35,7 @@ export class BitbucketRunner extends VcsRunner {
                 name: nameParts[1],
                 owner: nameParts[0],
                 private: repo.is_private,
-                defaultBranch: repo.mainbranch.name
+                defaultBranch: repo.mainbranch.name,
             });
         }
 

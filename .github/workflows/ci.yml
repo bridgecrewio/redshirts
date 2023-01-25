@@ -1,0 +1,31 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build:
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                node: [14.x, 16.x, 18.x]
+                os: [windows-latest, macos-latest]
+
+        steps:
+            - uses: actions/checkout@v3.3.0
+            - name: Use Node.js ${{ matrix.node }}
+              uses: actions/setup-node@v3.6.0
+              with:
+                  node-version: ${{ matrix.node }}
+            - run: yarn -D --ignore-scripts
+            - run: yarn run build
+            - run: yarn test-logs
+              env:
+                  CI: true
+                  DISABLE_LOGS: true

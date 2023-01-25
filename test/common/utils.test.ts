@@ -1,9 +1,10 @@
 import { Flags } from '@oclif/core';
 import { expect } from 'chai';
-import { Protocol, Repo } from '../../src/common/types';
+import { Protocol, Repo, SourceType, VcsSourceInfo } from '../../src/common/types';
 import {
     deleteFlagKey,
     filterRepoList,
+    getExplicitRepoList,
     getRepoListFromParams,
     getServerUrl,
     repoMatches,
@@ -97,6 +98,41 @@ describe('utils', () => {
                 },
             ])
             .and.to.have.length(2);
+    });
+
+    it('only adds unique repos to the repos list', () => {
+        const sourceInfo: VcsSourceInfo = {
+            url: 'example.com',
+            token: 'xxx',
+            minPathLength: 2,
+            maxPathLength: 2,
+            orgFlagName: '',
+            includePublic: false,
+            requiresEnrichment: false,
+            sourceType: SourceType.Github,
+            repoTerm: '',
+            orgTerm: '',
+        };
+        const reposList: Repo[] = [
+            { name: 'repo1', owner: 'org1' },
+            { name: 'repo3', owner: 'org3' },
+        ];
+        expect(getExplicitRepoList(sourceInfo, reposList, 'org1/repo1,org2/repo2', 'test/resources/repos1.txt'))
+            .to.have.deep.members([
+                {
+                    owner: 'org2',
+                    name: 'repo2',
+                },
+            ])
+            .and.to.have.length(1);
+        expect(getExplicitRepoList(sourceInfo, [], 'org1/repo1,org1/repo1,org1/repo1'))
+            .to.have.deep.members([
+                {
+                    owner: 'org1',
+                    name: 'repo1',
+                },
+            ])
+            .and.to.have.length(1);
     });
 
     it('splits and combines', () => {
