@@ -34,6 +34,7 @@ Repo1 has 2 unique contributors in the last 90 days (user1 and user2). Repo2 als
 * [Installation and requirements](#installation-and-requirements)
 * [Modes](#modes)
 * [Examples](#examples)
+* [Output](#output)
 * [Support and troubleshooting](#support-and-troubleshooting)
 * [Usage](#usage)
 * [Commands](#commands)
@@ -198,7 +199,7 @@ $ npm install -g @paloaltonetworks/redshirts
 $ redshirts COMMAND
 running command...
 $ redshirts (--version)
-@paloaltonetworks/redshirts/0.2.0 darwin-x64 node-v16.6.2
+@paloaltonetworks/redshirts/0.3.1 darwin-arm64 node-v16.17.0
 $ redshirts --help [COMMAND]
 USAGE
   $ redshirts COMMAND
@@ -227,8 +228,8 @@ Count active contributors for Azure DevOps repos
 USAGE
   $ redshirts azuredevops -t <value> [--orgs <value>] [--projects <value>] [--skip-projects <value>] [-o
     summary|json|csv] [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty]
-    [--include-public] [--log-level error|warn|info|debug] [--repos <value>] [--repo-file <value>] [--skip-repos
-    <value>] [--skip-repo-file <value>]
+    [--include-public] [--log-level error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>]
+    [--skip-repos <value>] [--skip-repo-file <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -238,21 +239,22 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) An Azure DevOps user personal access token tied to the provided username. This token
-                       must be tied to a user that has sufficient visibility of the repo(s) being counted. See the
-                       description below for more information about the token.
+  -t, --token=<value>  (required) An Azure DevOps user personal access token tied to the provided username. Can also be
+                       supplied with the REDSHIRTS_TOKEN environment variable. This token must be tied to a user that
+                       has sufficient visibility of the repo(s) being counted. See the description below for more
+                       information about the token.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -334,7 +336,7 @@ EXAMPLES
   $ redshirts azuredevops --token obnwxxx --orgs bridgecrewio,try-bridgecrew --projects org/project
 ```
 
-_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/azuredevops.ts)_
+_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/azuredevops.ts)_
 
 ## `redshirts bitbucket`
 
@@ -343,9 +345,9 @@ Count active contributors for Bitbucket repos
 ```
 USAGE
   $ redshirts bitbucket -u <value> -t <value> [--workspaces <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
-    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [--requests-per-hour
-    <value>]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>] [--requests-per-hour <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -355,21 +357,22 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. This token must be tied to
-                          a user that has sufficient visibility of the repo(s) being counted. See the description below
-                          for how to create this token.
+  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. Can also be supplied with
+                          the REDSHIRTS_TOKEN environment variable. This token must be tied to a user that has
+                          sufficient visibility of the repo(s) being counted. See the description below for how to
+                          create this token.
   -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
 
 CONNECTION FLAGS
@@ -448,7 +451,7 @@ EXAMPLES
   $ redshirts bitbucket --username my_username --token ATBBXXX --workspaces bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/bitbucket.ts)_
+_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/bitbucket.ts)_
 
 ## `redshirts bitbucket-server`
 
@@ -458,8 +461,8 @@ Count active contributors for Bitbucket server (self-hosted) repos
 USAGE
   $ redshirts bitbucket-server -u <value> -t <value> -h <value> [--workspaces <value>] [-o summary|json|csv]
     [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
-    error|warn|info|debug] [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
-    [--requests-per-hour <value>] [-p <value>] [--protocol http|https] [--projects <value>]
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>] [--requests-per-hour <value>] [-p <value>] [--protocol http|https] [--projects <value>]
 
 CONNECTION FLAGS
   -h, --hostname=<value>
@@ -494,21 +497,22 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. This token must be tied to
-                          a user that has sufficient visibility of the repo(s) being counted. See the description below
-                          for how to create this token.
+  -t, --token=<value>     (required) A Bitbucket access token tied to the provided username. Can also be supplied with
+                          the REDSHIRTS_TOKEN environment variable. This token must be tied to a user that has
+                          sufficient visibility of the repo(s) being counted. See the description below for how to
+                          create this token.
   -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
 
 REPO SPECIFICATION FLAGS
@@ -582,7 +586,7 @@ EXAMPLES
   $ redshirts bitbucket-server --token ATXXX --workspaces bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/bitbucket-server.ts)_
+_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/bitbucket-server.ts)_
 
 ## `redshirts github`
 
@@ -591,8 +595,9 @@ Count active contributors for GitHub repos
 ```
 USAGE
   $ redshirts github -t <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>] [--days <value>]
-    [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug] [--repos
-    <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
+    [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -602,20 +607,21 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information.
+  -t, --token=<value>  (required) Github personal access token. Can also be supplied with the REDSHIRTS_TOKEN
+                       environment variable. This token must be tied to a user that has sufficient visibility of the
+                       repo(s) being counted. See the description below for more information.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -686,7 +692,7 @@ EXAMPLES
   $ redshirts github --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/github.ts)_
+_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/github.ts)_
 
 ## `redshirts github-server`
 
@@ -695,9 +701,9 @@ Count active contributors for GitHub server (self-hosted) repos
 ```
 USAGE
   $ redshirts github-server -t <value> -h <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
-    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [-p <value>] [--protocol
-    http|https]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>] [-p <value>] [--protocol http|https]
 
 CONNECTION FLAGS
   -h, --hostname=<value>   (required) The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and
@@ -719,20 +725,21 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Github personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information.
+  -t, --token=<value>  (required) Github personal access token. Can also be supplied with the REDSHIRTS_TOKEN
+                       environment variable. This token must be tied to a user that has sufficient visibility of the
+                       repo(s) being counted. See the description below for more information.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -793,7 +800,7 @@ EXAMPLES
   $ redshirts github-server --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/github-server.ts)_
+_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/github-server.ts)_
 
 ## `redshirts gitlab`
 
@@ -802,8 +809,9 @@ Count active contributors for GitLab repos
 ```
 USAGE
   $ redshirts gitlab -t <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>] [--days
-    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
-    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
+    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -813,21 +821,21 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Gitlab personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information about the
-                       token.
+  -t, --token=<value>  (required) Gitlab personal access token. Can also be supplied with the REDSHIRTS_TOKEN
+                       environment variable. This token must be tied to a user that has sufficient visibility of the
+                       repo(s) being counted. See the description below for more information about the token.
 
 CONNECTION FLAGS
   --ca-cert=<value>  Path to certificate chain to use in HTTP requests. See
@@ -893,7 +901,7 @@ EXAMPLES
   $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
 ```
 
-_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab.ts)_
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/gitlab.ts)_
 
 ## `redshirts gitlab-server`
 
@@ -902,9 +910,9 @@ Count active contributors for GitLab server (self-hosted) repos
 ```
 USAGE
   $ redshirts gitlab-server -t <value> -h <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level error|warn|info|debug]
-    [--repos <value>] [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [-p <value>] [--protocol
-    http|https]
+    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
+    [--skip-repo-file <value>] [-p <value>] [--protocol http|https]
 
 CONNECTION FLAGS
   -h, --hostname=<value>   (required) The hostname of your server, e.g. `git.mycompany.com`. Do not include the port and
@@ -926,21 +934,21 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
       name, or by descending contributor count (ignored for JSON)
 
 AUTHENTICATION FLAGS
-  -t, --token=<value>  (required) Gitlab personal access token. This token must be tied to a user that has sufficient
-                       visibility of the repo(s) being counted. See the description below for more information about the
-                       token.
+  -t, --token=<value>  (required) Gitlab personal access token. Can also be supplied with the REDSHIRTS_TOKEN
+                       environment variable. This token must be tied to a user that has sufficient visibility of the
+                       repo(s) being counted. See the description below for more information about the token.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -1002,7 +1010,7 @@ EXAMPLES
   $ redshirts gitlab-server --token ghp_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup --hostname gitlab.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/gitlab-server.ts)_
+_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/gitlab-server.ts)_
 
 ## `redshirts help [COMMAND]`
 
@@ -1032,7 +1040,7 @@ Count active contributors in local directories using `git log`
 USAGE
   $ redshirts local [-d <value>] [--directory-file <value>] [--skip-directories <value>]
     [--skip-directory-file <value>] [-o summary|json|csv] [--days <value>] [--sort repo|contributors] [--exclude-empty]
-    [--log-level error|warn|info|debug]
+    [--log-level error|warn|info|debug|ERROR|WARN|INFO|DEBUG]
 
 REPO SPECIFICATION FLAGS
   -d, --directories=<value>
@@ -1068,12 +1076,12 @@ OUTPUT FLAGS
   --exclude-empty
       Do not include repos with no commits in the output
 
-  --log-level=(error|warn|info|debug)
+  --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable LOG_API_RESPONSES=true. You can also disable all logging by setting DISABLE_LOGS=true as an
-      environment variable. This is not recommended, as you may miss important processing messages. All logs will be
-      written to the stderr stream.
+      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
+      messages. All logs will be written to the stderr stream.
 
   --sort=(repo|contributors)
       [default: repo] The output field on which to sort for CSV or console output: alphabetically by repo fully qualified
@@ -1091,5 +1099,5 @@ EXAMPLES
   $ redshirts local --repos ~/repos,/tmp/repo,/tmp/repo/submodule
 ```
 
-_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.2.0/dist/commands/local.ts)_
+_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/local.ts)_
 <!-- commandsstop -->
