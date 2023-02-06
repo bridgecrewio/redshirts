@@ -1,6 +1,6 @@
 {
     "name": "@paloaltonetworks/redshirts",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Counts contributors for git repositories in the same way that Prisma Cloud Code Security counts them for developer-based pricing. Use this tool to estimate the impact on credit consumption prior to connecting repos to the platform. Note that while this tool applies the same logic as the platform when identifying users, due to the timing of platform scans, differences in repo visibility for different access tokens, etc, these results may not exactly match those in the platform. Report issues to your account team, PANW support, or at https://github.com/bridgecrewio/redshirts",
     "author": "Palo Alto Networks",
     "bin": {
