@@ -32,8 +32,6 @@ export const printSummary = (counter: BaseRunner, outputFormat: string, sortFiel
             break;
 
         case OutputFormat.Summary:
-            // TODO determine tabular output format (mainly the header with total)
-
             const table = new Table({
                 title: 'Contributors per Repository',
                 columns: [

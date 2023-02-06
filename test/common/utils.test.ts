@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { Protocol, Repo, SourceType, VcsSourceInfo } from '../../src/common/types';
 import {
     deleteFlagKey,
+    filterRepoList,
     getExplicitRepoList,
     getRepoListFromParams,
     getServerUrl,
@@ -164,6 +165,70 @@ describe('utils', () => {
         expect(getServerUrl('xyz.com', undefined, Protocol.HTTP)).to.equal('http://xyz.com');
         expect(getServerUrl('xyz.com', undefined, Protocol.HTTPS)).to.equal('https://xyz.com');
         expect(getServerUrl('xyz.com', 123, Protocol.HTTPS)).to.equal('https://xyz.com:123');
+    });
+
+    it('filters skipped repos with the default function', () => {
+        const repos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ];
+
+        const skipRepos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo4',
+            },
+        ];
+
+        expect(filterRepoList(repos, [], 'repo')).to.deep.equal(repos);
+        expect(filterRepoList(repos, skipRepos, 'repo')).to.deep.equal([
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ]);
+    });
+
+    it('filters skipped repos with a custom function', () => {
+        const repos: Repo[] = [
+            {
+                owner: 'org',
+                name: 'repo1',
+            },
+            {
+                owner: 'org',
+                name: 'repo2',
+            },
+            {
+                owner: 'org',
+                name: 'repo3',
+            },
+        ];
+
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const f = (_: { owner: string; name: string }, __: { owner: string; name: string }): boolean => {
+            return true;
+        };
+
+        expect(filterRepoList(repos, repos, 'repo', f)).to.deep.equal([]);
     });
 });
 

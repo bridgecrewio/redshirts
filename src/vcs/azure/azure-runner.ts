@@ -69,6 +69,16 @@ export class AzureRunner extends VcsRunner {
         const projectsList: string | undefined = this.flags.projects;
         const skipProjectsList: string | undefined = this.flags['skip-projects'];
 
+        if (this.flags.repos && this.flags['repo-file']) {
+            LOGGER.warn('You specified both "--repos" and "--repo-file". "--repo-file" will be ignored.');
+        }
+
+        if (this.flags['skip-repos'] && this.flags['skip-repo-file']) {
+            LOGGER.warn(
+                'You specified both "--skip-repos" and "--skip-repo-file". "--skip-repo-file" will be ignored.'
+            );
+        }
+
         let repos: Repo[] = [];
 
         if (orgsString) {

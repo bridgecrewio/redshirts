@@ -1,12 +1,6 @@
 /* eslint-disable camelcase */
 import { RepoResponse, VCSCommit } from '../../common/types';
 
-export type GitlabAuthor = {
-    name: string;
-    email: string;
-    date: string;
-};
-
 export interface GitlabCommit extends VCSCommit {
     author_name: string;
     author_email: string;
