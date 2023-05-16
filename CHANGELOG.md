@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.3.0...redshirts-v0.3.1) (2023-05-16)
+
+
+### Bug Fixes
+
+* fix env var name for logging API responses ([#70](https://github.com/bridgecrewio/redshirts/issues/70)) ([907565c](https://github.com/bridgecrewio/redshirts/commit/907565cad1a1ce95f84786262b4c104b8f1aee12))
+* Get and use default branch for Azure ([#71](https://github.com/bridgecrewio/redshirts/issues/71)) ([f1a4cd3](https://github.com/bridgecrewio/redshirts/commit/f1a4cd3495c417058ff18138f41a0488b2784d60))
+
 ## [0.3.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.2.0...redshirts-v0.3.0) (2023-01-12)
 
 
