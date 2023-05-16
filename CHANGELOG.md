@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.3.1...redshirts-v0.4.0) (2023-05-16)
+
+
+### Features
+
+* Release 0.4.0 ([#73](https://github.com/bridgecrewio/redshirts/issues/73)) ([33d5cc3](https://github.com/bridgecrewio/redshirts/commit/33d5cc34c540f46bc172ec8f24b13bdbd44342a8))
+
 ## [0.3.1](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.3.0...redshirts-v0.3.1) (2023-05-16)
 
 
