@@ -36,6 +36,10 @@ export class AzureApiManager extends RateLimitVcsApiManager {
             },
         };
 
+        if (repo.defaultBranch) {
+            config.params['searchCriteria.itemVersion.version'] = repo.defaultBranch;
+        }
+
         const result: AxiosResponse = await this.submitPaginatedRequest(config);
         const commits = result?.data.value || [];
         return commits;
@@ -128,5 +132,7 @@ export class AzureApiManager extends RateLimitVcsApiManager {
         const response = await this.submitRequest(config);
         const data: AzureRepoResponse = response.data;
         repo.private = data.project.visibility !== 'public';
+        // value comes in as refs/head/branch
+        repo.defaultBranch = data.defaultBranch?.split('/')[2];
     }
 }

@@ -85,7 +85,7 @@ export default class AzureDevOps extends Command {
             minPathLength: 3,
             maxPathLength: 3,
             includePublic,
-            requiresEnrichment: false,
+            requiresEnrichment: true,
         };
     }
 }
