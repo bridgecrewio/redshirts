@@ -43,6 +43,8 @@ export class AzureRunner extends VcsRunner {
                 name: repo.name,
                 owner: repo.owner,
                 private: repo.project.visibility === 'private',
+                // value comes in as refs/head/branch
+                defaultBranch: repo.defaultBranch?.split('/')[2],
             });
         }
 
