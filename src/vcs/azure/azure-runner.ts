@@ -94,24 +94,21 @@ export class AzureRunner extends VcsRunner {
 
         const addedRepos = getExplicitRepoList(this.sourceInfo, repos, reposList, reposFile);
         if (addedRepos.length > 0) {
-            if (!this.sourceInfo.includePublic) {
-                LOGGER.info(
-                    `--include-public was not set - getting the visibility of all explicitly specified ${this.sourceInfo.repoTerm}s`
-                );
-                for (const repo of addedRepos) {
-                    try {
-                        await this.apiManager.enrichRepo(repo);
-                    } catch (error) {
-                        // eslint-disable-next-line max-depth
-                        if (error instanceof AxiosError && isSslError(error)) {
-                            throw error;
-                        }
-
-                        logError(
-                            error as Error,
-                            `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`
-                        );
+            LOGGER.info(
+                `Getting the visibility and default branch of all explicitly specified ${this.sourceInfo.repoTerm}s`
+            );
+            for (const repo of addedRepos) {
+                try {
+                    await this.apiManager.enrichRepo(repo);
+                } catch (error) {
+                    if (error instanceof AxiosError && isSslError(error)) {
+                        throw error;
                     }
+
+                    logError(
+                        error as Error,
+                        `An error occurred getting the visibility for the ${this.sourceInfo.repoTerm} ${repo.owner}/${repo.name}. It will be excluded from the list, because this will probably lead to an error later.`
+                    );
                 }
             }
 
