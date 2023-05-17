@@ -53,7 +53,7 @@ export default class AzureDevOps extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(AzureDevOps);
-        init(flags);
+        init(flags, this.config);
 
         const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token, flags['include-public']);
 

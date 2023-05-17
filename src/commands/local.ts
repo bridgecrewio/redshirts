@@ -52,7 +52,7 @@ export default class Local extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Local);
-        init(flags);
+        init(flags, this.config);
 
         if (!(flags.directories || flags['directory-file'])) {
             throw new CLIError('At least one of --directories or --directory-file is required for running locally.');

@@ -37,7 +37,7 @@ export default class Gitlab extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Gitlab);
-        init(flags);
+        init(flags, this.config);
 
         const sourceInfo = Gitlab.getSourceInfo(flags.token, flags['include-public']);
 
