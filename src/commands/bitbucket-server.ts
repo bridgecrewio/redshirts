@@ -38,7 +38,7 @@ export default class BitbucketServer extends Bitbucket {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(BitbucketServer);
-        init(flags);
+        init(flags, this.config);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/rest/api/1.0`;

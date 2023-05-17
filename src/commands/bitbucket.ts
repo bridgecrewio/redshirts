@@ -49,7 +49,7 @@ export default class Bitbucket extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Bitbucket);
-        init(flags);
+        init(flags, this.config);
 
         const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`, flags['include-public']);
 

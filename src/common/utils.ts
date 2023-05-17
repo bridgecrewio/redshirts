@@ -2,11 +2,13 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { readFileSync } from 'node:fs';
 import { Protocol, Repo, VcsSourceInfo } from './types';
 import * as winston from 'winston';
+import * as os from 'node:os';
 import { FlagBase } from '@oclif/core/lib/interfaces';
 import { spawn, SpawnOptionsWithoutStdio } from 'node:child_process';
 import { EOL } from 'node:os';
 import { MAX_REQUESTS_PER_SECOND_VAR } from './throttled-vcs-api-manager';
 import { LOG_API_RESPONSES_ENV } from './api-manager';
+import { Config } from '@oclif/core';
 
 export const DEFAULT_DAYS = 90;
 export const DEFAULT_LOG_LEVEL = 'warn';
@@ -356,14 +358,20 @@ export const exec = (command: string, args: string[], options: SpawnOptionsWitho
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const init = (flags: any): void => {
+export const init = (flags: any, config: Config): void => {
     // performs common, command-independent initialization
     setLogLevel(flags['log-level'].toLowerCase());
-    logParams(flags);
+    logParams(flags, config);
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const logParams = (flags: any): void => {
+export const logParams = (flags: any, config: Config): void => {
+    LOGGER.debug('Environment details:');
+    LOGGER.debug(`Redshirts version: ${config.version}`);
+    LOGGER.debug(`Node version: ${process.version}`);
+    LOGGER.debug(`OS: ${os.type} - ${process.platform} - ${os.release}`);
+    LOGGER.debug(`CPU arch: ${process.arch}`);
+
     const tokenParams = new Set(['-t', '--token']);
     const tokenFlags = new Set(['token']);
 

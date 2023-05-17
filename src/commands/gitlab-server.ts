@@ -26,7 +26,7 @@ export default class GitlabServer extends Gitlab {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(GitlabServer);
-        init(flags);
+        init(flags, this.config);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v4`;

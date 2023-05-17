@@ -26,7 +26,7 @@ export default class GithubServer extends Github {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(GithubServer);
-        init(flags);
+        init(flags, this.config);
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/api/v3`;

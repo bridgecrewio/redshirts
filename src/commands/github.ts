@@ -42,8 +42,7 @@ export default class Github extends Command {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Github);
-        init(flags);
-
+        init(flags, this.config);
         const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public']);
 
         const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
