@@ -199,7 +199,7 @@ $ npm install -g @paloaltonetworks/redshirts
 $ redshirts COMMAND
 running command...
 $ redshirts (--version)
-@paloaltonetworks/redshirts/0.3.1 darwin-arm64 node-v16.17.0
+@paloaltonetworks/redshirts/0.4.1 darwin-arm64 node-v16.17.0
 $ redshirts --help [COMMAND]
 USAGE
   $ redshirts COMMAND
@@ -336,7 +336,7 @@ EXAMPLES
   $ redshirts azuredevops --token obnwxxx --orgs bridgecrewio,try-bridgecrew --projects org/project
 ```
 
-_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/azuredevops.ts)_
+_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/azuredevops.ts)_
 
 ## `redshirts bitbucket`
 
@@ -451,7 +451,7 @@ EXAMPLES
   $ redshirts bitbucket --username my_username --token ATBBXXX --workspaces bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/bitbucket.ts)_
+_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/bitbucket.ts)_
 
 ## `redshirts bitbucket-server`
 
@@ -586,7 +586,7 @@ EXAMPLES
   $ redshirts bitbucket-server --token ATXXX --workspaces bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/bitbucket-server.ts)_
+_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/bitbucket-server.ts)_
 
 ## `redshirts github`
 
@@ -692,7 +692,7 @@ EXAMPLES
   $ redshirts github --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/github.ts)_
+_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/github.ts)_
 
 ## `redshirts github-server`
 
@@ -800,7 +800,7 @@ EXAMPLES
   $ redshirts github-server --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/github-server.ts)_
+_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/github-server.ts)_
 
 ## `redshirts gitlab`
 
@@ -901,7 +901,7 @@ EXAMPLES
   $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
 ```
 
-_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/gitlab.ts)_
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/gitlab.ts)_
 
 ## `redshirts gitlab-server`
 
@@ -1010,7 +1010,7 @@ EXAMPLES
   $ redshirts gitlab-server --token ghp_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup --hostname gitlab.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/gitlab-server.ts)_
+_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/gitlab-server.ts)_
 
 ## `redshirts help [COMMAND]`
 
@@ -1099,5 +1099,5 @@ EXAMPLES
   $ redshirts local --repos ~/repos,/tmp/repo,/tmp/repo/submodule
 ```
 
-_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.3.1/dist/commands/local.ts)_
+_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/local.ts)_
 <!-- commandsstop -->
