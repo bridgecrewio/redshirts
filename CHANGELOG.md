@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.5.0...redshirts-v0.5.1) (2023-05-23)
+
+
+### Features
+
+* Add bitbucket server bearer token auth and no-cert-verify flag ([#78](https://github.com/bridgecrewio/redshirts/issues/78)) ([40728c9](https://github.com/bridgecrewio/redshirts/commit/40728c9db4cd0aceca26431246f9d88224280dca))
+
 ## [0.5.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.4.1...redshirts-v0.5.0) (2023-05-17)
 
 
