@@ -45,7 +45,7 @@ export default class Github extends Command {
         init(flags, this.config);
         const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public']);
 
-        const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new GithubApiManager(sourceInfo, flags['ca-cert'], flags['no-cert-verify']);
         const runner = new GithubRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

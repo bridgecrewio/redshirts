@@ -53,7 +53,12 @@ export default class Bitbucket extends Command {
 
         const sourceInfo = Bitbucket.getSourceInfo(`${flags.username}:${flags.token}`, flags['include-public']);
 
-        const apiManager = new BitbucketApiManager(sourceInfo, flags['requests-per-hour'], flags['ca-cert']);
+        const apiManager = new BitbucketApiManager(
+            sourceInfo,
+            flags['requests-per-hour'],
+            flags['ca-cert'],
+            flags['no-cert-verify']
+        );
         const runner = new BitbucketRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

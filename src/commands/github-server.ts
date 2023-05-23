@@ -32,7 +32,7 @@ export default class GithubServer extends Github {
         const baseUrl = `${serverUrl}/api/v3`;
         const sourceInfo = Github.getSourceInfo(flags.token, flags['include-public'], baseUrl, SourceType.GithubServer);
 
-        const apiManager = new GithubServerApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new GithubServerApiManager(sourceInfo, flags['ca-cert'], flags['no-cert-verify']);
         const runner = new GithubServerRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

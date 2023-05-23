@@ -1,13 +1,15 @@
-import { Flags } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
 import { vcsServerFlags } from '../common/flags';
 import { MAX_REQUESTS_PER_SECOND_VAR } from '../common/throttled-vcs-api-manager';
-import { HelpGroup, SourceType, VcsSourceInfo } from '../common/types';
+import { HelpGroup, SourceType } from '../common/types';
 import { deleteFlagKey, getServerUrl, init } from '../common/utils';
 import { BitbucketServerApiManager } from '../vcs/bitbucketServer/bitbucket-server-api-manager';
 import { BitbucketServerRunner } from '../vcs/bitbucketServer/bitbucket-server-runner';
 import Bitbucket from './bitbucket';
+import { BitbucketServerVcsSourceInfo } from '../vcs/bitbucketServer/bitbucket-server-types';
 
-export default class BitbucketServer extends Bitbucket {
+// do not extend Bitbucket command, because we do not want to inherit all of the flags (workspaces is not relevant)
+export default class BitbucketServer extends Command {
     static summary = 'Count active contributors for Bitbucket server (self-hosted) repos';
 
     static description = `This tool works with Bitbucket server v1 APIs.
@@ -20,8 +22,8 @@ export default class BitbucketServer extends Bitbucket {
     If you run this tool multiple times in quick succession, or if there are other external consumers of this rate limit, you may need to provide a lower value here, because there is no way to check the rate limit status in a stateless way. For Bitbucket Server, you can also control throttling by setting the ${MAX_REQUESTS_PER_SECOND_VAR} environment variable. This will cause the tool to submit no more than that many requests per second from the start of execution. This will slow down execution but avoid unexpected rate limit issues.`;
 
     static examples = [
-        `$ <%= config.bin %> <%= command.id %> --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname github.mycompany.internal`,
-        `$ <%= config.bin %> <%= command.id %> --token ATXXX --workspaces bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999`,
+        `$ <%= config.bin %> <%= command.id %> --username myuser --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname bitbucket.mycompany.internal`,
+        `$ <%= config.bin %> <%= command.id %> --token ATXXX --projects bridgecrewio,try-bridgecrew --hostname bitbucket.mycompany.internal --port 9999`,
     ];
 
     // we can reuse most of the Bitbucket args, but `workspaces` is not relevant, so we can do this fun thing
@@ -33,7 +35,14 @@ export default class BitbucketServer extends Bitbucket {
             required: false,
             helpGroup: HelpGroup.REPO_SPEC,
         }),
-        ...deleteFlagKey(Bitbucket.flags, 'workspaces'),
+        ...deleteFlagKey(Bitbucket.flags, 'workspaces', 'username'),
+        username: Flags.string({
+            description:
+                'Your Bitbucket username associated with the provided app token. If provided, then Redshirts will use Basic authentication with this username and token. If omitted, then Redshirts will use Bearer auth with the provided token.',
+            char: 'u',
+            required: false,
+            helpGroup: HelpGroup.AUTH,
+        }),
     } as any;
 
     async run(): Promise<void> {
@@ -42,13 +51,14 @@ export default class BitbucketServer extends Bitbucket {
 
         const serverUrl = getServerUrl(flags.hostname, flags.port, flags.protocol);
         const baseUrl = `${serverUrl}/rest/api/1.0`;
-        const sourceInfo = BitbucketServer.getSourceInfo(
-            `${flags.username}:${flags.token}`,
-            flags['include-public'],
-            baseUrl
-        );
+        const sourceInfo = BitbucketServer.getSourceInfo(flags.token, flags['include-public'], baseUrl, flags.username);
 
-        const apiManager = new BitbucketServerApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new BitbucketServerApiManager(
+            sourceInfo,
+            flags['requests-per-hour'],
+            flags['ca-cert'],
+            flags['no-cert-verify']
+        );
         const runner = new BitbucketServerRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();
@@ -58,11 +68,13 @@ export default class BitbucketServer extends Bitbucket {
         token: string,
         includePublic: boolean,
         url: string,
+        username?: string,
         sourceType = SourceType.BitbucketServer
-    ): VcsSourceInfo {
+    ): BitbucketServerVcsSourceInfo {
         return {
             sourceType,
             url,
+            username,
             token,
             repoTerm: 'repo',
             orgTerm: 'project',

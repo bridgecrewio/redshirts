@@ -57,7 +57,7 @@ export default class AzureDevOps extends Command {
 
         const sourceInfo = AzureDevOps.getSourceInfo(':' + flags.token, flags['include-public']);
 
-        const apiManager = new AzureApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new AzureApiManager(sourceInfo, flags['ca-cert'], flags['no-cert-verify']);
         const runner = new AzureRunner(sourceInfo, flags, apiManager);
 
         if (!(flags.orgs || flags.projects || flags.repos || flags['repo-file'])) {

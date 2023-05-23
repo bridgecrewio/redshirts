@@ -1,4 +1,9 @@
+import { VcsSourceInfo } from '../../common/types';
 import { BitbucketAuthor, BitbucketCommit, BitbucketRepoResponse } from '../bitbucket/bitbucket-types';
+
+export interface BitbucketServerVcsSourceInfo extends VcsSourceInfo {
+    username?: string;
+}
 
 export interface BitbucketServerAuthor extends BitbucketAuthor {
     name: string;

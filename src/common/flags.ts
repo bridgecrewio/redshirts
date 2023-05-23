@@ -19,6 +19,11 @@ export const commonFlags = {
         required: false,
         helpGroup: HelpGroup.CONNECTION,
     }),
+    'no-cert-verify': Flags.boolean({
+        description:
+            'Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose your data, including API tokens, in the event that your network path is compromised.',
+        helpGroup: HelpGroup.CONNECTION,
+    }),
     days: Flags.integer({
         description:
             'The number of days for which to fetch commit history. Defaults to 90, which is the value used in the Prisma Cloud platform. It is not recommended to change this except for experimentation purposes.',
