@@ -33,7 +33,7 @@ export default class GitlabServer extends Gitlab {
 
         const sourceInfo = Gitlab.getSourceInfo(flags.token, flags['include-public'], baseUrl, SourceType.GitlabServer);
 
-        const apiManager = new GitlabServerApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new GitlabServerApiManager(sourceInfo, flags['ca-cert'], flags['no-cert-verify']);
         const runner = new GitlabServerRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

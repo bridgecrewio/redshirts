@@ -41,7 +41,7 @@ export default class Gitlab extends Command {
 
         const sourceInfo = Gitlab.getSourceInfo(flags.token, flags['include-public']);
 
-        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert']);
+        const apiManager = new GitlabApiManager(sourceInfo, flags['ca-cert'], flags['no-cert-verify']);
         const runner = new GitlabRunner(sourceInfo, flags, apiManager);
 
         await runner.execute();

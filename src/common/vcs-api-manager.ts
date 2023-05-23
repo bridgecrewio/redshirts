@@ -8,27 +8,35 @@ export abstract class VcsApiManager extends ApiManager {
     sourceInfo: VcsSourceInfo;
     certPath?: string;
     cert?: Buffer;
+    noCertVerify: boolean;
     axiosInstance: AxiosInstance;
 
-    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string, noCertVerify = false) {
         super(sourceInfo);
         this.sourceInfo = sourceInfo;
         this.certPath = certPath;
         this.cert = certPath ? getFileBuffer(certPath) : undefined;
+        this.noCertVerify = noCertVerify;
         this.axiosInstance = axios.create(this._getAxiosConfiguration());
     }
 
     _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert
-            ? {
-                  baseURL,
-                  headers,
-                  httpsAgent: new https.Agent({ ca: this.cert }),
-              }
-            : {
-                  baseURL,
-                  headers,
-              };
+        const httpsOpts: https.AgentOptions = {};
+
+        if (this.cert) {
+            httpsOpts.ca = this.cert;
+        }
+
+        if (this.noCertVerify) {
+            // I am not sure why, but this works, but setting rejectUnauthorized: false does not
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        }
+
+        return {
+            baseURL,
+            headers,
+            httpsAgent: new https.Agent(httpsOpts),
+        };
     }
 
     abstract _getAxiosConfiguration(): any;

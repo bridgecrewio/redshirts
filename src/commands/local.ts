@@ -47,7 +47,7 @@ export default class Local extends Command {
             aliases: ['skip-dir-file'],
             helpGroup: HelpGroup.REPO_SPEC,
         }),
-        ...deleteFlagKey(commonFlags, 'include-public', 'ca-cert'),
+        ...deleteFlagKey(commonFlags, 'include-public', 'ca-cert', 'no-cert-verify'),
     };
 
     async run(): Promise<void> {

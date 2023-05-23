@@ -2,12 +2,31 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Repo } from '../../common/types';
 import { LOGGER } from '../../common/utils';
 import { BitbucketApiManager } from '../bitbucket/bitbucket-api-manager';
-import { BitbucketServerCommit, BitbucketServerRepoResponse } from './bitbucket-server-types';
+import {
+    BitbucketServerCommit,
+    BitbucketServerRepoResponse,
+    BitbucketServerVcsSourceInfo,
+} from './bitbucket-server-types';
 import { getBitbucketServerDateCompareFunction } from './bitbucket-server-utils';
 
 const MAX_PAGE_SIZE = 100;
 
 export class BitbucketServerApiManager extends BitbucketApiManager {
+    _getAxiosConfiguration(): AxiosRequestConfig {
+        const sourceInfo = this.sourceInfo as BitbucketServerVcsSourceInfo;
+
+        const authType = sourceInfo.username ? 'Basic' : 'Bearer';
+        LOGGER.debug(`Using ${authType} authentication for bitbucket server`);
+
+        const authToken = sourceInfo.username
+            ? Buffer.from(`${sourceInfo.username}:${sourceInfo.token}`).toString('base64')
+            : sourceInfo.token;
+
+        return this._buildAxiosConfiguration(this.sourceInfo.url, {
+            Authorization: `${authType} ${authToken}`,
+        });
+    }
+
     async getCommits(repo: Repo, sinceDate: Date): Promise<BitbucketServerCommit[]> {
         const config: AxiosRequestConfig = {
             url: `projects/${repo.owner}/repos/${repo.name}/commits`,

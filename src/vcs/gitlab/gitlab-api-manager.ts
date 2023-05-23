@@ -11,8 +11,15 @@ const RATE_LIMIT_RESET_HEADER = 'ratelimit-reset';
 const RATE_LIMIT_ENDPOINT = 'user';
 
 export class GitlabApiManager extends RateLimitVcsApiManager {
-    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
-        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string, noCertVerify = false) {
+        super(
+            sourceInfo,
+            RATE_LIMIT_REMAINING_HEADER,
+            RATE_LIMIT_RESET_HEADER,
+            RATE_LIMIT_ENDPOINT,
+            certPath,
+            noCertVerify
+        );
     }
 
     _getAxiosConfiguration(): AxiosRequestConfig {

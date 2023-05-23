@@ -10,8 +10,8 @@ const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
 const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 
 export class AzureApiManager extends RateLimitVcsApiManager {
-    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
-        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, undefined, certPath);
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string, noCertVerify = false) {
+        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, undefined, certPath, noCertVerify);
     }
 
     getUserRepos(): Promise<RepoResponse[]> {

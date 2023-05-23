@@ -1,6 +1,5 @@
-import { AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { RepoResponse, VcsSourceInfo } from './types';
-import https = require('https');
 import { VcsApiManager } from './vcs-api-manager';
 import Bottleneck from 'bottleneck';
 import { getEnvVarWithDefault, LOGGER } from './utils';
@@ -11,8 +10,8 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
     requestsPerHour: number;
     bottleneck: Bottleneck;
 
-    constructor(sourceInfo: VcsSourceInfo, requestsPerHour: number, certPath?: string) {
-        super(sourceInfo, certPath);
+    constructor(sourceInfo: VcsSourceInfo, requestsPerHour: number, certPath?: string, noCertVerify = false) {
+        super(sourceInfo, certPath, noCertVerify);
         this.requestsPerHour = requestsPerHour;
 
         const rps = Number.parseInt(getEnvVarWithDefault(MAX_REQUESTS_PER_SECOND_VAR, DEFAULT_MAX_REQUESTS_PER_SECOND));
@@ -27,26 +26,15 @@ export abstract class ThrottledVcsApiManager extends VcsApiManager {
         });
     }
 
-    _buildAxiosConfiguration(baseURL: string, headers?: RawAxiosRequestHeaders): AxiosRequestConfig {
-        return this.cert
-            ? {
-                  baseURL,
-                  headers,
-                  httpsAgent: new https.Agent({ ca: this.cert }),
-              }
-            : {
-                  baseURL,
-                  headers,
-              };
-    }
-
     abstract _getAxiosConfiguration(): any;
     abstract getOrgRepos(group: string): Promise<RepoResponse[]>;
     abstract getUserRepos(): Promise<RepoResponse[]>;
 
     async submitRequest(config: AxiosRequestConfig, _?: AxiosResponse): Promise<AxiosResponse> {
         try {
+            // eslint-disable-next-line no-return-await
             const response = await this.bottleneck.schedule(() => this.axiosInstance.request(config));
+            // const response = await this.axiosInstance.request(config);
 
             if (LOGGER.level === 'debug') {
                 // check log level before we do an await unnecessarily

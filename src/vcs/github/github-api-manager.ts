@@ -10,8 +10,15 @@ const RATE_LIMIT_REMAINING_HEADER = 'x-ratelimit-remaining';
 const RATE_LIMIT_RESET_HEADER = 'x-ratelimit-reset';
 const RATE_LIMIT_ENDPOINT = 'rate_limit';
 export class GithubApiManager extends RateLimitVcsApiManager {
-    constructor(sourceInfo: VcsSourceInfo, certPath?: string) {
-        super(sourceInfo, RATE_LIMIT_REMAINING_HEADER, RATE_LIMIT_RESET_HEADER, RATE_LIMIT_ENDPOINT, certPath);
+    constructor(sourceInfo: VcsSourceInfo, certPath?: string, noCertVerify = false) {
+        super(
+            sourceInfo,
+            RATE_LIMIT_REMAINING_HEADER,
+            RATE_LIMIT_RESET_HEADER,
+            RATE_LIMIT_ENDPOINT,
+            certPath,
+            noCertVerify
+        );
     }
 
     _getAxiosConfiguration(): AxiosRequestConfig {
