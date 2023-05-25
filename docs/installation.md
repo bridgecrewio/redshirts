@@ -22,3 +22,11 @@ node_modules/@paloaltonetworks/redshirts/bin/run help
 If you receive SSL-related errors while running the commands above, you may have a VPN that is intercepting requests. Try disabling the VPN or [obtaining a certificate chain](https://www.baeldung.com/linux/ssl-certificates) for `registry.npmjs.org`. Then add it to your `.npmrc` file: `cafile=<path_to_file>`. See [NPM docs](https://docs.npmjs.com/cli/v9/using-npm/config#npmrc-files) for more details.
 
 You can also [build and run from source](./run-from-source.md), if you prefer.
+
+# Upgrading
+
+To upgrade redshirts to the latest version, use the same approach you used to install it, but replace `install` with `upgrade`. For example:
+
+```
+npm upgrade -g @paloaltonetworks/redshirts
+```
