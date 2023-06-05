@@ -199,7 +199,7 @@ $ npm install -g @paloaltonetworks/redshirts
 $ redshirts COMMAND
 running command...
 $ redshirts (--version)
-@paloaltonetworks/redshirts/0.4.1 darwin-arm64 node-v16.17.0
+@paloaltonetworks/redshirts/0.5.1 darwin-x64 node-v16.13.1
 $ redshirts --help [COMMAND]
 USAGE
   $ redshirts COMMAND
@@ -227,9 +227,9 @@ Count active contributors for Azure DevOps repos
 ```
 USAGE
   $ redshirts azuredevops -t <value> [--orgs <value>] [--projects <value>] [--skip-projects <value>] [-o
-    summary|json|csv] [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty]
-    [--include-public] [--log-level error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>]
-    [--skip-repos <value>] [--skip-repo-file <value>]
+    summary|json|csv] [--ca-cert <value>] [--no-cert-verify] [--days <value>] [--sort repo|contributors]
+    [--exclude-empty] [--include-public] [--log-level error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>]
+    [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>]
 
 OUTPUT FLAGS
   -o, --output=(summary|json|csv)
@@ -242,7 +242,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -262,6 +262,8 @@ CONNECTION FLAGS
                      chain for your environment. Note that for some systems, the hostname for the API endpoint may be
                      different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
                      to obtain a certificate for the correct hostname.
+  --no-cert-verify   Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose
+                     your data, including API tokens, in the event that your network path is compromised.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -336,7 +338,7 @@ EXAMPLES
   $ redshirts azuredevops --token obnwxxx --orgs bridgecrewio,try-bridgecrew --projects org/project
 ```
 
-_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/azuredevops.ts)_
+_See code: [dist/commands/azuredevops.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/azuredevops.ts)_
 
 ## `redshirts bitbucket`
 
@@ -345,7 +347,7 @@ Count active contributors for Bitbucket repos
 ```
 USAGE
   $ redshirts bitbucket -u <value> -t <value> [--workspaces <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    [--no-cert-verify] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
     [--skip-repo-file <value>] [--requests-per-hour <value>]
 
@@ -360,7 +362,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -381,6 +383,10 @@ CONNECTION FLAGS
       information on obtaining a certificate chain for your environment. Note that for some systems, the hostname for the
       API endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be
       sure to obtain a certificate for the correct hostname.
+
+  --no-cert-verify
+      Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose your data, including
+      API tokens, in the event that your network path is compromised.
 
   --requests-per-hour=<value>
       [default: 1000] The maximum number of requests to the server per hour. Requests will be throttled and spread to
@@ -451,7 +457,7 @@ EXAMPLES
   $ redshirts bitbucket --username my_username --token ATBBXXX --workspaces bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/bitbucket.ts)_
+_See code: [dist/commands/bitbucket.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/bitbucket.ts)_
 
 ## `redshirts bitbucket-server`
 
@@ -459,10 +465,10 @@ Count active contributors for Bitbucket server (self-hosted) repos
 
 ```
 USAGE
-  $ redshirts bitbucket-server -u <value> -t <value> -h <value> [--workspaces <value>] [-o summary|json|csv]
-    [--ca-cert <value>] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
-    error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
-    [--skip-repo-file <value>] [--requests-per-hour <value>] [-p <value>] [--protocol http|https] [--projects <value>]
+  $ redshirts bitbucket-server -h <value> -t <value> [-p <value>] [--protocol http|https] [--projects <value>] [-o
+    summary|json|csv] [--ca-cert <value>] [--no-cert-verify] [--days <value>] [--sort repo|contributors]
+    [--exclude-empty] [--include-public] [--log-level error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>]
+    [--repo-file <value>] [--skip-repos <value>] [--skip-repo-file <value>] [--requests-per-hour <value>] [-u <value>]
 
 CONNECTION FLAGS
   -h, --hostname=<value>
@@ -477,6 +483,10 @@ CONNECTION FLAGS
       information on obtaining a certificate chain for your environment. Note that for some systems, the hostname for the
       API endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be
       sure to obtain a certificate for the correct hostname.
+
+  --no-cert-verify
+      Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose your data, including
+      API tokens, in the event that your network path is compromised.
 
   --protocol=(http|https)
       [default: https] Protocol for your server, https (default) or http. Affects the default port value if you do not
@@ -500,7 +510,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -513,7 +523,9 @@ AUTHENTICATION FLAGS
                           the REDSHIRTS_TOKEN environment variable. This token must be tied to a user that has
                           sufficient visibility of the repo(s) being counted. See the description below for how to
                           create this token.
-  -u, --username=<value>  (required) Your Bitbucket username associated with the provided app token
+  -u, --username=<value>  Your Bitbucket username associated with the provided app token. If provided, then Redshirts
+                          will use Basic authentication with this username and token. If omitted, then Redshirts will
+                          use Bearer auth with the provided token.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -554,11 +566,6 @@ REPO SPECIFICATION FLAGS
       the same repo is included in --repos and --skip-repos, then the repo will be skipped. Takes precedence over
       --skip-repo-file.
 
-  --workspaces=<value>
-      A comma separated list of workspace and / or usernames for which to fetch repos. Use the --repos option to add
-      additional specific repos on top of those in the specified workspace(s). Use the --skip-repos option to exclude
-      individual repos that are a part of these workspace(s).
-
 DESCRIPTION
   Count active contributors for Bitbucket server (self-hosted) repos
 
@@ -581,12 +588,12 @@ DESCRIPTION
   This will slow down execution but avoid unexpected rate limit issues.
 
 EXAMPLES
-  $ redshirts bitbucket-server --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname github.mycompany.internal
+  $ redshirts bitbucket-server --username myuser --token ATXXX --repos bridgecrewio/checkov,try-bridgecrew/terragoat --hostname bitbucket.mycompany.internal
 
-  $ redshirts bitbucket-server --token ATXXX --workspaces bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
+  $ redshirts bitbucket-server --token ATXXX --projects bridgecrewio,try-bridgecrew --hostname bitbucket.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/bitbucket-server.ts)_
+_See code: [dist/commands/bitbucket-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/bitbucket-server.ts)_
 
 ## `redshirts github`
 
@@ -594,8 +601,8 @@ Count active contributors for GitHub repos
 
 ```
 USAGE
-  $ redshirts github -t <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>] [--days <value>]
-    [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+  $ redshirts github -t <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>]
+    [--no-cert-verify] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
     [--skip-repo-file <value>]
 
@@ -610,7 +617,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -629,6 +636,8 @@ CONNECTION FLAGS
                      chain for your environment. Note that for some systems, the hostname for the API endpoint may be
                      different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
                      to obtain a certificate for the correct hostname.
+  --no-cert-verify   Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose
+                     your data, including API tokens, in the event that your network path is compromised.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -692,7 +701,7 @@ EXAMPLES
   $ redshirts github --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew
 ```
 
-_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/github.ts)_
+_See code: [dist/commands/github.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/github.ts)_
 
 ## `redshirts github-server`
 
@@ -701,7 +710,7 @@ Count active contributors for GitHub server (self-hosted) repos
 ```
 USAGE
   $ redshirts github-server -t <value> -h <value> [--orgs <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    [--no-cert-verify] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
     [--skip-repo-file <value>] [-p <value>] [--protocol http|https]
 
@@ -714,6 +723,8 @@ CONNECTION FLAGS
                            certificate chain for your environment. Note that for some systems, the hostname for the API
                            endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs.
                            github.com). Be sure to obtain a certificate for the correct hostname.
+  --no-cert-verify         Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can
+                           expose your data, including API tokens, in the event that your network path is compromised.
   --protocol=(http|https)  [default: https] Protocol for your server, https (default) or http. Affects the default port
                            value if you do not specify a port. You must specify a protocol here, not in the hostname.
 
@@ -728,7 +739,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -800,7 +811,7 @@ EXAMPLES
   $ redshirts github-server --token ghp_xxxx --orgs bridgecrewio,try-bridgecrew --hostname github.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/github-server.ts)_
+_See code: [dist/commands/github-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/github-server.ts)_
 
 ## `redshirts gitlab`
 
@@ -808,8 +819,8 @@ Count active contributors for GitLab repos
 
 ```
 USAGE
-  $ redshirts gitlab -t <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>] [--days
-    <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+  $ redshirts gitlab -t <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>]
+    [--no-cert-verify] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
     [--skip-repo-file <value>]
 
@@ -824,7 +835,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -843,6 +854,8 @@ CONNECTION FLAGS
                      chain for your environment. Note that for some systems, the hostname for the API endpoint may be
                      different from the hostname you visit in a browser (e.g., api.github.com vs. github.com). Be sure
                      to obtain a certificate for the correct hostname.
+  --no-cert-verify   Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can expose
+                     your data, including API tokens, in the event that your network path is compromised.
 
 REPO SPECIFICATION FLAGS
   --days=<value>
@@ -901,7 +914,7 @@ EXAMPLES
   $ redshirts gitlab --token glpat_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup
 ```
 
-_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/gitlab.ts)_
+_See code: [dist/commands/gitlab.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/gitlab.ts)_
 
 ## `redshirts gitlab-server`
 
@@ -910,7 +923,7 @@ Count active contributors for GitLab server (self-hosted) repos
 ```
 USAGE
   $ redshirts gitlab-server -t <value> -h <value> [--groups <value>] [-o summary|json|csv] [--ca-cert <value>]
-    [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
+    [--no-cert-verify] [--days <value>] [--sort repo|contributors] [--exclude-empty] [--include-public] [--log-level
     error|warn|info|debug|ERROR|WARN|INFO|DEBUG] [--repos <value>] [--repo-file <value>] [--skip-repos <value>]
     [--skip-repo-file <value>] [-p <value>] [--protocol http|https]
 
@@ -923,6 +936,8 @@ CONNECTION FLAGS
                            certificate chain for your environment. Note that for some systems, the hostname for the API
                            endpoint may be different from the hostname you visit in a browser (e.g., api.github.com vs.
                            github.com). Be sure to obtain a certificate for the correct hostname.
+  --no-cert-verify         Bypass SSL verification on HTTPS requests. WARNING: This is inherently dangerous and can
+                           expose your data, including API tokens, in the event that your network path is compromised.
   --protocol=(http|https)  [default: https] Protocol for your server, https (default) or http. Affects the default port
                            value if you do not specify a port. You must specify a protocol here, not in the hostname.
 
@@ -937,7 +952,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -1010,7 +1025,7 @@ EXAMPLES
   $ redshirts gitlab-server --token ghp_xxxx --groups bridgecrewio,try-bridgecrew,group/subgroup --hostname gitlab.mycompany.internal --port 9999
 ```
 
-_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/gitlab-server.ts)_
+_See code: [dist/commands/gitlab-server.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/gitlab-server.ts)_
 
 ## `redshirts help [COMMAND]`
 
@@ -1079,7 +1094,7 @@ OUTPUT FLAGS
   --log-level=(error|warn|info|debug|ERROR|WARN|INFO|DEBUG)
       [default: warn] Set the log level for the execution. Can also be set with the LOG_LEVEL environment variable. Use
       'debug' for granular logging, which will be required for any support cases. You can log individual responses using
-      the environment variable REDSHIRT_LOG_API_RESPONSES=true. You can also disable all logging by setting
+      the environment variable REDSHIRTS_LOG_API_RESPONSES=true. You can also disable all logging by setting
       DISABLE_LOGS=true as an environment variable. This is not recommended, as you may miss important processing
       messages. All logs will be written to the stderr stream.
 
@@ -1099,5 +1114,5 @@ EXAMPLES
   $ redshirts local --repos ~/repos,/tmp/repo,/tmp/repo/submodule
 ```
 
-_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.4.1/dist/commands/local.ts)_
+_See code: [dist/commands/local.ts](https://github.com/bridgecrewio/redshirts/blob/v0.5.1/dist/commands/local.ts)_
 <!-- commandsstop -->

@@ -5,17 +5,10 @@ import { printSummary } from './output';
 import { Commit, ContributorMap, Repo, RepoResponse, SourceInfo, VCSCommit, VcsSourceInfo } from './types';
 import { DEFAULT_DAYS, getXDaysAgoDate, isSslError, logError, LOGGER } from './utils';
 
-// TODO
-// - test on windows
-
 const EXCLUDED_EMAIL_REGEXES = [
-    /41898282\+github-actions\[bot]@users\.noreply\.github.com/,
-    /49699333\+dependabot\[bot]@users\.noreply\.github.com/,
     /action@github\.com/,
-    /60663194\+bridgecrew\[bot]@users\.noreply\.github\.com/,
-    /89982750\+prisma-cloud-devsecops\[bot]@users\.noreply\.github\.com/,
-    /github-actions\[bot]@users\.noreply\.github\.com/,
     /commits-noreply@bitbucket\.org/,
+    /^.+@users\.noreply\.github\.com/,
 ];
 
 export abstract class BaseRunner {
