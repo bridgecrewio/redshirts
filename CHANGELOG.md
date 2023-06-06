@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.5.1...redshirts-v0.6.0) (2023-06-06)
+
+
+### Features
+
+* filter out all github noreply email addresses ([#81](https://github.com/bridgecrewio/redshirts/issues/81)) ([f847416](https://github.com/bridgecrewio/redshirts/commit/f8474167b6233ef5ee639facb066de036e52dc80))
+
 ## [0.5.1](https://github.com/bridgecrewio/redshirts/compare/redshirts-v0.5.0...redshirts-v0.5.1) (2023-05-23)
 
 
