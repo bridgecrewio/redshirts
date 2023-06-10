@@ -36,7 +36,7 @@
         "@types/chai": "^4",
         "@types/listr": "^0.14.4",
         "@types/mocha": "^9.0.0",
-        "@types/node": "^16.18.3",
+        "@types/node": "^16.18.35",
         "axios-mock-adapter": "^1.21.2",
         "chai": "^4",
         "eslint": "^7.32.0",
